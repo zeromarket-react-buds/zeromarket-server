@@ -53,7 +53,10 @@
         </where>
     </sql>
 
-    <insert id="insertBoard" parameterType="com.zeromarket.server.common.entity.Board">
+    <insert id="insertBoard" parameterType="com.zeromarket.server.common.entity.Board"
+        useGeneratedKeys="true"
+        keyProperty="id"
+        keyColumn="id">
         INSERT INTO board(title,
                           content,
                           writer_id,
@@ -66,6 +69,8 @@
                 #{status},
                 now(),
                 now())
+
+            RETURNING id
     </insert>
 
     <update id="updateBoard" parameterType="com.zeromarket.server.common.entity.Board">

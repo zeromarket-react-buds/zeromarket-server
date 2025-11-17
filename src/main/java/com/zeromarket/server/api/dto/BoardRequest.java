@@ -7,9 +7,10 @@ import lombok.Setter;
 @Setter
 public class BoardRequest extends DefaultRequest {
 
+    private Long id;
     private String title;
     private String content;
-    private String writerId;
+    private Long writerId;
     private String status;
 
 }

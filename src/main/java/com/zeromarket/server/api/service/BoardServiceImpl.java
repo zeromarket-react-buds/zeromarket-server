@@ -45,12 +45,22 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
-    public int insertBoard(BoardRequest boardRequest) {
-        // BeanUtils 사용: board 필드를 boardEntity 객체의 같은 이름 필드로 복사
+    public Board insertBoard(BoardRequest boardRequest) { // 반환 타입을 int -> Board (또는 Long)로 변경
         Board boardEntity = new Board();
+        // 요청 DTO의 내용을 Entity에 복사
         BeanUtils.copyProperties(boardRequest, boardEntity);
 
-        return boardMapper.insertBoard(boardEntity);
+        // 1. INSERT 실행 및 ID 획득
+        // 매퍼 실행 후, boardEntity 객체에 생성된 ID가 자동으로 채워집니다.
+        int affectedRows = boardMapper.insertBoard(boardEntity);
+
+        if (affectedRows > 0) {
+            // 성공적으로 삽입되었다면, ID가 채워진 Entity 자체를 반환합니다.
+            return boardEntity;
+        }
+
+        // 삽입 실패 시 예외 처리 (예시)
+        throw new RuntimeException("게시글 삽입에 실패했습니다.");
     }
 
     @Override

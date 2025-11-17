@@ -12,7 +12,7 @@ public interface BoardService {
 
     PageResponse<BoardResponse> selectBoardList(BoardRequest boardRequest);
 
-    int insertBoard(BoardRequest board);
+    Board insertBoard(BoardRequest board);
 
     int updateBoard(BoardRequest board);
 

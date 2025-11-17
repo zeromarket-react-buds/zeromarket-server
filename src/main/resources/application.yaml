@@ -2,9 +2,33 @@ spring:
   application:
     name: zeromarket-server
   datasource:
-    url: ${DB_URL}
+    url: ${DB_URL}?prepareThreshold=0
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 4      # 최대 4개 정도로 줄이기
+      minimum-idle: 1           # 유휴 커넥션 1~2개 정도만 유지
+      connection-timeout: 5000  # 연결 못 잡으면 5초 뒤 예외
+      idle-timeout: 300000      # 5분 유휴 시 커넥션 정리
+      max-lifetime: 600000      # 10분마다 커넥션 재생성
+      leak-detection-threshold: 60000
+#      maximum-pool-size: 10        # 최대 연결 수 제한
+#      minimum-idle: 5               # 최소 유휴 연결
+#      connection-timeout: 20000     # 연결 타임아웃 (20초)
+#      idle-timeout: 300000          # 유휴 연결 타임아웃 (5분)
+#      max-lifetime: 600000          # 연결 최대 수명 (10분)
+#      leak-detection-threshold: 60000  # 연결 누수 감지 (60초)
 
 mybatis:
   mapper-locations: classpath:api/mapper/*.xml
+
+logging:
+  level:
+    root: INFO
+    com.zeromarket.server: DEBUG
+    org.springframework.web: WARN
+    # 쿼리 파라미터를 포함한 SQL 쿼리 로깅 활성화 (JPA/Hibernate 사용 시)
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
+    com.zaxxer.hikari: DEBUG
+    com.zaxxer.hikari.HikariConfig: DEBUG

@@ -1,5 +1,6 @@
 package com.zeromarket.server.common.entity;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,12 +8,12 @@ import lombok.Setter;
 @Setter
 public class Board {
 
-    private String id;
+    private Long id;
     private String title;
     private String content;
-    private String writerId;
+    private Long writerId;
     private String status;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 }

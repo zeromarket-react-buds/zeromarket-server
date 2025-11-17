@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 public class BoardResponse {
 
-    private String id;
+    private Long id;
     private String title;
     private String content;
-    private String writerId;
+    private Long writerId;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
