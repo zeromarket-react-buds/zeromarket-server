@@ -1,5 +1,5 @@
 package com.zeromarket.server.api;
 
-public class boboclass {
- wow2
+public class mm {
+    var a=1+1;
 }
