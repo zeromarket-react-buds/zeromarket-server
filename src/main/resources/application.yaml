@@ -21,6 +21,8 @@ spring:
 
 mybatis:
   mapper-locations: classpath:api/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
 
 logging:
   level:
@@ -32,3 +34,6 @@ logging:
     org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
     com.zaxxer.hikari: DEBUG
     com.zaxxer.hikari.HikariConfig: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET_KEY}

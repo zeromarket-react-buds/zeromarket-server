@@ -1,12 +1,15 @@
 package com.zeromarket.server.api.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class TokenInfo {
 
     private String accessToken;
     private String refreshToken;
-    private String grantType;
-    private Long expiresIn;
+
+//    private String grantType;
+//    private Long expiresIn;
 }

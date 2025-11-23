@@ -1,17 +1,18 @@
 package com.zeromarket.server.api.service;
 
 import com.zeromarket.server.api.dto.MemberLoginRequest;
-import com.zeromarket.server.api.dto.MemberResponse;
 import com.zeromarket.server.api.dto.MemberSignupRequest;
 import com.zeromarket.server.api.dto.TokenInfo;
 import com.zeromarket.server.api.mapper.MemberMapper;
+import com.zeromarket.server.api.security.JwtUtil;
 import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.enums.Role;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Override
     public Long signup(MemberSignupRequest dto) {
@@ -58,6 +60,33 @@ public class MemberServiceImpl implements MemberService {
             throw new SecurityException("비밀번호가 일치하지 않습니다.");
         }
 
-        return null;
+        return new TokenInfo(
+            jwtUtil.generateAccessToken(member.getLoginId(), member.getRole()),
+            jwtUtil.generateRefreshToken(member.getLoginId())
+        );
+    }
+
+    @Override
+    public TokenInfo refresh(String refreshToken) {
+
+//        1. null 확인
+        if (refreshToken == null) {
+            throw new AuthenticationCredentialsNotFoundException("JWT 토큰이 존재하지 않습니다.");
+        }
+
+//        2. access token 유효 확인
+        if (!jwtUtil.validateRefreshToken(refreshToken)) {
+            throw new BadCredentialsException("유효하지 않은 JWT 토큰입니다.");
+        }
+
+        String loginId = jwtUtil.getLoginId(refreshToken);
+
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
+            .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+
+        String newAccessToken = jwtUtil.generateAccessToken(member.getLoginId(), member.getRole());
+        String newRefreshToken = jwtUtil.generateRefreshToken(member.getLoginId());
+
+        return new TokenInfo(newAccessToken, newRefreshToken);
     }
 }

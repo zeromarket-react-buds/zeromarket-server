@@ -2,17 +2,30 @@ package com.zeromarket.server.api.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import com.zeromarket.server.api.security.JwtFilter;
+import com.zeromarket.server.api.security.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtUtil jwtUtil;
+
+    @Bean
+    public JwtFilter jwtFilter() {
+        return new JwtFilter(jwtUtil);
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -23,7 +36,7 @@ public class SecurityConfig {
                 // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
                 .requestMatchers("/**").permitAll()
                 // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
-                .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
@@ -35,7 +48,11 @@ public class SecurityConfig {
             // 2. 폼 로그인 설정 (기본값)
             .formLogin(withDefaults())
             // 3. CSRF 비활성화 (API 서버인 경우 임시로 비활성화 가능)
-            .csrf(csrf -> csrf.disable());
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
