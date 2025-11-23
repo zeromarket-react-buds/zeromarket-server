@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.ProductQueryMapper">
+
+    <resultMap id="ProductListMap" type="com.zeromarket.server.api.dto.ProductQueryResponse">
+
+        <id property="productId" column="product_id"/>
+
+        <result property="productTitle" column="product_title"/>
+        <result property="sellPrice" column="sell_price"/>
+        <result property="sellingArea" column="selling_area"/>
+        <result property="productStatus" column="product_status"/>
+        <result property="isDelivery" column="is_delivery"/>
+        <result property="isDirect" column="is_direct"/>
+        <result property="createdAt" column="created_at"/>
+
+        <result property="wishCount" column="wish_count"/>
+        <result property="thumbnailUrl" column="thumbnail_url"/>
+
+    </resultMap>
+    <select id="selectProductsWishOrderByCursor" resultMap="ProductListMap">
+        SELECT
+        p.product_id,
+        p.product_title,
+        p.sell_price,
+        p.selling_area,
+        p.product_status,
+        p.is_delivery,
+        p.is_direct,
+        p.created_at,
+
+        COALESCE(wc.wish_count, 0) AS wish_count,
+        pi.image_url AS thumbnail_url
+
+        FROM product p
+
+        LEFT JOIN (
+        SELECT product_id, COUNT(product_id) AS wish_count
+        FROM wish
+        WHERE is_deleted = false
+        GROUP BY product_id
+        ) wc ON wc.product_id = p.product_id
+
+        LEFT JOIN LATERAL (
+        SELECT image_url
+        FROM product_image
+        WHERE product_id = p.product_id
+        ORDER BY is_main DESC, sort_order ASC, image_id ASC
+        LIMIT 1
+        ) pi ON true
+
+        WHERE p.is_hidden = false
+        AND p.is_deleted = false
+
+        <if test="keyword != null and keyword != ''">
+            AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
+        </if>
+
+        <if test="cursor != null">
+            AND p.product_id &lt; #{cursor}
+        </if>
+
+        ORDER BY
+        wish_count DESC,
+        p.created_at DESC,
+        p.product_id DESC
+
+        LIMIT #{size}
+    </select>
+
+</mapper>
