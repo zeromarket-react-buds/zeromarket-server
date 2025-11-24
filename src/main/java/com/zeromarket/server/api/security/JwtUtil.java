@@ -3,11 +3,8 @@ package com.zeromarket.server.api.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,11 +14,11 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
 
     @Value("${jwt.secret}")
-    private String SECRET_KEY;   // Base64 인코딩된 문자열
+    private String SECRET_KEY;   // Base64 인코딩된 문자열 (X)
 
     private SecretKey signingKey;
 
-    private final long ACCESS_EXPIRATION = 1000L * 10;           // 15분
+    private final long ACCESS_EXPIRATION = 1000L * 60 * 15;           // 15분
     private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7일
 
     @PostConstruct

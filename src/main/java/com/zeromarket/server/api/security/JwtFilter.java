@@ -28,7 +28,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth"); // '로그인/회원가입/refresh요청'은 필터 건너뛰기
+//        return path.startsWith("/api/auth"); // '로그인/회원가입/refresh요청'은 필터 건너뛰기
+        return path.startsWith("/api");
     }
 
     @Override
