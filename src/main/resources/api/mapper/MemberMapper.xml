@@ -10,11 +10,19 @@
     INSERT INTO member (
         login_id,
         password,
-        role
+        role,
+        name,
+        nickname,
+        phone,
+        email
     ) VALUES (
         #{loginId},
         #{password},
-        #{role}
+        #{role},
+        #{name},
+        #{nickname},
+        #{phone},
+        #{email}
     )
   </insert>
 
@@ -38,5 +46,26 @@
     WHERE login_id = #{loginId}
     AND withdrawn_at IS NULL
   </select>
+
+    <select id="existsByNickname" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE nickname = #{nickname}
+        AND withdrawn_at IS NULL
+    </select>
+
+    <select id="existsByPhone" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE phone = #{phone}
+        AND withdrawn_at IS NULL
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE email = #{email}
+        AND withdrawn_at IS NULL
+    </select>
 
 </mapper>

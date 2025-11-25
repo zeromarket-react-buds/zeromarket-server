@@ -32,7 +32,7 @@ public interface MemberMapper {
 //
 //    // 중복 체크
     boolean existsByLoginId(String loginId);
-//    boolean existsByEmail(String email);
-//    boolean existsByNickname(String nickname);
-//    boolean existsByPhone(String phone);
+    boolean existsByEmail(String email);
+    boolean existsByNickname(String nickname);
+    boolean existsByPhone(String phone);
 }

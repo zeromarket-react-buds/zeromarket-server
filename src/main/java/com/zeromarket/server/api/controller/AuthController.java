@@ -10,9 +10,11 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,9 +45,17 @@ public class AuthController {
 
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody Map<String, String> body) {
+    public ResponseEntity<TokenInfo> refresh(@RequestBody Map<String, String> body) {
         TokenInfo tokenInfo = memberService.refresh(body.get("refreshToken"));
 
         return ResponseEntity.ok(tokenInfo);
+    }
+
+    @Operation(summary = "아이디 중복 체크", description = "")
+    @GetMapping("/check-id")
+    public ResponseEntity<Map> checkDuplicateId(@RequestParam String loginId) {
+        Boolean existsByLoginId = memberService.checkDuplicateId(loginId);
+
+        return ResponseEntity.ok(Map.of("existsByLoginId", existsByLoginId));
     }
 }
