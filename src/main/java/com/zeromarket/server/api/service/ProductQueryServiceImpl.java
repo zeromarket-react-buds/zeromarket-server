@@ -26,6 +26,7 @@ public class ProductQueryServiceImpl implements ProductQueryService{
         queryReq.setSize(size + 1);
         queryReq.setCursor(cursor);
         queryReq.setKeyword(req.getKeyword());
+        queryReq.setSort(req.getSort());
 
         List<ProductQueryResponse> fetched = mapper.selectProductsCursor(queryReq);
 
