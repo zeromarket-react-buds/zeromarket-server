@@ -15,6 +15,7 @@ public class ProductQueryResponse {
     private String sellingArea;
 
     private String productStatus;
+    private String salesStatus;
     private int viewCount;
 
     private boolean isDelivery;

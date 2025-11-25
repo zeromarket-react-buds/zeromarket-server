@@ -32,8 +32,8 @@ logging:
     # 쿼리 파라미터를 포함한 SQL 쿼리 로깅 활성화 (JPA/Hibernate 사용 시)
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
-    com.zaxxer.hikari: DEBUG
-    com.zaxxer.hikari.HikariConfig: DEBUG
+#    com.zaxxer.hikari: DEBUG
+#    com.zaxxer.hikari.HikariConfig: DEBUG
 
 jwt:
   secret: ${JWT_SECRET_KEY}
