@@ -51,4 +51,56 @@
         LIMIT #{size}
     </select>
 
+    <select id="selectProductDetail" parameterType="java.lang.Long" resultType="com.zeromarket.server.api.dto.ProductDetailResponse">
+      SELECT
+      p.product_id AS productId,
+      p.seller_id AS sellerId,
+<!--      p.level1_id AS categoryDepth1,-->
+<!--      p.level2_id AS categoryDepth2,-->
+      p.level3_id AS categoryDepth3,
+      p.product_title AS productTitle,
+      p.description AS productDescription,
+      p.sell_price AS sellPrice,
+      p.created_at AS createdAt,
+      p.is_delivery AS isDelivery,
+      p.is_direct AS isDirect,
+      p.selling_area AS sellingArea,
+      p.view_count AS viewCount,
+      p.sales_status AS salesStatus,
+      p.product_status AS productStatus,
+      p.is_hidden AS isHidden,
+      p.is_deleted AS isDeleted,
+      m.member_id AS sellerId,
+      m.nickname AS sellerNickName,
+      m.introduction AS sellerIntroduction
+
+      FROM product p
+      LEFT JOIN member m ON m.member_id = p.seller_id
+      WHERE p.product_id = #{productId}
+        AND p.is_deleted = false
+        AND p.is_hidden = false
+    </select>
+
+    <select id="selectProductImages" parameterType="java.lang.Long" resultType="com.zeromarket.server.api.dto.ProductDetailImageInfo">
+      SELECT
+      image_id AS imageId,
+      image_url AS imageUrl,
+      is_main AS isMain,
+      sort_order AS sortOrder
+      FROM product_image
+      WHERE product_id = #{productId}
+      ORDER BY sort_order ASC
+
+    </select>
+  <select id="selectProductSeller" parameterType="java.lang.Long" resultType="com.zeromarket.server.api.dto.ProductDetailSellerInfo">
+    SELECT
+    m.member_id AS sellerId,
+    m.nickname AS sellerNickName,
+    m.introduction AS sellerIntroduction
+    FROM member m
+    WHERE m.member_id = #{memberId}
+
+  </select>
+
+
 </mapper>

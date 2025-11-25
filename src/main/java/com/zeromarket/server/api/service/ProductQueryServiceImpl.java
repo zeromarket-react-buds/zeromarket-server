@@ -1,13 +1,15 @@
 package com.zeromarket.server.api.service;
 
 import com.zeromarket.server.api.dto.LoadMoreResponse;
+import com.zeromarket.server.api.dto.ProductDetailImageInfo;
+import com.zeromarket.server.api.dto.ProductDetailResponse;
+import com.zeromarket.server.api.dto.ProductDetailSellerInfo;
 import com.zeromarket.server.api.dto.ProductQueryRequest;
 import com.zeromarket.server.api.dto.ProductQueryResponse;
 import com.zeromarket.server.api.mapper.ProductQueryMapper;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -36,4 +38,32 @@ public class ProductQueryServiceImpl implements ProductQueryService{
 
         return LoadMoreResponse.of(fetched, nextCursor, hasNext);
     }
+
+    @Override
+    public ProductDetailResponse selectProductDetail(Long productId) {
+        ProductDetailResponse detail = mapper.selectProductDetail(productId);
+        if(detail == null) return null;
+
+        //판매자 정보
+        ProductDetailSellerInfo seller =
+            mapper.selectProductSeller(detail.getSellerId());
+        detail.setSeller(seller);
+
+        List<ProductDetailImageInfo> images = mapper.selectProductImages(productId);
+        detail.setImages(images);
+
+        Integer mainIndex = null;
+        for (int i = 0; i < images.size(); i++){
+            if(images.get(i).isMain()){
+                mainIndex = i;
+                break;
+            }
+        }
+        detail.setMainImageIndex(mainIndex);
+
+        return detail;
+
+    }
+
+
 }
