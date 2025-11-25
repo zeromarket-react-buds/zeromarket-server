@@ -25,7 +25,7 @@ public class ProductQueryServiceImpl implements ProductQueryService{
         queryReq.setCursor(cursor);
         queryReq.setKeyword(req.getKeyword());
 
-        List<ProductQueryResponse> fetched = mapper.selectProductsWishOrderByCursor(queryReq);
+        List<ProductQueryResponse> fetched = mapper.selectProductsCursor(queryReq);
 
         boolean hasNext = fetched.size() > size;
         if (hasNext) fetched = fetched.subList(0, size);

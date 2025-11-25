@@ -3,28 +3,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zeromarket.server.api.mapper.ProductQueryMapper">
 
-    <resultMap id="ProductListMap" type="com.zeromarket.server.api.dto.ProductQueryResponse">
-
-        <id property="productId" column="product_id"/>
-
-        <result property="productTitle" column="product_title"/>
-        <result property="sellPrice" column="sell_price"/>
-        <result property="sellingArea" column="selling_area"/>
-        <result property="productStatus" column="product_status"/>
-        <result property="isDelivery" column="is_delivery"/>
-        <result property="isDirect" column="is_direct"/>
-        <result property="createdAt" column="created_at"/>
-
-        <result property="wishCount" column="wish_count"/>
-        <result property="thumbnailUrl" column="thumbnail_url"/>
-
-    </resultMap>
-    <select id="selectProductsWishOrderByCursor" resultMap="ProductListMap">
+    <select id="selectProductsCursor"
+            resultType="com.zeromarket.server.api.dto.ProductQueryResponse">
         SELECT
         p.product_id,
         p.product_title,
         p.sell_price,
         p.selling_area,
+        p.sales_status,
         p.product_status,
         p.is_delivery,
         p.is_direct,
@@ -42,13 +28,9 @@
         GROUP BY product_id
         ) wc ON wc.product_id = p.product_id
 
-        LEFT JOIN LATERAL (
-        SELECT image_url
-        FROM product_image
-        WHERE product_id = p.product_id
-        ORDER BY is_main DESC, sort_order ASC, image_id ASC
-        LIMIT 1
-        ) pi ON true
+        LEFT JOIN product_image pi
+        ON pi.product_id = p.product_id
+        AND pi.is_main = true
 
         WHERE p.is_hidden = false
         AND p.is_deleted = false

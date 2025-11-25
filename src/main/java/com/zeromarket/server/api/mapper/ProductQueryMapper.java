@@ -9,5 +9,5 @@ import java.util.List;
 @Mapper
 public interface ProductQueryMapper {
 
-    List<ProductQueryResponse> selectProductsWishOrderByCursor(ProductQueryRequest queryReq);
+    List<ProductQueryResponse> selectProductsCursor(ProductQueryRequest queryReq);
 }
