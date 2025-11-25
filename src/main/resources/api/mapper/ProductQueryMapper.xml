@@ -34,6 +34,7 @@
 
         WHERE p.is_hidden = false
             AND p.is_deleted = false
+            AND p.sales_status != 'SOLD_OUT'
 
         <if test="keyword != null and keyword != ''">
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
