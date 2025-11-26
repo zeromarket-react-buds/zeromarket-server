@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<?> handleApiException(ApiException e) {
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException e) {
 
         ErrorCode code = e.getErrorCode();
 
@@ -22,11 +22,18 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(code.name(), code.getMessage()));
     }
 
+//    TODO: e.getMessage()는 log.error 등으로 서버 로그에서만 노출
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
         return ResponseEntity
             .status(500)
             .body(new ErrorResponse("INTERNAL_ERROR", e.getMessage()));
+//        log.error("예외 발생 ######## ", e.getMessage());
+//        ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
+//
+//        return ResponseEntity
+//            .status(code.getStatus())
+//            .body(new ErrorResponse(code.name(), code.getMessage()));
     }
 
 }

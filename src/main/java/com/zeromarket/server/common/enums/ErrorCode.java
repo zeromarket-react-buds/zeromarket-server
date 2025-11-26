@@ -9,10 +9,10 @@ public enum ErrorCode {
     // 인증 관련
     UNAUTHORIZED(401, "로그인이 필요합니다."),
     FORBIDDEN(403, "접근 권한이 없습니다."),
-    LOGINID_ALREADY_EXIST(401, "로그인 ID가 이미 존재합니다."),
-    NICKNAME_ALREADY_EXIST(401, "닉네임이 이미 존재합니다."),
-    PHONE_ALREADY_EXIST(401, "핸드폰 번호가 이미 존재합니다."),
-    EMAIL_ALREADY_EXIST(401, "이메일이 이미 존재합니다."),
+    LOGINID_ALREADY_EXIST(409, "로그인 ID가 이미 존재합니다."),
+    NICKNAME_ALREADY_EXIST(409, "닉네임이 이미 존재합니다."),
+    PHONE_ALREADY_EXIST(409, "핸드폰 번호가 이미 존재합니다."),
+    EMAIL_ALREADY_EXIST(409, "이메일이 이미 존재합니다."),
 
     // 회원
     MEMBER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),
