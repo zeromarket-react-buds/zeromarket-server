@@ -7,10 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProductDetailSellerInfo {
-    private Long memberId;
-    private String nickname;
-    private String introduction; // 자기소개
-    private String role;
-    private LocalDateTime createdAt;
+    private Long sellerId;              // seller_id
+    private String sellerNickName;      // seller_nickname
+    private String sellerIntroduction;  // seller_introduction
+
 
 }

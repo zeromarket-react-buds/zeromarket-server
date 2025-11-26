@@ -9,9 +9,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,7 +49,32 @@ public class ProductRestController {
         return ResponseEntity.ok(result);
     }
 
+    //조회수 증가
+    @Operation(summary = "조회수 증가", description = "상품 상세 조회 시 조회수를 +1 증가")
+    @PatchMapping("/{productId}/view")
+    public ResponseEntity<Void> increaseViewCount(
+        @PathVariable Long productId
+    ) {
+        productQueryService.increaseViewCount(productId);
+        return ResponseEntity.ok().build();
+    }
     
+    //찜 토글
+    @Operation(summary = "찜 추가", description = "상품에 찜을 추가한다")
+    @PostMapping("/{productId}/wish")
+    public ResponseEntity<Void> addWish(@PathVariable Long productId) {
+        productQueryService.addWish(productId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "찜 삭제", description = "상품에 찜을 취소한다")
+    @DeleteMapping("/{productId}/wish")
+    public ResponseEntity<Void> removeWish(@PathVariable Long productId) {
+        productQueryService.removeWish(productId);
+        return ResponseEntity.ok().build();
+    }
+
+
     //상품 등록
 //    @Operation(summary = "상품 등록", description = "상품 정보 + 이미지 업로드")
 //    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

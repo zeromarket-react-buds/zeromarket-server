@@ -42,20 +42,16 @@ public class ProductQueryServiceImpl implements ProductQueryService{
 
     @Override
     public ProductDetailResponse selectProductDetail(Long productId) {
+        mapper.updateViewCount(productId);
         ProductDetailResponse detail = mapper.selectProductDetail(productId);
         if(detail == null) return null;
 
-        //판매자 정보
-        ProductDetailSellerInfo seller =
-            mapper.selectProductSeller(detail.getSellerId());
-        detail.setSeller(seller);
-
-        List<ProductDetailImageInfo> images = mapper.selectProductImages(productId);
-        detail.setImages(images);
+        detail.setProductStatusKr(convertProductStatusToKr(detail.getProductStatus()));
+        detail.setSalesStatusKr(convertSalesStatusToKr(detail.getSalesStatus()));
 
         Integer mainIndex = null;
-        for (int i = 0; i < images.size(); i++){
-            if(images.get(i).isMain()){
+        for (int i = 0; i < detail.getImages().size(); i++){
+            if(detail.getImages().get(i).isMain()){
                 mainIndex = i;
                 break;
             }
@@ -67,4 +63,42 @@ public class ProductQueryServiceImpl implements ProductQueryService{
     }
 
 
+
+    @Override
+    public void increaseViewCount(Long productId) {
+        mapper.updateViewCount(productId);
+    }
+
+    @Override
+    public void addWish(Long productId) {
+        mapper.insertWish(productId);
+    }
+
+    @Override
+    public void removeWish(Long productId) {
+        mapper.deleteWish(productId);
+
+    }
+
+    private String convertProductStatusToKr(String status) {
+        if (status == null) return null;
+
+        return switch (status) {
+            case "UNOPENED" -> "미개봉";
+            case "OPENED_UNUSED" -> "개봉·미사용";
+            case "USED" -> "중고";
+            default -> status;
+        };
+    }
+
+    private String convertSalesStatusToKr(String status) {
+        if (status == null) return null;
+
+        return switch (status) {
+            case "FOR_SALE" -> "판매중";
+            case "RESERVED" -> "예약중";
+            case "SOLD_OUT" -> "판매완료";
+            default -> status;
+        };
+    }
 }

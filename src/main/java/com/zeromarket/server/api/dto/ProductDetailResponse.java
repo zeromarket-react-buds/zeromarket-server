@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 public class ProductDetailResponse {
 
+
     private ProductDetailSellerInfo seller;
     private List<ProductDetailImageInfo> images;
     private Integer mainImageIndex;
@@ -21,20 +22,26 @@ public class ProductDetailResponse {
     private String productDescription;
     private Long sellPrice;
 
-//    private String categoryDepth1;
-//    private String categoryDepth2;
+    private String categoryDepth1;
+    private String categoryDepth2;
     private String categoryDepth3;
     private String productStatus;
     private String salesStatus;
-    private int viewCount;
+
+    private String productStatusKr;
+    private String salesStatusKr;
+
+    private boolean isWished;
     private int wishCount;
 
+    private int viewCount;
     private boolean isDelivery;
     private boolean isDirect;
     private String sellingArea;
     private LocalDateTime createdAt;
     private boolean isHidden;
     private boolean isDeleted;
+
 
 
 }

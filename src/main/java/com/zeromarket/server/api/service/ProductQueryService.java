@@ -9,4 +9,10 @@ public interface ProductQueryService {
     LoadMoreResponse<ProductQueryResponse> selectProductList(ProductQueryRequest productQueryRequest);
 
     ProductDetailResponse selectProductDetail(Long productId);
+
+    void increaseViewCount(Long productId);
+
+    void addWish(Long productId);
+
+    void removeWish(Long productId);
 }

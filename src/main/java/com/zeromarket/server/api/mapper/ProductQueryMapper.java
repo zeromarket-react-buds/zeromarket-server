@@ -15,9 +15,9 @@ public interface ProductQueryMapper {
 
     ProductDetailResponse selectProductDetail(Long productId);
 
-    List<ProductDetailImageInfo> selectProductImages(Long productId);
+    void updateViewCount(Long productId);
 
-    ProductDetailSellerInfo selectProductSeller(Long memberId);
+    void insertWish(Long productId);
 
-
+    void deleteWish(Long productId);
 }
