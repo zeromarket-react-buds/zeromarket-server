@@ -25,9 +25,9 @@ public class ProductDetailResponse {
     private String categoryDepth1;
     private String categoryDepth2;
     private String categoryDepth3;
+
     private String productStatus;
     private String salesStatus;
-
     private String productStatusKr;
     private String salesStatusKr;
 

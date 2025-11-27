@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.ProductCommandMapper">
+
+  <!--  상품등록-->
+  <insert id="insertProduct" useGeneratedKeys="true" keyProperty="productId">
+    INSERT INTO product
+    (
+    seller_id,
+    product_title,
+    description,
+    sell_price,
+    level3_id,
+    sales_status,
+    product_status,
+    is_direct,
+    is_delivery,
+    selling_area,
+    created_at
+    )
+    VALUES
+    (
+    #{sellerId},
+    #{productTitle},
+    #{productDescription},
+    #{sellPrice},
+    #{categoryDepth3},
+    #{salesStatus},
+    #{productStatus},
+    #{direct},
+    #{delivery},
+    #{sellingArea},
+    NOW()
+    )
+  </insert>
+
+  <!--  상품 사진등록-->
+  <insert id="insertProductImage">
+    INSERT INTO product_image
+    (
+    product_id,
+    image_url
+    )
+    VALUES
+    (
+    #{productId},
+    #{imageUrl}
+    )
+  </insert>
+
+</mapper>

@@ -205,4 +205,6 @@
     SET is_deleted = true
     WHERE product_id = #{productId}
   </update>
+
+
 </mapper>
