@@ -114,7 +114,8 @@
     <result property="isDirect" column="is_direct"/>
     <result property="sellingArea" column="selling_area"/>
     <result property="viewCount" column="view_count"/>
-    <result property="salesStatus" column="sales_status"/>
+    <result property="salesStatus" column="sales_status"
+      typeHandler="com.zeromarket.server.common.enums.handler.SalesStatusHandler"/>
     <result property="productStatus" column="product_status"/>
     <result property="wishCount" column="wish_count"/>
     <result property="isWished" column="is_wished"/>
@@ -193,18 +194,12 @@
     AND is_hidden = false
   </update>
 
-  <!-- 찜 추가 -->
-  <insert id="insertWish">
-    INSERT INTO wish (product_id, is_deleted)
-    VALUES (#{productId}, false)
-  </insert>
-
-  <!-- 찜 삭제 -->
-  <update id="deleteWish">
-    UPDATE wish
-    SET is_deleted = true
+  <select id="countWishByProductId" resultType="int">
+    SELECT COUNT(*)
+    FROM wish
     WHERE product_id = #{productId}
-  </update>
+    AND is_deleted = false
+  </select>
 
 
 </mapper>

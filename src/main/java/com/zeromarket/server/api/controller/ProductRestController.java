@@ -5,6 +5,7 @@ import com.zeromarket.server.api.dto.ProductCreateRequest;
 import com.zeromarket.server.api.dto.ProductDetailResponse;
 import com.zeromarket.server.api.dto.ProductQueryRequest;
 import com.zeromarket.server.api.dto.ProductQueryResponse;
+import com.zeromarket.server.api.dto.WishCountResponse;
 import com.zeromarket.server.api.service.ProductCommandService;
 import com.zeromarket.server.api.service.ProductQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,22 +66,14 @@ public class ProductRestController {
         productQueryService.increaseViewCount(productId);
         return ResponseEntity.ok().build();
     }
-    
-    //찜 토글
-    @Operation(summary = "찜 추가", description = "상품에 찜을 추가한다")
-    @PostMapping("/{productId}/wish")
-    public ResponseEntity<Void> addWish(@PathVariable Long productId) {
-        productQueryService.addWish(productId);
-        return ResponseEntity.ok().build();
-    }
 
-    @Operation(summary = "찜 삭제", description = "상품에 찜을 취소한다")
-    @DeleteMapping("/{productId}/wish")
-    public ResponseEntity<Void> removeWish(@PathVariable Long productId) {
-        productQueryService.removeWish(productId);
-        return ResponseEntity.ok().build();
+    //찜 수 조회
+    @Operation(summary = "찜 수 조회", description = "상품 찜 수 조회")
+    @GetMapping("/{productId}/wish-count")
+    public ResponseEntity<WishCountResponse> getWishCount(@PathVariable Long productId) {
+        WishCountResponse result = productQueryService.getWishCount(productId);
+        return ResponseEntity.ok(result);
     }
-
 
     //상품 등록
     @Operation(summary = "상품 등록", description = "상품 정보 + 이미지 업로드")
@@ -102,5 +95,7 @@ public class ProductRestController {
     //상품 수정
     
     //상품 삭제
+
+
 
 }

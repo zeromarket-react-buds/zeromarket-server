@@ -6,6 +6,7 @@ import com.zeromarket.server.api.dto.ProductDetailResponse;
 import com.zeromarket.server.api.dto.ProductDetailSellerInfo;
 import com.zeromarket.server.api.dto.ProductQueryRequest;
 import com.zeromarket.server.api.dto.ProductQueryResponse;
+import com.zeromarket.server.api.dto.WishCountResponse;
 import com.zeromarket.server.api.mapper.ProductQueryMapper;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -42,12 +43,12 @@ public class ProductQueryServiceImpl implements ProductQueryService{
 
     @Override
     public ProductDetailResponse selectProductDetail(Long productId) {
-        mapper.updateViewCount(productId);
+//        mapper.updateViewCount(productId); 조회수증가 중복으로삭제
         ProductDetailResponse detail = mapper.selectProductDetail(productId);
         if(detail == null) return null;
 
         detail.setProductStatusKr(convertProductStatusToKr(detail.getProductStatus()));
-        detail.setSalesStatusKr(convertSalesStatusToKr(detail.getSalesStatus()));
+//        detail.setSalesStatusKr(convertSalesStatusToKr(detail.getSalesStatus()));
 
         Integer mainIndex = null;
         for (int i = 0; i < detail.getImages().size(); i++){
@@ -62,23 +63,20 @@ public class ProductQueryServiceImpl implements ProductQueryService{
 
     }
 
-
-
     @Override
     public void increaseViewCount(Long productId) {
         mapper.updateViewCount(productId);
     }
 
     @Override
-    public void addWish(Long productId) {
-        mapper.insertWish(productId);
+    public WishCountResponse getWishCount(Long productId) {
+        int count = mapper.countWishByProductId(productId);
+        WishCountResponse dto = new WishCountResponse();
+        dto.setProductId(productId);
+        dto.setWishCount(count);
+        return dto;
     }
 
-    @Override
-    public void removeWish(Long productId) {
-        mapper.deleteWish(productId);
-
-    }
 
     private String convertProductStatusToKr(String status) {
         if (status == null) return null;
@@ -91,14 +89,14 @@ public class ProductQueryServiceImpl implements ProductQueryService{
         };
     }
 
-    private String convertSalesStatusToKr(String status) {
-        if (status == null) return null;
-
-        return switch (status) {
-            case "FOR_SALE" -> "판매중";
-            case "RESERVED" -> "예약중";
-            case "SOLD_OUT" -> "판매완료";
-            default -> status;
-        };
-    }
+//    private String convertSalesStatusToKr(String status) {
+//        if (status == null) return null;
+//
+//        return switch (status) {
+//            case "FOR_SALE" -> "판매중";
+//            case "RESERVED" -> "예약중";
+//            case "SOLD_OUT" -> "판매완료";
+//            default -> status;
+//        };
+//    }
 }

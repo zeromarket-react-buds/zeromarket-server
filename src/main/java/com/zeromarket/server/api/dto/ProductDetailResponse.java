@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.dto;
 
 
+import com.zeromarket.server.common.enums.SalesStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -26,10 +27,13 @@ public class ProductDetailResponse {
     private String categoryDepth2;
     private String categoryDepth3;
 
+    private SalesStatus salesStatus;
+//    private String salesStatus;
+    //    private String salesStatusKr;
+
     private String productStatus;
-    private String salesStatus;
     private String productStatusKr;
-    private String salesStatusKr;
+
 
     private boolean isWished;
     private int wishCount;

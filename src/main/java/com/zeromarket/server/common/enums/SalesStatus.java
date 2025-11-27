@@ -1,5 +1,8 @@
 package com.zeromarket.server.common.enums;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum SalesStatus {
     /** 판매 중 (상품 구매 가능) */
     FOR_SALE("판매 중"),

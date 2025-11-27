@@ -20,4 +20,6 @@ public interface ProductQueryMapper {
     void insertWish(Long productId);
 
     void deleteWish(Long productId);
+
+    int countWishByProductId(Long productId);
 }
