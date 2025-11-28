@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class MemberServiceImpl implements MemberService {
 //    email, loginId, nickname, phone (unique)
 
     @Override
+    @Transactional
     public Long signup(MemberSignupRequest dto) {
 //        email 필드가 빈 문자열("")인 경우, Null 값으로 변경(DB 저장을 위해)
         String email = dto.getEmail();
@@ -57,22 +59,11 @@ public class MemberServiceImpl implements MemberService {
             throw new ApiException(ErrorCode.EMAIL_ALREADY_EXIST);
         }
 
-//        Member member = memberMapper.selectMemberByLoginId(dto.getLoginId()); // 유효성 검사? (loginId 중복 검사)
-//        if(member != null){
-////            throw new IllegalArgumentException("이미 존재하는 id 입니다.");
-//            throw new ApiException(ErrorCode.LOGINID_ALREADY_EXIST);
-//        }
-
 //        dto -> entity
         Member member = new Member();
         BeanUtils.copyProperties(dto, member);
         member.setRole(Role.ROLE_USER.getDescription());
         member.setPassword(passwordEncoder.encode(dto.getPassword()));
-////        "" --> Null
-//        String email = member.getEmail();
-//        if(email == null || email.isBlank()) {
-//            member.setEmail(null);
-//        }
 
         try {
             memberMapper.insertMember(member);
@@ -80,27 +71,21 @@ public class MemberServiceImpl implements MemberService {
         } catch (DuplicateKeyException e) {
             throw new ApiException(ErrorCode.DUPLICATE_RESOURCE);
         }
-////        db insert
-//        int affectedRows = memberMapper.insertMember(member);
-//
-////        결과: 성공
-//        if(affectedRows > 0){
-//            return member.getMemberId();
-//        }
-//
-////        결과: 실패
-//        throw new ApiException(ErrorCode.DB_INSERT_FAILED);
-////        throw new RuntimeException("회원 정보 삽입에 실패했습니다.");
     }
 
 
     @Override
+    @Transactional(readOnly = true)
     public TokenInfo login(MemberLoginRequest dto) {
+        System.out.println(">>>>>>>>>>>>>>>" + dto.toString());
+
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(dto.getLoginId()))
-            .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+
+        System.out.println(">>>>>>>>>>>>>>>" + member.toString());
 
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new SecurityException("비밀번호가 일치하지 않습니다.");
+            throw new ApiException(ErrorCode.LOGIN_FAIL);
         }
 
         return new TokenInfo(
@@ -110,10 +95,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TokenInfo refresh(String refreshToken) {
 
 //        1. null 확인
-        if (refreshToken == null) {
+        if (refreshToken == null|| refreshToken.isBlank()) {
             throw new AuthenticationCredentialsNotFoundException("JWT 토큰이 존재하지 않습니다.");
         }
 
@@ -122,6 +108,7 @@ public class MemberServiceImpl implements MemberService {
             throw new BadCredentialsException("유효하지 않은 JWT 토큰입니다.");
         }
 
+//        3. token 재발급
         String loginId = jwtUtil.getLoginId(refreshToken);
 
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
@@ -134,11 +121,13 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MemberResponse getMyInfo() {
         Authentication authentication =
             SecurityContextHolder.getContext().getAuthentication();
         String loginId = authentication.getName();
-        Member member = memberMapper.selectMemberByLoginId(loginId);
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId)).orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+//        Member member = memberMapper.selectMemberByLoginId(loginId);
 
         MemberResponse response = new MemberResponse();
         BeanUtils.copyProperties(member, response);
@@ -147,25 +136,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Boolean checkDuplicateId(String loginId) {
         boolean existsByLoginId = memberMapper.existsByLoginId(loginId);
 
         return  existsByLoginId;
     }
-
-//    @Override
-//    public Member getMyInfo(Authentication authentication) {
-//
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new UnauthorizedException("로그인이 필요합니다.");
-//        }
-//
-//        String loginId = authentication.getName();
-//
-//        return Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
-//            .orElseThrow(() ->
-//                new MemberNotFoundException("해당 회원을 찾을 수 없습니다.")
-//            );
-//    }
-
 }

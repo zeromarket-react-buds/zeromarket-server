@@ -13,6 +13,7 @@ public enum ErrorCode {
     NICKNAME_ALREADY_EXIST(409, "닉네임이 이미 존재합니다."),
     PHONE_ALREADY_EXIST(409, "핸드폰 번호가 이미 존재합니다."),
     EMAIL_ALREADY_EXIST(409, "이메일이 이미 존재합니다."),
+    LOGIN_FAIL(401, "아이디 또는 비밀번호가 올바르지 않습니다."),
 
     // 회원
     MEMBER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),
