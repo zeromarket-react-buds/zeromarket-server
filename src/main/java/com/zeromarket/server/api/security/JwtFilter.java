@@ -25,11 +25,25 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
+    private static final String[] EXCLUDED_PATHS = {
+        "/api/auth",
+//        "api/products",
+        "/swagger-ui",
+        "/v3/api-docs"
+    };
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+
+        for (String excluded : EXCLUDED_PATHS) {
+            if (path.startsWith(excluded)) {
+                return true;
+            }
+        }
+        return false;
 //        return path.startsWith("/api/auth"); // '로그인/회원가입/refresh요청'은 필터 건너뛰기
-        return path.startsWith("/api");
+//        return path.startsWith("/api");
     }
 
     @Override

@@ -51,7 +51,7 @@ public class AuthController {
         // ✅ HttpOnly Cookie에 refresh token 저장
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenInfo.getRefreshToken())
             .httpOnly(true)
-            .secure(true)           // https 환경이면 true 로 변경
+            .secure(false)           // https 환경이면 true 로 변경
             .path("/")              // 모든 요청에 포함
             .maxAge(Duration.ofDays(7)) // 7일
             .sameSite("Strict")     // 또는 Lax, 같은 도메인/포트 조합이면 Strict도 무방
@@ -99,7 +99,8 @@ public class AuthController {
         // 같은 이름 + path + maxAge=0 으로 쿠키 삭제
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
-            .secure(true)
+            .secure(false) // 개발 시
+//            .secure(true) // 운영 서버 배포 시
             .path("/")
             .maxAge(0)
             .build();
