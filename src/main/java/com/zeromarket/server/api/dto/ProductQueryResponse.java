@@ -2,6 +2,8 @@ package com.zeromarket.server.api.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import com.zeromarket.server.common.enums.SalesStatus;
+import com.zeromarket.server.common.enums.ProductStatus;
 
 import java.time.LocalDateTime;
 
@@ -14,8 +16,8 @@ public class ProductQueryResponse {
     private Long sellPrice;
     private String sellingArea;
 
-    private String productStatus;
-    private String salesStatus;
+    private ProductStatus productStatus;
+    private SalesStatus salesStatus;
     private int viewCount;
 
     private boolean isDelivery;

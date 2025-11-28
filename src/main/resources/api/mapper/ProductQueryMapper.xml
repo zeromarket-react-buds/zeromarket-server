@@ -3,8 +3,31 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zeromarket.server.api.mapper.ProductQueryMapper">
 
-    <select id="selectProductsCursor"
-            resultType="com.zeromarket.server.api.dto.ProductQueryResponse">
+    <resultMap id="ProductQueryResponseMap"
+               type="com.zeromarket.server.api.dto.ProductQueryResponse">
+
+        <id column="product_id" property="productId" />
+        <result column="product_title" property="productTitle" />
+        <result column="sell_price" property="sellPrice" />
+        <result column="selling_area" property="sellingArea" />
+
+        <result column="product_status"
+                property="productStatus"
+                javaType="com.zeromarket.server.common.enums.ProductStatus" />
+
+        <result column="sales_status"
+                property="salesStatus"
+                javaType="com.zeromarket.server.common.enums.SalesStatus" />
+
+        <result column="is_delivery" property="delivery" />
+        <result column="is_direct" property="direct" />
+
+        <result column="created_at" property="createdAt" />
+        <result column="wish_count" property="wishCount" />
+        <result column="thumbnail_url" property="thumbnailUrl" />
+    </resultMap>
+    <select id="selectProductsOffset"
+            resultMap="ProductQueryResponseMap">
         SELECT
             p.product_id,
             p.product_title,
@@ -40,49 +63,15 @@
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
 
-        <if test="cursor != null">
-            AND p.product_id &lt; #{cursor}
-        </if>
-
-        <choose>
-            <when test="sort == 'popularity'">
-                ORDER BY
-                wish_count DESC,
-                p.created_at DESC,
-                p.product_id DESC
-                LIMIT #{size}
-            </when>
-
-            <when test="sort == 'latest'">
-                ORDER BY
-                p.created_at DESC,
-                p.product_id DESC
-                LIMIT #{size}
-            </when>
-
-            <when test="sort == 'priceAsc'">
-                ORDER BY
-                p.sell_price ASC,
-                p.created_at DESC,
-                p.product_id DESC
-                LIMIT #{size}
-            </when>
-
-            <when test="sort == 'priceDesc'">
-                ORDER BY
-                p.sell_price DESC,
-                p.created_at DESC,
-                p.product_id DESC
-                LIMIT #{size}
-            </when>
-            <otherwise>
-                ORDER BY
-                wish_count DESC,
-                p.created_at DESC,
-                p.product_id DESC
-                LIMIT #{size}
-            </otherwise>
-        </choose>
+        ORDER BY
+            CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END DESC,
+            CASE WHEN #{sort} = 'latest'     THEN p.created_at END DESC,
+            CASE WHEN #{sort} = 'priceAsc'   THEN p.sell_price END ASC,
+            CASE WHEN #{sort} = 'priceDesc'  THEN p.sell_price END DESC,
+            p.created_at DESC,
+            p.product_id DESC
+        LIMIT #{size}
+        OFFSET COALESCE(#{offset}, 0)
     </select>
 
 

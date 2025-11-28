@@ -11,11 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 public class LoadMoreResponse<T> {
     private List<T> content;
-    private Long cursor;
+    private Long offset;
     private boolean hasNext;
 
-    public static <T> LoadMoreResponse<T> of(List<T> content, Long cursor, boolean hasNext) {
-        return new LoadMoreResponse<>(content, cursor, hasNext);
+    public static <T> LoadMoreResponse<T> of(List<T> content, Long offset, boolean hasNext) {
+        return new LoadMoreResponse<>(content, offset, hasNext);
     }
 }
 

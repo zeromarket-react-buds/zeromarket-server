@@ -21,24 +21,30 @@ public class ProductQueryServiceImpl implements ProductQueryService{
     @Override
     public LoadMoreResponse<ProductQueryResponse> selectProductList(ProductQueryRequest req) {
         int size = (req.getSize() == null || req.getSize() < 1) ? 10 : req.getSize();
-        Long cursor = req.getCursor();
+
+        // cursor를 offset으로 사용
+        Long offset = req.getOffset();
+        int safeOffset = (offset == null || offset < 0) ? 0 : offset.intValue();
 
         ProductQueryRequest queryReq = new ProductQueryRequest();
-        queryReq.setSize(size + 1);
-        queryReq.setCursor(cursor);
+        queryReq.setSize(size + 1);                 // hasNext 판단용(다음 페이지가 있는지 체크용 + 1)
+        queryReq.setOffset((long) safeOffset);      // mapper에서 OFFSET 으로 사용
         queryReq.setKeyword(req.getKeyword());
         queryReq.setSort(req.getSort());
 
-        List<ProductQueryResponse> fetched = mapper.selectProductsCursor(queryReq);
+        List<ProductQueryResponse> fetched = mapper.selectProductsOffset(queryReq);
 
         boolean hasNext = fetched.size() > size;
-        if (hasNext) fetched = fetched.subList(0, size);
+        if (hasNext) {
+            fetched = fetched.subList(0, size);
+        }
 
-        Long nextCursor = fetched.isEmpty()
-                ? null
-                : fetched.get(fetched.size() - 1).getProductId();
+        // 다음 offset = 현재 offset + 이번에 실제로 보낸 개수
+        Long nextOffset = hasNext
+            ? (long) (safeOffset + size)
+            : null;
 
-        return LoadMoreResponse.of(fetched, nextCursor, hasNext);
+        return LoadMoreResponse.of(fetched, nextOffset, hasNext);
     }
 
     @Override

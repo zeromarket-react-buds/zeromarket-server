@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface ProductQueryMapper {
 
-    List<ProductQueryResponse> selectProductsCursor(ProductQueryRequest queryReq);
+    List<ProductQueryResponse> selectProductsOffset(ProductQueryRequest queryReq);
 
     ProductDetailResponse selectProductDetail(Long productId);
 

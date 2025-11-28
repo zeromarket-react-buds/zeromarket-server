@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProductQueryRequest {
-    private Long cursor;
+    private Long offset;
     private Integer size;
     private Long level3Id;
     private String keyword;
