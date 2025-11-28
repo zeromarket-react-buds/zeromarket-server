@@ -8,7 +8,10 @@ import lombok.Setter;
 public class ProductQueryRequest {
     private Long offset;
     private Integer size;
-    private Long level3Id;
     private String keyword;
     private String sort;
+    private Long category;
+    private Integer minPrice;
+    private Integer maxPrice;
+    private String area;
 }

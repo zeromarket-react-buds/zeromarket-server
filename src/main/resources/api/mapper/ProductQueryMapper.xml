@@ -63,6 +63,23 @@
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
 
+        <if test="category != null">
+            AND p.level3_id = #{category}
+        </if>
+
+        <if test="area != null and area != ''">
+            AND p.selling_area ILIKE CONCAT('%', #{area}, '%')
+        </if>
+
+        <if test="minPrice != null">
+            AND p.sell_price &gt;= #{minPrice}
+        </if>
+
+        <if test="maxPrice != null">
+            AND p.sell_price &lt;= #{maxPrice}
+        </if>
+
+
         ORDER BY
             CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END DESC,
             CASE WHEN #{sort} = 'latest'     THEN p.created_at END DESC,

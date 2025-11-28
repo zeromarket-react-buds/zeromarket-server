@@ -31,6 +31,10 @@ public class ProductQueryServiceImpl implements ProductQueryService{
         queryReq.setOffset((long) safeOffset);      // mapper에서 OFFSET 으로 사용
         queryReq.setKeyword(req.getKeyword());
         queryReq.setSort(req.getSort());
+        queryReq.setCategory(req.getCategory());
+        queryReq.setMinPrice(req.getMinPrice());
+        queryReq.setMaxPrice(req.getMaxPrice());
+        queryReq.setArea(req.getArea());
 
         List<ProductQueryResponse> fetched = mapper.selectProductsOffset(queryReq);
 
