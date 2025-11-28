@@ -26,6 +26,9 @@ public class ProductDetailResponse {
     private String categoryDepth1;
     private String categoryDepth2;
     private String categoryDepth3;
+    private Long level1Id;
+    private Long level2Id;
+    private Long level3Id;
 
     private SalesStatus salesStatus;
 //    private String salesStatus;

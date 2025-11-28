@@ -91,6 +91,17 @@ public class ProductRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newProductId);
     }
 
+    //비슷한 상품 조회
+    @Operation(summary = "비슷한 상품 조회", description = "현 상품과 비슷한 상품 조회")
+    @GetMapping("/{productId}/similar")
+    public ResponseEntity<List<ProductQueryResponse>> getSimilarProducts(@PathVariable Long productId) {
+//        List<ProductQueryResponse> result = productQueryService.findSimilarProducts(productId);
+//        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(productQueryService.findSimilarProducts(productId));
+    }
+
+
+
 
     //상품 수정
     

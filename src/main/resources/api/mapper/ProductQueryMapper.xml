@@ -121,11 +121,13 @@
     <result property="isWished" column="is_wished"/>
     <result property="isHidden" column="is_hidden"/>
     <result property="isDeleted" column="is_deleted"/>
-
-    <!-- 카테고리 -->
+    
     <result property="categoryDepth1" column="category_depth1"/>
     <result property="categoryDepth2" column="category_depth2"/>
     <result property="categoryDepth3" column="category_depth3"/>
+    <result property="level1Id" column="level1_id"/>
+    <result property="level2Id" column="level2_id"/>
+    <result property="level3Id" column="level3_id"/>
 
     <!-- 판매자 (1:1) -->
     <association property="seller" resultMap="sellerMap"/>
@@ -160,10 +162,13 @@
     m.nickname AS seller_nickname,
     m.introduction AS seller_introduction,
 
-    -- 카테고리 이름
+    -- 카테고리 이름,ID
     c1.level1_name AS category_depth1,
     c2.level2_name AS category_depth2,
     c3.level3_name AS category_depth3,
+    c1.level1_id AS level1_id,
+    c2.level2_id AS level2_id,
+    c3.level3_id AS level3_id,
 
     -- 이미지
     pi.image_id,
@@ -201,5 +206,50 @@
     AND is_deleted = false
   </select>
 
+  <select id="selectSimilarProducts"
+    parameterType="long"
+    resultType="com.zeromarket.server.api.dto.ProductQueryResponse">
+
+    SELECT
+    p.product_id,
+    p.product_title,
+    p.sell_price,
+    p.selling_area,
+    p.sales_status,
+    p.product_status,
+    p.is_delivery,
+    p.is_direct,
+    p.created_at,
+
+    COALESCE(w.wish_count, 0) AS wish_count,
+    pi.image_url AS thumbnail_url
+
+    FROM product p
+
+    LEFT JOIN (
+    SELECT product_id, COUNT(*) AS wish_count
+    FROM wish
+    WHERE is_deleted = false
+    GROUP BY product_id
+    ) w ON w.product_id = p.product_id
+
+    LEFT JOIN product_image pi
+    ON pi.product_id = p.product_id
+    AND pi.is_main = true
+
+    WHERE p.is_hidden = false
+    AND p.is_deleted = false
+    AND p.sales_status != 'SOLD_OUT'
+    AND p.product_id != #{productId}
+    AND p.level3_id = (
+    SELECT level3_id
+    FROM product
+    WHERE product_id = #{productId}
+    )
+
+    ORDER BY w.wish_count DESC, p.created_at DESC
+    LIMIT 6
+
+  </select>
 
 </mapper>

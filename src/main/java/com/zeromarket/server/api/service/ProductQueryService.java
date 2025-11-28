@@ -5,6 +5,7 @@ import com.zeromarket.server.api.dto.ProductDetailResponse;
 import com.zeromarket.server.api.dto.ProductQueryRequest;
 import com.zeromarket.server.api.dto.ProductQueryResponse;
 import com.zeromarket.server.api.dto.WishCountResponse;
+import java.util.List;
 
 public interface ProductQueryService {
     LoadMoreResponse<ProductQueryResponse> selectProductList(ProductQueryRequest productQueryRequest);
@@ -14,4 +15,6 @@ public interface ProductQueryService {
     void increaseViewCount(Long productId);
 
     WishCountResponse getWishCount(Long productId);
+
+    List<ProductQueryResponse> findSimilarProducts(Long productId);
 }

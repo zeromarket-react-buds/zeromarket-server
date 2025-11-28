@@ -77,6 +77,11 @@ public class ProductQueryServiceImpl implements ProductQueryService{
         return dto;
     }
 
+    @Override
+    public List<ProductQueryResponse> findSimilarProducts(Long productId) {
+        return mapper.selectSimilarProducts(productId);
+    }
+
 
     private String convertProductStatusToKr(String status) {
         if (status == null) return null;

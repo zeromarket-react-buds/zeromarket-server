@@ -22,4 +22,6 @@ public interface ProductQueryMapper {
     void deleteWish(Long productId);
 
     int countWishByProductId(Long productId);
+
+    List<ProductQueryResponse> selectSimilarProducts(Long productId);
 }
