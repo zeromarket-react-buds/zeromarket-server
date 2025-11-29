@@ -110,8 +110,8 @@
   <resultMap id="productDetailMap" type="com.zeromarket.server.api.dto.ProductDetailResponse">
 
     <id property="productId" column="product_id"/>
-    <result property="sellerId" column="seller_id"/>
 
+    <result property="sellerId" column="seller_id"/>
     <result property="productTitle" column="product_title"/>
     <result property="productDescription" column="product_description"/>
     <result property="sellPrice" column="sell_price"/>
@@ -121,8 +121,9 @@
     <result property="sellingArea" column="selling_area"/>
     <result property="viewCount" column="view_count"/>
     <result property="salesStatus" column="sales_status"
-      typeHandler="com.zeromarket.server.common.enums.handler.SalesStatusHandler"/>
-    <result property="productStatus" column="product_status"/>
+      javaType="com.zeromarket.server.common.enums.SalesStatus"/>
+    <result property="productStatus" column="product_status"
+      javaType="com.zeromarket.server.common.enums.ProductStatus"/>
     <result property="wishCount" column="wish_count"/>
     <result property="isWished" column="is_wished"/>
     <result property="isHidden" column="is_hidden"/>

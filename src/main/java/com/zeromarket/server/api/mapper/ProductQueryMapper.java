@@ -17,10 +17,6 @@ public interface ProductQueryMapper {
 
     void updateViewCount(Long productId);
 
-    void insertWish(Long productId);
-
-    void deleteWish(Long productId);
-
     int countWishByProductId(Long productId);
 
     List<ProductQueryResponse> selectSimilarProducts(Long productId);

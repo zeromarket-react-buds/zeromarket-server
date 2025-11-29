@@ -8,10 +8,10 @@ public enum SalesStatus {
     FOR_SALE("판매 중"),
 
     /** 예약됨 (잠시 판매 대기) */
-    RESERVED("예약됨"),
+    RESERVED("예약 중"),
 
     /** 품절 (재고 없음) */
-    SOLD_OUT("품절");
+    SOLD_OUT("거래 완료");
 
     // 필드 추가 (선택 사항: 문자열 설명)
     private final String description;

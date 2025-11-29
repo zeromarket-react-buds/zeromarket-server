@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class ProductQueryServiceImpl implements ProductQueryService{
+public class ProductQueryServiceImpl implements ProductQueryService {
 
     private final ProductQueryMapper mapper;
 
@@ -55,14 +55,12 @@ public class ProductQueryServiceImpl implements ProductQueryService{
     public ProductDetailResponse selectProductDetail(Long productId) {
 //        mapper.updateViewCount(productId); 조회수증가 중복으로삭제
         ProductDetailResponse detail = mapper.selectProductDetail(productId);
-        if(detail == null) return null;
-
-        detail.setProductStatusKr(convertProductStatusToKr(detail.getProductStatus()));
-//        detail.setSalesStatusKr(convertSalesStatusToKr(detail.getSalesStatus()));
+        if (detail == null)
+            return null;
 
         Integer mainIndex = null;
-        for (int i = 0; i < detail.getImages().size(); i++){
-            if(detail.getImages().get(i).isMain()){
+        for (int i = 0; i < detail.getImages().size(); i++) {
+            if (detail.getImages().get(i).isMain()) {
                 mainIndex = i;
                 break;
             }
@@ -93,25 +91,4 @@ public class ProductQueryServiceImpl implements ProductQueryService{
     }
 
 
-    private String convertProductStatusToKr(String status) {
-        if (status == null) return null;
-
-        return switch (status) {
-            case "UNOPENED" -> "미개봉";
-            case "OPENED_UNUSED" -> "개봉·미사용";
-            case "USED" -> "중고";
-            default -> status;
-        };
-    }
-
-//    private String convertSalesStatusToKr(String status) {
-//        if (status == null) return null;
-//
-//        return switch (status) {
-//            case "FOR_SALE" -> "판매중";
-//            case "RESERVED" -> "예약중";
-//            case "SOLD_OUT" -> "판매완료";
-//            default -> status;
-//        };
-//    }
 }

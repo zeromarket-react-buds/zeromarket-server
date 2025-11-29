@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.dto;
 
 
+import com.zeromarket.server.common.enums.ProductStatus;
 import com.zeromarket.server.common.enums.SalesStatus;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProductDetailResponse {
-
 
     private ProductDetailSellerInfo seller;
     private List<ProductDetailImageInfo> images;
@@ -30,13 +30,9 @@ public class ProductDetailResponse {
     private Long level2Id;
     private Long level3Id;
 
+    //영어 상태 > ENUM으로 유지
     private SalesStatus salesStatus;
-//    private String salesStatus;
-    //    private String salesStatusKr;
-
-    private String productStatus;
-    private String productStatusKr;
-
+    private ProductStatus productStatus;
 
     private boolean isWished;
     private int wishCount;
