@@ -2,7 +2,6 @@ package com.zeromarket.server.api.controller;
 
 import com.zeromarket.server.api.dto.MemberResponse;
 import com.zeromarket.server.api.service.MemberService;
-import com.zeromarket.server.common.entity.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
 @Tag(name = "Member API", description = "회원 API")
-public class MemberController {
+public class MemberRestController {
 
     private final MemberService memberService;
 
