@@ -43,35 +43,18 @@ public class ProductRestController {
     }
     
     //상품 상세 조회
-    @Operation(summary = "상품 상세조회", description = "상품id로 개별 상세조회")
+    @Operation(summary = "상품 상세조회", description = "상세조회 화면 - 상품id로 개별조회 + 조회수 증가 + 찜 수 조회")
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(
-        @PathVariable Long productId
-    ){
+    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId){
+        //조회수 증가 전 상품 존재여부 확인
         ProductDetailResponse result = productQueryService.selectProductDetail(productId);
-
         //미조회시 404 응답 보내기
         if(result == null){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(result);
-    }
-
-    //조회수 증가
-    @Operation(summary = "조회수 증가", description = "상품 상세 조회 시 조회수를 +1 증가")
-    @PatchMapping("/{productId}/view")
-    public ResponseEntity<Void> increaseViewCount(
-        @PathVariable Long productId
-    ) {
+        //조회수 증가
         productQueryService.increaseViewCount(productId);
-        return ResponseEntity.ok().build();
-    }
 
-    //찜 수 조회
-    @Operation(summary = "찜 수 조회", description = "상품 찜 수 조회")
-    @GetMapping("/{productId}/wish-count")
-    public ResponseEntity<WishCountResponse> getWishCount(@PathVariable Long productId) {
-        WishCountResponse result = productQueryService.getWishCount(productId);
         return ResponseEntity.ok(result);
     }
 
@@ -95,12 +78,9 @@ public class ProductRestController {
     @Operation(summary = "비슷한 상품 조회", description = "현 상품과 비슷한 상품 조회")
     @GetMapping("/{productId}/similar")
     public ResponseEntity<List<ProductQueryResponse>> getSimilarProducts(@PathVariable Long productId) {
-//        List<ProductQueryResponse> result = productQueryService.findSimilarProducts(productId);
-//        return ResponseEntity.ok(result);
+
         return ResponseEntity.ok(productQueryService.findSimilarProducts(productId));
     }
-
-
 
 
     //상품 수정

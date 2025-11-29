@@ -148,20 +148,22 @@
     resultMap="productDetailMap">
 
     SELECT
-    p.product_id,
-    p.product_title,
-    p.description AS product_description,
-    p.sell_price,
-    p.created_at,
-    p.is_delivery,
-    p.is_direct,
-    p.selling_area,
-    p.view_count,
-    p.sales_status,
-    p.product_status,
-    p.is_hidden,
-    p.is_deleted,
-    (SELECT COUNT(*) FROM wish w WHERE w.product_id = p.product_id AND w.is_deleted = false) AS wish_count,
+      p.product_id,
+      p.product_title,
+      p.description AS product_description,
+      p.sell_price,
+      p.created_at,
+      p.is_delivery,
+      p.is_direct,
+      p.selling_area,
+      p.view_count,
+      p.sales_status,
+      p.product_status,
+      p.is_hidden,
+      p.is_deleted,
+
+      (SELECT COUNT(*) FROM wish w
+      WHERE w.product_id = p.product_id AND w.is_deleted = false) AS wish_count,
 
 
     -- 판매자 ID
@@ -205,13 +207,6 @@
     AND is_deleted = false
     AND is_hidden = false
   </update>
-
-  <select id="countWishByProductId" resultType="int">
-    SELECT COUNT(*)
-    FROM wish
-    WHERE product_id = #{productId}
-    AND is_deleted = false
-  </select>
 
   <select id="selectSimilarProducts"
     parameterType="long"

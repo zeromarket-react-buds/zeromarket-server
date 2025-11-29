@@ -17,7 +17,5 @@ public interface ProductQueryMapper {
 
     void updateViewCount(Long productId);
 
-    int countWishByProductId(Long productId);
-
     List<ProductQueryResponse> selectSimilarProducts(Long productId);
 }

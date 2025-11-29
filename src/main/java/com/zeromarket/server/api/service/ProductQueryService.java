@@ -14,7 +14,5 @@ public interface ProductQueryService {
 
     void increaseViewCount(Long productId);
 
-    WishCountResponse getWishCount(Long productId);
-
     List<ProductQueryResponse> findSimilarProducts(Long productId);
 }

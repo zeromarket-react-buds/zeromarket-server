@@ -55,8 +55,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     public ProductDetailResponse selectProductDetail(Long productId) {
 //        mapper.updateViewCount(productId); 조회수증가 중복으로삭제
         ProductDetailResponse detail = mapper.selectProductDetail(productId);
-        if (detail == null)
-            return null;
+        if (detail == null) return null;
 
         Integer mainIndex = null;
         for (int i = 0; i < detail.getImages().size(); i++) {
@@ -74,15 +73,6 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     @Override
     public void increaseViewCount(Long productId) {
         mapper.updateViewCount(productId);
-    }
-
-    @Override
-    public WishCountResponse getWishCount(Long productId) {
-        int count = mapper.countWishByProductId(productId);
-        WishCountResponse dto = new WishCountResponse();
-        dto.setProductId(productId);
-        dto.setWishCount(count);
-        return dto;
     }
 
     @Override

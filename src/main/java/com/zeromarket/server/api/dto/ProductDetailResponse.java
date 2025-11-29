@@ -17,7 +17,6 @@ public class ProductDetailResponse {
     private Integer mainImageIndex;
 
     private Long sellerId;
-    //private String sellerNickname;
     private Long productId;
     private String productTitle;
     private String productDescription;
@@ -30,7 +29,6 @@ public class ProductDetailResponse {
     private Long level2Id;
     private Long level3Id;
 
-    //영어 상태 > ENUM으로 유지
     private SalesStatus salesStatus;
     private ProductStatus productStatus;
 
@@ -44,7 +42,5 @@ public class ProductDetailResponse {
     private LocalDateTime createdAt;
     private boolean isHidden;
     private boolean isDeleted;
-
-
 
 }
