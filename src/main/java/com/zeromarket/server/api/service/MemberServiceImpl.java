@@ -13,6 +13,7 @@ import com.zeromarket.server.common.exception.ApiException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
@@ -77,12 +79,12 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly = true)
     public TokenInfo login(MemberLoginRequest dto) {
-        System.out.println(">>>>>>>>>>>>>>>" + dto.toString());
+        log.info(">>>>>>>>>>>>>>>{}", dto.toString());
 
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(dto.getLoginId()))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
-        System.out.println(">>>>>>>>>>>>>>>" + member.toString());
+        log.info(">>>>>>>>>>>>>>>{}", member.toString());
 
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
             throw new ApiException(ErrorCode.LOGIN_FAIL);
