@@ -46,14 +46,8 @@ public class ProductRestController {
     @Operation(summary = "상품 상세조회", description = "상세조회 화면 - 상품id로 개별조회 + 조회수 증가 + 찜 수 조회")
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId){
-        //조회수 증가 전 상품 존재여부 확인
-        ProductDetailResponse result = productQueryService.selectProductDetail(productId);
-        //미조회시 404 응답 보내기
-        if(result == null){
-            return ResponseEntity.notFound().build();
-        }
-        //조회수 증가
-        productQueryService.increaseViewCount(productId);
+
+        ProductDetailResponse result = productQueryService.getProductDetail(productId);
 
         return ResponseEntity.ok(result);
     }

@@ -10,9 +10,9 @@ import java.util.List;
 public interface ProductQueryService {
     LoadMoreResponse<ProductQueryResponse> selectProductList(ProductQueryRequest productQueryRequest);
 
-    ProductDetailResponse selectProductDetail(Long productId);
-
-    void increaseViewCount(Long productId);
+    //상품상세 통합 메서드
+    ProductDetailResponse getProductDetail(Long productId);
 
     List<ProductQueryResponse> findSimilarProducts(Long productId);
+
 }

@@ -11,6 +11,7 @@ import com.zeromarket.server.api.mapper.ProductQueryMapper;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -52,11 +53,18 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     }
 
     @Override
-    public ProductDetailResponse selectProductDetail(Long productId) {
-//        mapper.updateViewCount(productId); 조회수증가 중복으로삭제
-        ProductDetailResponse detail = mapper.selectProductDetail(productId);
-        if (detail == null) return null;
+    @Transactional
+    public ProductDetailResponse getProductDetail(Long productId) {
 
+        mapper.updateViewCount(productId);
+
+        ProductDetailResponse detail = mapper.selectProductDetail(productId);
+
+        //상품없음=예외발생
+        if(detail==null){
+            throw new RuntimeException("상품이 존재하지 않습니다.");
+        }
+        //메인 이미지 인덱스 계산 - 이미지 등록시 재확인예정
         Integer mainIndex = null;
         for (int i = 0; i < detail.getImages().size(); i++) {
             if (detail.getImages().get(i).isMain()) {
@@ -67,12 +75,6 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         detail.setMainImageIndex(mainIndex);
 
         return detail;
-
-    }
-
-    @Override
-    public void increaseViewCount(Long productId) {
-        mapper.updateViewCount(productId);
     }
 
     @Override
