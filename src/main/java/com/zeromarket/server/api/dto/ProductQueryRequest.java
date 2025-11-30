@@ -10,7 +10,7 @@ public class ProductQueryRequest {
     private Integer size;
     private String keyword;
     private String sort;
-    private Long category;
+    private Long categoryId;
     private Integer minPrice;
     private Integer maxPrice;
     private String area;

@@ -63,8 +63,8 @@
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
 
-        <if test="category != null">
-            AND p.level3_id = #{category}
+        <if test="categoryId != null">
+            AND p.level3_id = #{categoryId}
         </if>
 
         <if test="area != null and area != ''">
