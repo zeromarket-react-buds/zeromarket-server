@@ -40,12 +40,18 @@
     INSERT INTO product_image
     (
     product_id,
-    image_url
+    image_url,
+    sort_order,
+    is_main,
+    created_at
     )
     VALUES
     (
     #{productId},
-    #{imageUrl}
+    #{imageUrl},
+    #{sortOrder},
+    #{isMain},
+    NOW()
     )
   </insert>
 

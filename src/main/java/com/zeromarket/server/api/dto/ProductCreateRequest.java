@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,4 +24,15 @@ public class ProductCreateRequest {
     public Long getProductId() { //DB insert 후 자동생성 id 받을때
         return productId;
     }
+
+    private List<ProductImageDto> images;//첨부 이미지 객체 형태,내부클래스public static
+
+    @Getter
+    @Setter
+    public static class ProductImageDto {
+        private String imageUrl; //supabase에서 받아온 이미지 url 리스트
+        private Integer sortOrder;
+        private Boolean isMain; //프론트에서 보낸 대표이미지
+    }
+
 }

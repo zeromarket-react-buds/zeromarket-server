@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductCommandService {
 
-    Long createProduct(ProductCreateRequest request, List<MultipartFile> images);
+    Long createProduct(ProductCreateRequest request);
 //    void updateProduct(Long productId, ProductCreateRequest request, List<MultipartFile> images);
 
 }

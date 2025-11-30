@@ -2,6 +2,7 @@ package com.zeromarket.server.api.controller;
 
 import com.zeromarket.server.api.dto.LoadMoreResponse;
 import com.zeromarket.server.api.dto.ProductCreateRequest;
+import com.zeromarket.server.api.dto.ProductCreateResponse;
 import com.zeromarket.server.api.dto.ProductDetailResponse;
 import com.zeromarket.server.api.dto.ProductQueryRequest;
 import com.zeromarket.server.api.dto.ProductQueryResponse;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,19 +55,21 @@ public class ProductRestController {
     }
 
     //상품 등록
-    @Operation(summary = "상품 등록", description = "상품 정보 + 이미지 업로드")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Long> createProduct(
+    @Operation(summary = "상품 등록", description = "상품 정보 + Supabase 이미지 URL")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ProductCreateResponse> createProduct(@RequestBody ProductCreateRequest request
         //@RequestPart : 아래처럼 작성하여, JSON + 파일을 각각 분리하여 받을수있게함
-        @RequestPart("data") ProductCreateRequest request,
-        // required = false : 스프링이 특정 요청 파트를 반드시 필요로 하지 않게 만드는 옵션,이미지가 없어도 에러를 내지 말고 images = null 로 (상품등록을)처리하라는 의미.
-        @RequestPart(value = "images",required = false) List<MultipartFile> images
-    )
-    {
-        Long newProductId = productCommandService.createProduct(request,images);
+//        @RequestPart("data") ProductCreateRequest request,
+//        // required = false : 스프링이 특정 요청 파트를 반드시 필요로 하지 않게 만드는 옵션,이미지가 없어도 에러를 내지 말고 images = null 로 (상품등록을)처리하라는 의미.
+//        @RequestPart(value = "images",required = false) List<MultipartFile> images
+    ){
+        Long newProductId = productCommandService.createProduct(request);
+        ProductCreateResponse response =
+            new ProductCreateResponse(newProductId, "상품이 정상적으로 등록되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
         //HttpStatus.CREATED = 201
         //메서드 체이닝 - HTTP 201 Created 상태로 newProductId 를 body 에 담아 JSON 응답
-        return ResponseEntity.status(HttpStatus.CREATED).body(newProductId);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(newProductId);
     }
 
     //비슷한 상품 조회
