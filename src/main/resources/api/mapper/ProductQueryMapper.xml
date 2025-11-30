@@ -254,4 +254,22 @@
 
   </select>
 
+    <select id="selectBasicInfo"
+        parameterType="java.lang.Long"
+        resultType="com.zeromarket.server.api.dto.ProductBasicInfo">
+        SELECT
+            p.product_id,
+            p.seller_id,
+            (SELECT pi.image_url
+             FROM product_image pi
+             WHERE pi.product_id = p.product_id
+             ORDER BY pi.is_main DESC, pi.sort_order ASC
+                            LIMIT 1) AS main_image
+        FROM product p
+        WHERE p.product_id = #{productId}
+          <!-- TODO: 삭제, 숨김 상품에 대한 채팅방 어떻게 할지?
+          AND p.is_deleted = false
+          AND p.is_hidden = false -->
+    </select>
+
 </mapper>

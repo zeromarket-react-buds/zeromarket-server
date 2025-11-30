@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.ChatMapper">
+
+    <select id="selectChatRoom" resultType="java.lang.Long">
+        SELECT
+            chat_room_id
+        FROM chat_room cr
+        WHERE cr.product_id = #{productId}
+          AND cr.buyer_id = #{buyerId}
+        AND cr.seller_id = #{sellerId}
+    </select>
+
+    <insert id="createChatRoom" parameterType="com.zeromarket.server.common.entity.ChatRoom"
+        useGeneratedKeys="true"
+        keyProperty="chatRoomId"
+        keyColumn="chat_room_id">
+        INSERT INTO
+            chat_room
+        (
+               product_id,
+               buyer_id,
+               seller_id,
+               product_image
+        ) VALUES (
+                #{productId},
+                #{buyerId},
+                #{sellerId},
+                #{productImage}
+        )
+    </insert>
+
+    <insert id="createChatParticipant" >
+        INSERT INTO
+            chat_room_participant
+        (
+             chat_room_id,
+             member_id,
+             deleted_at
+        )
+        VALUES
+        (
+             #{chatRoomId},
+             #{memberId},
+             null
+        )
+    </insert>
+
+    <insert id="createChatMessage" parameterType="com.zeromarket.server.common.entity.ChatMessage">
+        INSERT INTO
+            chat_message
+        (
+            chat_room_id,
+            member_id,
+            content,
+            message_type,
+            is_read
+        )
+        VALUES
+        (
+             #{chatRoomId},
+             #{memberId},
+             #{content},
+             #{messageType},
+             false
+        )
+    </insert>
+
+    <select id="selectChatMessageByMessageId" resultType="com.zeromarket.server.common.entity.ChatMessage"
+        parameterType="Long">
+        SELECT message_id,
+               chat_room_id,
+               member_id,
+               content,
+               message_type,
+               is_read,
+               created_at,
+               updated_at
+        FROM chat_message
+        WHERE message_id = #{messageId}
+    </select>
+
+    <!--테스트용-->
+    <select id="countChatParticipants" resultType="int">
+        SELECT COUNT(*)
+        FROM chat_room_participant
+        WHERE chat_room_id = #{chatRoomId}
+          AND deleted_at is null
+    </select>
+
+    <select id="selectChatMessages" resultType="com.zeromarket.server.api.dto.ChatMessageResponse">
+        SELECT
+            message_id,
+            chat_room_id,
+            member_id,
+            content,
+            message_type,
+            is_read,
+            created_at,
+            updated_at,
+            member_id = #{memberId} as is_mine
+        FROM chat_message
+        WHERE chat_room_id = #{chatRoomId}
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="existsParticipant" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM chat_room_participant cp
+                     INNER JOIN chat_room cr
+                                ON cp.chat_room_id = cr.chat_room_id
+            WHERE cp.chat_room_id = #{chatRoomId}
+              AND cp.member_id = #{memberId}
+              AND cp.deleted_at IS NULL
+              AND cr.is_deleted = false
+        )
+    </select>
+
+<!--    <select id="selectOrCreateChatRoomByProductIdBuyerId" resultType="long">-->
+<!--        WITH product_info AS (-->
+<!--            SELECT-->
+<!--                p.product_id,-->
+<!--                p.seller_id,-->
+<!--                (-->
+<!--                    SELECT pi.image_url-->
+<!--                    FROM product_image pi-->
+<!--                    WHERE pi.product_id = p.product_id-->
+<!--                    ORDER BY pi.is_main DESC, pi.sort_order ASC-->
+<!--                    LIMIT 1-->
+<!--        ) AS product_image-->
+<!--        FROM product p-->
+<!--        WHERE p.product_id = #{productId}-->
+<!--            ),-->
+<!--            upsert AS (-->
+<!--        INSERT INTO chat_room (-->
+<!--            product_id,-->
+<!--            buyer_id,-->
+<!--            seller_id,-->
+<!--            product_image-->
+<!--        )-->
+<!--        SELECT-->
+<!--            product_id,-->
+<!--            #{buyerId}        AS buyer_id,-->
+<!--            seller_id,-->
+<!--            product_image-->
+<!--        FROM product_info-->
+<!--        ON CONFLICT (product_id, buyer_id, seller_id) DO NOTHING-->
+<!--            RETURNING chat_room_id-->
+<!--            )-->
+<!--        SELECT chat_room_id-->
+<!--        FROM upsert-->
+
+<!--        UNION ALL-->
+
+<!--        SELECT cr.chat_room_id-->
+<!--        FROM chat_room cr-->
+<!--                 JOIN product_info pi-->
+<!--                      ON cr.product_id = pi.product_id-->
+<!--                          AND cr.seller_id = pi.seller_id-->
+<!--        WHERE cr.buyer_id = #{buyerId}-->
+
+<!--            LIMIT 1-->
+<!--    </select>-->
+
+
+</mapper>

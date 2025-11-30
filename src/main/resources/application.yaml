@@ -1,4 +1,7 @@
 spring:
+  output:
+    ansi:
+      enabled: ALWAYS
   jackson:
     time-zone: Asia/Seoul
   application:

@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.mapper;
 
+import com.zeromarket.server.api.dto.ProductBasicInfo;
 import com.zeromarket.server.api.dto.ProductDetailImageInfo;
 import com.zeromarket.server.api.dto.ProductDetailResponse;
 import com.zeromarket.server.api.dto.ProductDetailSellerInfo;
@@ -18,4 +19,6 @@ public interface ProductQueryMapper {
     void updateViewCount(Long productId);
 
     List<ProductQueryResponse> selectSimilarProducts(Long productId);
+
+    ProductBasicInfo selectBasicInfo(Long productId);
 }

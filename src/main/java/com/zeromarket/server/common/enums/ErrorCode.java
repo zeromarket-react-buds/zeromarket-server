@@ -23,8 +23,14 @@ public enum ErrorCode {
 
     // DB
     DB_INSERT_FAILED(500, "DB 내부 오류 (SQL 오류)"),
-    DUPLICATE_RESOURCE(500, "중복된 정보가 존재합니다.");
+    DUPLICATE_RESOURCE(500, "중복된 정보가 존재합니다."), 
     
+    // 상품
+    PRODUCT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다."),
+
+    // 채팅
+    CHAT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다.");
+
     private final int status;
     private final String message;
 
