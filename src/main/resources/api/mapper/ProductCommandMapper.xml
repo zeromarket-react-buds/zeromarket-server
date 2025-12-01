@@ -55,4 +55,22 @@
     )
   </insert>
 
+<!--  상품 숨기기on/off-->
+  <update id="updateHidden">
+    UPDATE product
+    SET
+    is_hidden = #{hidden},
+    updated_at = NOW()
+    WHERE product_id = #{productId};
+  </update>
+
+<!--  상품 soft 삭제-->
+  <update id="softDeleteProduct">
+    UPDATE product
+    SET
+    is_deleted = true,
+    updated_at=NOW()
+    WHERE product_id = #{productId};
+  </update>
+
 </mapper>

@@ -18,4 +18,7 @@ public interface ProductCommandMapper {
         @Param("isMain") Boolean isMain
         );
 
+    void updateHidden(Long productId, boolean hidden);
+
+    void softDeleteProduct(Long productId);
 }

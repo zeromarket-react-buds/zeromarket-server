@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.controller;
 
+import com.zeromarket.server.api.dto.HideRequest;
 import com.zeromarket.server.api.dto.LoadMoreResponse;
 import com.zeromarket.server.api.dto.ProductCreateRequest;
 import com.zeromarket.server.api.dto.ProductCreateResponse;
@@ -79,11 +80,24 @@ public class ProductRestController {
 
         return ResponseEntity.ok(productQueryService.findSimilarProducts(productId));
     }
-
+    
+    //상품 숨기기
+    @PatchMapping("/{productId}/hide")
+    public ResponseEntity<Void> updateHidden(
+        @PathVariable Long productId,
+        @RequestBody HideRequest request){//숨기기도 상품상태 update의 일종이므로 command로
+        productCommandService.updateHidden(productId, request.isHidden());
+        return ResponseEntity.ok().build();
+    }
 
     //상품 수정
     
-    //상품 삭제
+    //상품 삭제-soft delete 방식
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId){
+        productCommandService.deleteProduct(productId);
+        return ResponseEntity.ok().build();
+    }
 
 
 

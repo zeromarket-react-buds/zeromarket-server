@@ -50,34 +50,17 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         }
         return newProductId; //여기까지 예외없이끝나면 트랜잭션이 커밋됨..
-//        //첨부이미지 url 리스트
-//        List<String> imageUrls = request.getImageUrls();
+    }
 
-        //이미지 없는 상품등록 - 여기서 종료
-//        if(imageUrls == null||imageUrls.isEmpty()){
-//            return newProductId;
-//        }
-//
-//        //이미지 있는 상품등록 - product_image 테이블 insert
-//        int mainIdx = (request.getMainImageIndex() !=null)
-//            ? request.getMainImageIndex()
-//            :0; //null이면 첫번째를 대표로
-//        int sortOrder = 0;
-//        for(String imageUrl : imageUrls){ // imageUrls에 든 값을 꺼내 변수imageUrl에 하나씩 담기 반복
-//            boolean isMain = (sortOrder ==mainIdx); //첫번째사진을 대표이미지로 ?
-//            mapper.insertProductImage(newProductId,imageUrl,sortOrder,isMain);
-//            sortOrder++;
-//        }
+    @Override
+    public void updateHidden(Long productId, boolean hidden) {
+        mapper.updateHidden(productId,hidden);
 
-        //이미지 url 디비에 저장(여기서 파일 URL은 프론트엔드에서 받은 Supabase URL)
-//        if(images!=null && !images.isEmpty()){
-//            for(MultipartFile file : images){
-//                String imageUrl = file.getOriginalFilename(); //url
-//                mapper.insertProductImage(newProductId, imageUrl); //디비에 url저장부분
-//            }
-//        }
-//
-//        return newProductId;
+    }
+
+    @Override
+    public void deleteProduct(Long productId) {
+        mapper.softDeleteProduct(productId);
     }
 
 
