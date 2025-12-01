@@ -67,22 +67,27 @@ public class AuthRestController {
 
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")
     @PostMapping("/refresh")
-    public ResponseEntity<TokenInfo> refresh(
+    public ResponseEntity<Map<String, String>> refresh(
         @CookieValue(value = "refreshToken", required = false) String refreshToken
-        //        @RequestBody Map<String, String> body
     ) {
+        TokenInfo tokens = memberService.refresh(refreshToken);
+//        TokenInfo tokenInfo = memberService.refresh(refreshToken);
 
-        TokenInfo tokenInfo = memberService.refresh(refreshToken);
+        // refreshToken 재발급 시 쿠키도 재설정
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
+            .httpOnly(true)
+            .secure(false)
+//            .secure(true)
+            .sameSite("Strict")
+            .path("/")
+            .maxAge(Duration.ofDays(7))
+            .build();
 
-        return ResponseEntity.ok(tokenInfo);
-    }
-//    @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")
-//    @PostMapping("/refresh")
-//    public ResponseEntity<TokenInfo> refresh(@RequestBody Map<String, String> body) {
-//        TokenInfo tokenInfo = memberService.refresh(body.get("refreshToken"));
-//
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+            .body(Map.of("accessToken", tokens.getAccessToken()));
 //        return ResponseEntity.ok(tokenInfo);
-//    }
+    }
 
     @Operation(summary = "아이디 중복 체크", description = "")
     @GetMapping("/check-id")

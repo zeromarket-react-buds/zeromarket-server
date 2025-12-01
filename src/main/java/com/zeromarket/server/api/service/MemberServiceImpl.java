@@ -79,12 +79,8 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly = true)
     public TokenInfo login(MemberLoginRequest dto) {
-        log.info(">>>>>>>>>>>>>>>{}", dto.toString());
-
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(dto.getLoginId()))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
-
-        log.info(">>>>>>>>>>>>>>>{}", member.toString());
 
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
             throw new ApiException(ErrorCode.LOGIN_FAIL);
@@ -125,13 +121,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly = true)
     public MemberResponse getMyInfo() {
-        Authentication authentication =
-            SecurityContextHolder.getContext().getAuthentication();
-        String loginId = authentication.getName();
-        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId)).orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
-//        Member member = memberMapper.selectMemberByLoginId(loginId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String loginId = authentication.getName(); // anoymousUser (?)
+
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
+            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         MemberResponse response = new MemberResponse();
+
         BeanUtils.copyProperties(member, response);
 
         return response;
