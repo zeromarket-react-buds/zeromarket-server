@@ -20,15 +20,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final CustomUserDetailService customUserDetailService;
 
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, CustomUserDetailService customUserDetailService) {
         this.jwtUtil = jwtUtil;
+        this.customUserDetailService = customUserDetailService;
     }
 
     private static final String[] EXCLUDED_PATHS = {
-        "/api",
-//        "/api/auth",
-//        "api/products",
+//        "/api",
+        "/api/auth",
+        "/api/products",
         "/swagger-ui",
         "/v3/api-docs"
     };
@@ -66,16 +68,22 @@ public class JwtFilter extends OncePerRequestFilter {
             jwtUtil.validateAccessToken(token); // 여기서 만료되면 예외 발생
 
 //            3. 인증 성공
-            String username = jwtUtil.getLoginId(token);
+            String loginId = jwtUtil.getLoginId(token);
             String role = jwtUtil.getRole(token);
 
+//            3-1. DB에서 CustomUserDetails 불러오기
+            CustomUserDetails userDetails = (CustomUserDetails) customUserDetailService.loadUserByUsername(loginId);
+
+//            3-2. Authentication 객체 만들기
             UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
-                    username,
+                    userDetails,
                     null,
-                    List.of(new SimpleGrantedAuthority(role))
+                        userDetails.getAuthorities()
+//                    List.of(new SimpleGrantedAuthority(role))
                 );
 
+//            3-3. SecurityContext에 저장
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             filterChain.doFilter(request, response);

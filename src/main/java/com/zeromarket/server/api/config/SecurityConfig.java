@@ -2,6 +2,7 @@ package com.zeromarket.server.api.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import com.zeromarket.server.api.security.CustomUserDetailService;
 import com.zeromarket.server.api.security.JwtFilter;
 import com.zeromarket.server.api.security.JwtUtil;
 import java.util.List;
@@ -25,10 +26,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final CustomUserDetailService customUserDetailService;
 
     @Bean
     public JwtFilter jwtFilter() {
-        return new JwtFilter(jwtUtil);
+        return new JwtFilter(jwtUtil, customUserDetailService);
     }
 
     @Bean
@@ -38,9 +40,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 // ⬇️ 여기를 수정해야 합니다. ⬇️
                 // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
-                .requestMatchers("/**").permitAll()
+//                .requestMatchers("/**").permitAll()
                 // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/products/**").permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",

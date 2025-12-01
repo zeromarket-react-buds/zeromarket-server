@@ -13,7 +13,7 @@ public interface MemberService {
 
     TokenInfo refresh(String refreshToken);
 
-    MemberResponse getMyInfo();
+    MemberResponse getMyInfo(String loginId);
 
     Boolean checkDuplicateId(String loginId);
 }

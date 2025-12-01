@@ -120,10 +120,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional(readOnly = true)
-    public MemberResponse getMyInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String loginId = authentication.getName(); // anoymousUser (?)
+    public MemberResponse getMyInfo(String loginId) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String loginId = authentication.getName(); // anoymousUser (?)
 
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
