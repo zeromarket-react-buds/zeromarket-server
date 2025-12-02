@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum SalesStatus {
     /** 판매 중 (상품 구매 가능) */
-    FOR_SALE("판매 중"),
+    FOR_SALE("판매중"),
 
     /** 예약됨 (잠시 판매 대기) */
-    RESERVED("예약 중"),
+    RESERVED("예약중"),
 
     /** 품절 (재고 없음) */
-    SOLD_OUT("거래 완료");
+    SOLD_OUT("거래완료");
 
     // 필드 추가 (선택 사항: 문자열 설명)
     private final String description;
