@@ -18,7 +18,7 @@ public class JwtUtil {
 
     private SecretKey signingKey;
 
-    private final long ACCESS_EXPIRATION = 1000L * 60 * 15;           // 15분
+    private final long ACCESS_EXPIRATION = 1000L * 60 * 30;           // 30분
     private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7일
 
     @PostConstruct

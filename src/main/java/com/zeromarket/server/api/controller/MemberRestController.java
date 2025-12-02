@@ -21,15 +21,17 @@ public class MemberRestController {
 
     private final MemberService memberService;
 
-//    인증 관련 사용 (프로필 조회 API)
+    //    인증 관련 사용 (프로필 조회 API)
     @Operation(summary = "내 정보 조회", description = "")
     @GetMapping("/me")
     public ResponseEntity<MemberResponse> getMyInfo(
-        @AuthenticationPrincipal CustomUserDetails principal
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 //        서버는 UserDetails.principal.memberId를 가지고
 //        DB에서 Member 엔티티 가져오기
-       MemberResponse response = memberService.getMyInfo(principal.getLoginId());
+
+//        TODO: principal null 검사해야 하나??
+        MemberResponse response = memberService.getMyInfo(userDetails.getLoginId());
 
         return ResponseEntity.ok(response);
     }
