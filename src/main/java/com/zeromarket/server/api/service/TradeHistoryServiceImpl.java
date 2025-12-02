@@ -2,6 +2,8 @@ package com.zeromarket.server.api.service;
 
 import com.zeromarket.server.api.dto.*;
 import com.zeromarket.server.api.mapper.TradeHistoryMapper;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +25,16 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
             mapper.selectTradeList(req);
 
         return histories;
+    }
+
+    @Override
+    public TradeReviewInfoDto getTradeInfoForReview(Long tradeId, Long loginMemberId) {
+        TradeReviewInfoDto dto = mapper.selectTradeInfoForReview(tradeId, loginMemberId);
+
+        if (dto == null) {
+            throw new ApiException(ErrorCode.TRADE_NOT_FOUND);
+        }
+
+        return dto;
     }
 }

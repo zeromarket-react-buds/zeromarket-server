@@ -66,4 +66,47 @@
         ORDER BY t.created_at DESC
 
     </select>
+
+    <resultMap id="TradeReviewInfoMap" type="com.zeromarket.server.api.dto.TradeReviewInfoDto">
+        <id property="tradeId" column="trade_id"/>
+
+        <result property="productId" column="product_id"/>
+        <result property="productTitle" column="product_title"/>
+        <result property="productImageUrl" column="product_image_url"/>
+        <result property="opponentNickname" column="opponent_nickname"/>
+    </resultMap>
+
+    <select id="selectTradeInfoForReview"
+        parameterType="map"
+        resultMap="TradeReviewInfoMap">
+        SELECT
+        t.trade_id,
+        p.product_id,
+        p.product_title,
+
+        pi.image_url AS product_image_url,
+
+        CASE
+        WHEN #{loginMemberId} = buyer.member_id
+        THEN seller.nickname
+        ELSE buyer.nickname
+        END AS opponent_nickname
+
+        FROM trade t
+        JOIN product p
+        ON t.product_id = p.product_id
+        LEFT JOIN product_image pi
+        ON p.product_id = pi.product_id
+        AND pi.is_main = TRUE
+        JOIN member seller
+        ON p.seller_id = seller.member_id
+        JOIN member buyer
+        ON t.buyer_id = buyer.member_id
+
+        WHERE t.trade_id = #{tradeId}
+        AND t.trade_status = 'COMPLETED'
+        AND p.is_deleted = FALSE
+    </select>
+
+
 </mapper>

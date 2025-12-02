@@ -31,7 +31,10 @@ public enum ErrorCode {
     HIDDEN_PRODUCT(403, "숨김 처리된 상품입니다."),
 
     // 채팅
-    CHAT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다.");
+    CHAT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다."),
+
+    // 거래
+    TRADE_NOT_FOUND(404, "거래 정보를 찾을 수 없습니다.");
 
     private final int status;
     private final String message;

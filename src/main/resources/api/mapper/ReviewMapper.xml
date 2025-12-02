@@ -17,21 +17,22 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
-    <!-- 리뷰 생성 -->
+<!--  리뷰 정의  -->
     <insert id="insertReview" parameterType="com.zeromarket.server.common.entity.Review"
         useGeneratedKeys="true" keyProperty="reviewId">
         INSERT INTO review (
         writer_id,
         trade_id,
         reviewed_by,
-        rating
-        <if test="content != null">, content</if>
-        ) VALUES (
+        rating,
+        content
+        )
+        VALUES (
         #{writerId},
         #{tradeId},
         #{reviewedBy},
-        #{rating}
-        <if test="content != null">, #{content}</if>
+        #{rating},
+        #{content}
         )
     </insert>
 
