@@ -1,8 +1,10 @@
 package com.zeromarket.server.api.controller;
 
 import com.zeromarket.server.api.dto.MemberLoginRequest;
+import com.zeromarket.server.api.dto.MemberResponse;
 import com.zeromarket.server.api.dto.MemberSignupRequest;
 import com.zeromarket.server.api.dto.TokenInfo;
+import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -113,6 +116,21 @@ public class AuthRestController {
         response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
 
         return ResponseEntity.ok().build();
+    }
+
+    //    인증 관련 사용 (프로필 조회 API)
+    @Operation(summary = "내 정보 조회", description = "")
+    @GetMapping("/me")
+    public ResponseEntity<MemberResponse> getMyInfo(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+//        서버는 UserDetails.principal.memberId를 가지고
+//        DB에서 Member 엔티티 가져오기
+
+//        TODO: principal null 검사해야 하나??
+        MemberResponse response = memberService.getMyInfo(userDetails.getLoginId());
+
+        return ResponseEntity.ok(response);
     }
 
 }

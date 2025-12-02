@@ -40,7 +40,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 // ⬇️ 여기를 수정해야 합니다. ⬇️
                 // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
-                .requestMatchers("/**").permitAll()
+//                .requestMatchers("/**").permitAll()
                 // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
                 .requestMatchers("/api/auth/**", "/api/products/**").permitAll()
                 .requestMatchers(
