@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.service;
 
 import com.zeromarket.server.api.dto.LoadMoreResponse;
+import com.zeromarket.server.api.dto.ProductBasicInfo;
 import com.zeromarket.server.api.dto.ProductDetailImageInfo;
 import com.zeromarket.server.api.dto.ProductDetailResponse;
 import com.zeromarket.server.api.dto.ProductDetailSellerInfo;
@@ -8,6 +9,8 @@ import com.zeromarket.server.api.dto.ProductQueryRequest;
 import com.zeromarket.server.api.dto.ProductQueryResponse;
 import com.zeromarket.server.api.dto.WishCountResponse;
 import com.zeromarket.server.api.mapper.ProductQueryMapper;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,23 +59,41 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     @Transactional
     public ProductDetailResponse getProductDetail(Long productId) {
 
+//        ProductBasicInfo basic = mapper.selectBasicInfo(productId);
+//
+//        if(basic==null){
+//            throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND); // 디비에없는상품판별
+//        }
+//        if(basic.isDeleted()){
+//            throw new ApiException(ErrorCode.DELETED_PRODUCT);
+//        }
+//        if(basic.isHidden()){
+//            throw new ApiException(ErrorCode.HIDDEN_PRODUCT);
+//        }
+
         mapper.updateViewCount(productId);
 
         ProductDetailResponse detail = mapper.selectProductDetail(productId);
 
-        //상품없음=예외발생
         if(detail==null){
-            throw new RuntimeException("상품이 존재하지 않습니다.");
+            throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND);
         }
-        //메인 이미지 인덱스 계산 - 이미지 등록시 재확인예정
-        Integer mainIndex = null;
-        for (int i = 0; i < detail.getImages().size(); i++) {
-            if (detail.getImages().get(i).isMain()) {
-                mainIndex = i;
-                break;
-            }
+        if(detail.isDeleted()){
+            throw new ApiException(ErrorCode.DELETED_PRODUCT);
         }
-        detail.setMainImageIndex(mainIndex);
+        if(detail.isHidden()){
+            throw new ApiException(ErrorCode.HIDDEN_PRODUCT);
+        }
+
+//        //메인 이미지 인덱스 계산 - 이미지 등록시 재확인예정
+//        Integer mainIndex = null;
+//        for (int i = 0; i < detail.getImages().size(); i++) {
+//            if (detail.getImages().get(i).isMain()) {
+//                mainIndex = i;
+//                break;
+//            }
+//        }
+//        detail.setMainImageIndex(mainIndex);
 
         return detail;
     }

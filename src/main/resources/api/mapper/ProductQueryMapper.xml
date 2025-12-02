@@ -195,7 +195,7 @@
 
     WHERE p.product_id = #{productId}
     AND p.is_deleted = false
-    AND p.is_hidden = false
+<!--    AND p.is_hidden = false-->
 
     ORDER BY pi.sort_order
   </select>

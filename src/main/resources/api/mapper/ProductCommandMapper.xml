@@ -55,7 +55,7 @@
     )
   </insert>
 
-<!--  상품 숨기기on/off-->
+<!--  상품 숨기기-->
   <update id="updateHidden">
     UPDATE product
     SET

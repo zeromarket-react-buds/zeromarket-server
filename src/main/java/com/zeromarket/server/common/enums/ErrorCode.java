@@ -27,6 +27,8 @@ public enum ErrorCode {
     
     // 상품
     PRODUCT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다."),
+    DELETED_PRODUCT(410, "삭제된 상품입니다."),
+    HIDDEN_PRODUCT(403, "숨김 처리된 상품입니다."),
 
     // 채팅
     CHAT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다.");

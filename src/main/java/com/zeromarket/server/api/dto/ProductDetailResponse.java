@@ -14,7 +14,7 @@ public class ProductDetailResponse {
 
     private ProductDetailSellerInfo seller;
     private List<ProductDetailImageInfo> images;
-    private Integer mainImageIndex;
+//    private Integer mainImageIndex;
 
     private Long sellerId;
     private Long productId;
