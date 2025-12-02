@@ -16,7 +16,6 @@ public class ProductQueryResponse {
     private Long sellPrice;
     private String sellingArea;
 
-    private ProductStatus productStatus;
     private SalesStatus salesStatus;
     private int viewCount;
 

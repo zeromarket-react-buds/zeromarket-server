@@ -11,10 +11,6 @@
         <result column="sell_price" property="sellPrice" />
         <result column="selling_area" property="sellingArea" />
 
-        <result column="product_status"
-                property="productStatus"
-                javaType="com.zeromarket.server.common.enums.ProductStatus" />
-
         <result column="sales_status"
                 property="salesStatus"
                 javaType="com.zeromarket.server.common.enums.SalesStatus" />
@@ -34,7 +30,6 @@
             p.sell_price,
             p.selling_area,
             p.sales_status,
-            p.product_status,
             p.is_delivery,
             p.is_direct,
             p.created_at,
