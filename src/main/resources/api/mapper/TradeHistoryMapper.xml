@@ -108,5 +108,15 @@
         AND p.is_deleted = FALSE
     </select>
 
+    <select id="selectSellerBuyerByTradeId" resultType="map">
+        SELECT seller.member_id AS sellerId,
+        t.buyer_id       AS buyerId
+        FROM trade t
+        JOIN product p
+        ON t.product_id = p.product_id
+        JOIN member seller
+        ON p.seller_id = seller.member_id
+        WHERE t.trade_id = #{tradeId}
+    </select>
 
 </mapper>

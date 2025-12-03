@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.service;
 
+import com.zeromarket.server.api.dto.ReviewCreateRequest;
 import com.zeromarket.server.common.entity.Review;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface ReviewService {
      * @param review 생성할 리뷰 정보
      * @return 생성된 리뷰 ID
      */
-    Long createReview(Review review);
+    Long createReview(ReviewCreateRequest review);
 
     /**
      * 리뷰 ID로 조회

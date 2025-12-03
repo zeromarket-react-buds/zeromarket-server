@@ -34,9 +34,9 @@ public class TradeRestController {
         return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "거래 상세 조회", description = "")
+    @Operation(summary = "후기용 거래 상세 조회", description = "")
     @GetMapping("{tradeId}")
-    public ResponseEntity<TradeReviewInfoDto> getTrade(
+    public ResponseEntity<TradeReviewInfoDto> getTradeInfoForReview(
         @PathVariable Long tradeId,
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {

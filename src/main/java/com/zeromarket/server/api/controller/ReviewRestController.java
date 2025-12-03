@@ -1,10 +1,14 @@
 package com.zeromarket.server.api.controller;
 
+import com.zeromarket.server.api.dto.ReviewCreateRequest;
+import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.ReviewService;
 import com.zeromarket.server.common.entity.Review;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +24,13 @@ public class ReviewRestController {
      * 리뷰 생성
      */
     @PostMapping
-    public ResponseEntity<Long> createReview(@RequestBody Review review) {
+    public ResponseEntity<Long> createReview(
+        @RequestBody ReviewCreateRequest dto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         try {
-            Long reviewId = reviewService.createReview(review);
+            dto.setWriterId(userDetails.getMemberId()); // memberId 넣어주기
+            Long reviewId = reviewService.createReview(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(reviewId);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

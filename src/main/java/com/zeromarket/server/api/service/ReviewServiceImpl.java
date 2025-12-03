@@ -1,8 +1,12 @@
 package com.zeromarket.server.api.service;
 
+import com.zeromarket.server.api.dto.ReviewCreateRequest;
 import com.zeromarket.server.api.mapper.ReviewMapper;
+import com.zeromarket.server.api.mapper.TradeHistoryMapper;
 import com.zeromarket.server.common.entity.Review;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,20 +18,53 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewMapper reviewMapper;
+    private final TradeHistoryMapper tradeMapper;
 
     /**
      * 리뷰 생성
      */
-    @Transactional
-    public Long createReview(Review review) {
-        // 평점 유효성 검사
-        if (review.getRating() < 1 || review.getRating() > 5) {
-            throw new IllegalArgumentException("평점은 1-5 사이여야 합니다.");
-        }
+    @Override
+    public Long createReview(ReviewCreateRequest dto, Long loginMemberId) {
 
-        reviewMapper.insertReview(review);
-        return review.getReviewId();
+        // 1) 거래 정보에서 seller/buyer 확인
+        Map<String, Long> info = tradeMapper.selectSellerBuyerByTradeId(dto.getTradeId());
+        Long sellerId = info.get("sellerId");
+        Long buyerId  = info.get("buyerId");
+
+        // 2) 작성자가 판매자인지 구매자인지 판별
+        String reviewedBy = loginMemberId.equals(sellerId)
+            ? "SELLER"
+            : "BUYER";
+
+        // 3) 엔티티 생성 + 값 설정
+        Review entity = new Review();
+        entity.setTradeId(dto.getTradeId());
+        entity.setWriterId(loginMemberId);
+        entity.setReviewedBy(reviewedBy);
+        entity.setRating(dto.getRating());
+        entity.setContent(dto.getContent());
+
+        // 4) 저장
+        reviewMapper.insertReview(entity);
+
+        return entity.getReviewId();
     }
+
+//    @Transactional
+//    public Long createReview(ReviewCreateRequest review) {
+//        // 평점 유효성 검사
+//        if (review.getRating() < 1 || review.getRating() > 5) {
+//            throw new IllegalArgumentException("평점은 1-5 사이여야 합니다.");
+//        }
+//
+////        dto -> entity
+//        Review entity = new Review();
+//        BeanUtils.copyProperties(review, entity);
+//
+//        reviewMapper.insertReview(entity);
+//
+//        return entity.getReviewId();
+//    }
 
     /**
      * 리뷰 ID로 조회
