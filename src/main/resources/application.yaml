@@ -25,7 +25,7 @@ spring:
 #      leak-detection-threshold: 60000  # 연결 누수 감지 (60초)
 
 mybatis:
-  mapper-locations: classpath:/api/mapper/*.xml
+  mapper-locations: classpath:/api/mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
 
