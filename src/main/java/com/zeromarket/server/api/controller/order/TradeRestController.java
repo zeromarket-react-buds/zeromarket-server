@@ -3,6 +3,8 @@ package com.zeromarket.server.api.controller.order;
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 import com.zeromarket.server.api.dto.order.TradeHistoryRequest;
 import com.zeromarket.server.api.dto.order.TradeHistoryResponse;
+import com.zeromarket.server.api.dto.order.TradeProductRequest;
+import com.zeromarket.server.api.dto.order.TradeProductResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.order.TradeHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,9 +37,21 @@ public class TradeRestController {
         return ResponseEntity.ok(result);
     }
 
+
+    @Operation(summary = "거래 내역 상세 조회", description = "거래내역 페이지 조회")
+    @GetMapping("/{tradeId}")
+    public ResponseEntity<TradeProductResponse> getTradeProduct(
+        @PathVariable Long tradeId,
+        @ModelAttribute TradeProductRequest tradeProductRequest
+    ) {
+        tradeProductRequest.setTradeId(tradeId);
+        TradeProductResponse result = tradeHistoryService.selectTradeProduct(tradeProductRequest);
+        return ResponseEntity.ok(result);
+    }
+
     @Operation(summary = "후기용 거래 상세 조회", description = "")
-    @GetMapping("{tradeId}")
-    public ResponseEntity<TradeReviewInfoDto> getTradeInfoForReview(
+    @GetMapping("{tradeId}/reviews")
+    public ResponseEntity<TradeReviewInfoDto> getTrade(
         @PathVariable Long tradeId,
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {

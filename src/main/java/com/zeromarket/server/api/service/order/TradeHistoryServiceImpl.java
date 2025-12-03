@@ -3,6 +3,8 @@ package com.zeromarket.server.api.service.order;
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 import com.zeromarket.server.api.dto.order.TradeHistoryRequest;
 import com.zeromarket.server.api.dto.order.TradeHistoryResponse;
+import com.zeromarket.server.api.dto.order.TradeProductRequest;
+import com.zeromarket.server.api.dto.order.TradeProductResponse;
 import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
@@ -27,6 +29,13 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
             mapper.selectTradeList(req);
 
         return histories;
+    }
+
+    @Override
+    public TradeProductResponse selectTradeProduct(TradeProductRequest req) {
+
+        TradeProductResponse product = mapper.selectTradeProduct(req);
+        return product;
     }
 
     @Override

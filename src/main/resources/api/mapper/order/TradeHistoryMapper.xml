@@ -4,6 +4,7 @@
 
 <mapper namespace="com.zeromarket.server.api.mapper.order.TradeHistoryMapper">
 
+    <!-- 거래내역 목록 조회 -->
     <resultMap id="TradeHistoryResponseMap"
                type="com.zeromarket.server.api.dto.order.TradeHistoryResponse">
 
@@ -64,6 +65,73 @@
         </if>
 
         ORDER BY t.created_at DESC
+
+    </select>
+
+    <!-- 거래내역 상세 조회 -->
+    <resultMap id="TradeProductResponseMap"
+               type="com.zeromarket.server.api.dto.order.TradeProductResponse">
+
+        <id     column="trade_id"      property="tradeId"/>
+        <result column="product_id"    property="productId"/>
+        <result column="product_title" property="productTitle"/>
+        <result column="thumbnail_url" property="thumbnailUrl"/>
+        <result column="sell_price"    property="sellPrice"/>
+
+        <result column="canceled_by"   property="canceledBy"/>
+        <result column="seller_id"     property="sellerId"/>
+        <result column="buyer_id"      property="buyerId"/>
+
+        <result column="nickname"      property="nickname"/>
+        <result column="name"          property="name"/>
+        <result column="phone"         property="phone"/>
+
+        <result column="trade_type"
+                property="tradeType"
+                javaType="com.zeromarket.server.common.enums.TradeType"/>
+        <result column="trade_status"
+                property="tradeStatus"
+                javaType="com.zeromarket.server.common.enums.TradeStatus"/>
+
+        <result column="created_at"    property="createdAt"/>
+        <result column="updated_at"    property="updatedAt"/>
+        <result column="completed_at"  property="completedAt"/>
+        <result column="canceled_at"   property="canceledAt"/>
+    </resultMap>
+
+    <select id="selectTradeProduct"
+            parameterType="com.zeromarket.server.api.dto.order.TradeProductRequest"
+            resultMap="TradeProductResponseMap">
+        SELECT
+            t.trade_id,
+            p.product_id,
+            p.product_title,
+            pi.image_url AS thumbnail_url,
+            p.sell_price,
+            t.canceled_by,
+            ms.member_id    AS seller_id,
+            mb.member_id    AS buyer_id,
+            ms.nickname     AS nickname,
+            mb.name         AS name,
+            mb.phone        AS phone,
+            t.trade_type,
+            t.trade_status,
+            t.created_at,
+            t.updated_at,
+            t.completed_at,
+            t.canceled_at
+        FROM trade t
+
+        JOIN product p
+            ON p.product_id = t.product_id
+        JOIN member ms
+            ON ms.member_id = p.seller_id
+        JOIN member mb
+            ON mb.member_id = t.buyer_id
+        LEFT JOIN product_image pi
+            ON pi.product_id = p.product_id
+            AND pi.is_main = TRUE
+        WHERE t.trade_id = #{tradeId}
 
     </select>
 
