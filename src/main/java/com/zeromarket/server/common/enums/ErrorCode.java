@@ -34,7 +34,12 @@ public enum ErrorCode {
     CHAT_NOT_FOUND(404, "채팅 정보를 찾을 수 없습니다."),
 
     // 거래
-    TRADE_NOT_FOUND(404, "거래 정보를 찾을 수 없습니다.");
+    TRADE_NOT_FOUND(404, "거래 정보를 찾을 수 없습니다."),
+
+    // 후기
+    REVIEW_EXIST(409, "이미 리뷰를 작성한 거래입니다."),
+    REVIEW_CREATE_FORBIDDEN(403, "거래에 참여한 사용자만 리뷰를 작성할 수 있습니다."),
+    REVIEW_NOT_FOUND(404, "후기 정보를 찾을 수 없습니다.");
 
     private final int status;
     private final String message;

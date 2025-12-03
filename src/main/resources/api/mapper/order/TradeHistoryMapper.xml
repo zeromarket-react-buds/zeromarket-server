@@ -108,15 +108,25 @@
         AND p.is_deleted = FALSE
     </select>
 
-    <select id="selectSellerBuyerByTradeId" resultType="map">
+    <resultMap id="TradeStatusMap" type="map">
+        <result column="sellerId" property="sellerId" javaType="java.lang.Long"/>
+        <result column="buyerId" property="buyerId" javaType="java.lang.Long"/>
+
+        <result column="tradeStatus"
+            property="tradeStatus"
+            javaType="com.zeromarket.server.common.enums.TradeStatus"
+            typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+    </resultMap>
+
+    <select id="selectSellerBuyerStatusByTradeId"
+        parameterType="long"
+        resultMap="TradeStatusMap">
         SELECT seller.member_id AS sellerId,
-        t.buyer_id       AS buyerId
+        t.buyer_id AS buyerId,
+        t.trade_status AS tradeStatus
         FROM trade t
-        JOIN product p
-        ON t.product_id = p.product_id
-        JOIN member seller
-        ON p.seller_id = seller.member_id
+        JOIN product p ON t.product_id = p.product_id
+        JOIN member seller ON p.seller_id = seller.member_id
         WHERE t.trade_id = #{tradeId}
     </select>
-
 </mapper>

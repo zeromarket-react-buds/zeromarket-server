@@ -18,5 +18,5 @@ public interface TradeHistoryMapper {
         @Param("loginMemberId") Long loginMemberId
     );
 
-    Map<String, Long> selectSellerBuyerByTradeId(Long tradeId);
+    Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
 }

@@ -15,32 +15,73 @@
         <result property="isDeleted" column="is_deleted"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+
+        <!-- 추가 매핑 -->
+        <result column="opponent_nickname" property="opponentNickname"/>
+        <result column="product_title" property="productTitle"/>
     </resultMap>
 
     <!--  리뷰 저장  -->
     <insert id="insertReview" parameterType="com.zeromarket.server.common.entity.Review"
         useGeneratedKeys="true" keyProperty="reviewId">
         INSERT INTO review (
-        writer_id,
-        trade_id,
-        reviewed_by,
-        rating,
-        content
+            writer_id,
+            trade_id,
+            reviewed_by,
+            rating,
+            content
         )
         VALUES (
-        #{writerId},
-        #{tradeId},
-        #{reviewedBy},
-        #{rating},
-        #{content}
+            #{writerId},
+            #{tradeId},
+            #{reviewedBy},
+            #{rating},
+            #{content}
         )
     </insert>
 
+    <!--  후기 중복 작성 방지  -->
+    <select id="existsReviewByWriter"
+        parameterType="map"
+        resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM review
+        WHERE trade_id = #{tradeId}
+        AND writer_id = #{writerId}
+        AND is_deleted = FALSE
+        )
+    </select>
+
     <!-- 리뷰 ID로 조회 -->
-    <select id="selectReviewById" resultMap="ReviewResultMap">
-        SELECT * FROM review
-        WHERE review_id = #{reviewId}
-        AND is_deleted = false
+    <select id="selectReviewById"
+        parameterType="long"
+        resultType="com.zeromarket.server.api.dto.mypage.ReviewResponse">
+        SELECT
+            r.review_id,
+            r.writer_id,
+            r.trade_id,
+            r.reviewed_by,
+            r.rating,
+            r.content,
+            r.created_at,
+
+            p.product_title,
+
+            CASE
+            WHEN r.reviewed_by = 'SELLER'
+                THEN buyer.nickname
+                ELSE seller.nickname
+            END AS opponent_nickname
+
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN product p ON t.product_id = p.product_id
+        JOIN member seller ON p.seller_id = seller.member_id
+        JOIN member buyer ON t.buyer_id = buyer.member_id
+
+        WHERE r.review_id = #{reviewId}
+        AND r.is_deleted = FALSE
     </select>
 
     <!-- 모든 리뷰 조회 -->

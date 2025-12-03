@@ -23,4 +23,7 @@ public class ReviewResponse {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String opponentNickname; // 추가
+    private String productTitle;     // 추가
 }

@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.mapper.mypage;
 
+import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.common.entity.Review;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,8 +13,14 @@ public interface ReviewMapper {
     // 리뷰 생성
     int insertReview(Review review);
 
+    // 리뷰 중복 작성 확인
+    boolean existsReviewByWriter(
+        @Param("tradeId") Long tradeId,
+        @Param("writerId") Long writerId
+    );
+
     // 리뷰 ID로 조회
-    Review selectReviewById(@Param("reviewId") Long reviewId);
+    ReviewResponse selectReviewById(@Param("reviewId") Long reviewId);
 
     // 모든 리뷰 조회
     List<Review> selectAllReviews();
