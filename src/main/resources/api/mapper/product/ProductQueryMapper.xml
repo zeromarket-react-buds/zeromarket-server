@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.product.ProductQueryMapper">
+
+    <resultMap id="ProductQueryResponseMap"
+               type="com.zeromarket.server.api.dto.product.ProductQueryResponse">
+
+        <id column="product_id" property="productId" />
+        <result column="product_title" property="productTitle" />
+        <result column="sell_price" property="sellPrice" />
+        <result column="selling_area" property="sellingArea" />
+
+        <result column="sales_status"
+                property="salesStatus"
+                javaType="com.zeromarket.server.common.enums.SalesStatus" />
+
+        <result column="is_delivery" property="delivery" />
+        <result column="is_direct" property="direct" />
+
+        <result column="created_at" property="createdAt" />
+        <result column="wish_count" property="wishCount" />
+        <result column="thumbnail_url" property="thumbnailUrl" />
+    </resultMap>
+    <select id="selectProductsOffset"
+            resultMap="ProductQueryResponseMap">
+        SELECT
+            p.product_id,
+            p.product_title,
+            p.sell_price,
+            p.selling_area,
+            p.sales_status,
+            p.is_delivery,
+            p.is_direct,
+            p.created_at,
+
+            COALESCE(wc.wish_count, 0) AS wish_count,
+            pi.image_url AS thumbnail_url
+
+        FROM product p
+
+        LEFT JOIN (
+            SELECT product_id, COUNT(product_id) AS wish_count
+            FROM wish
+            WHERE is_deleted = false
+            GROUP BY product_id
+        ) wc ON wc.product_id = p.product_id
+
+        LEFT JOIN product_image pi
+            ON pi.product_id = p.product_id
+            AND pi.is_main = true
+
+        WHERE p.is_hidden = false
+            AND p.is_deleted = false
+            AND p.sales_status != 'SOLD_OUT'
+
+        <if test="keyword != null and keyword != ''">
+            AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
+        </if>
+
+        <if test="categoryId != null">
+            AND p.level3_id = #{categoryId}
+        </if>
+
+        <if test="area != null and area != ''">
+            AND p.selling_area ILIKE CONCAT('%', #{area}, '%')
+        </if>
+
+        <if test="minPrice != null">
+            AND p.sell_price &gt;= #{minPrice}
+        </if>
+
+        <if test="maxPrice != null">
+            AND p.sell_price &lt;= #{maxPrice}
+        </if>
+
+
+        ORDER BY
+            CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END DESC,
+            CASE WHEN #{sort} = 'latest'     THEN p.created_at END DESC,
+            CASE WHEN #{sort} = 'priceAsc'   THEN p.sell_price END ASC,
+            CASE WHEN #{sort} = 'priceDesc'  THEN p.sell_price END DESC,
+            p.created_at DESC,
+            p.product_id DESC
+        LIMIT #{size}
+        OFFSET COALESCE(#{offset}, 0)
+    </select>
+
+
+  <resultMap id="sellerMap" type="com.zeromarket.server.api.dto.product.ProductDetailSellerInfo">
+    <id property="sellerId" column="seller_id"/>
+    <result property="sellerNickName" column="seller_nickname"/>
+    <result property="sellerIntroduction" column="seller_introduction"/>
+  </resultMap>
+
+
+  <resultMap id="imageMap" type="com.zeromarket.server.api.dto.product.ProductDetailImageInfo">
+    <id property="imageId" column="image_id"/>
+    <result property="imageUrl" column="image_url"/>
+    <result property="isMain" column="is_main"/>
+    <result property="sortOrder" column="sort_order"/>
+  </resultMap>
+
+
+  <resultMap id="productDetailMap" type="com.zeromarket.server.api.dto.product.ProductDetailResponse">
+
+    <id property="productId" column="product_id"/>
+
+    <result property="sellerId" column="seller_id"/>
+    <result property="productTitle" column="product_title"/>
+    <result property="productDescription" column="product_description"/>
+    <result property="sellPrice" column="sell_price"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="isDelivery" column="is_delivery"/>
+    <result property="isDirect" column="is_direct"/>
+    <result property="sellingArea" column="selling_area"/>
+    <result property="viewCount" column="view_count"/>
+    <result property="salesStatus" column="sales_status"
+      javaType="com.zeromarket.server.common.enums.SalesStatus"/>
+    <result property="productStatus" column="product_status"
+      javaType="com.zeromarket.server.common.enums.ProductStatus"/>
+    <result property="wishCount" column="wish_count"/>
+    <result property="isWished" column="is_wished"/>
+    <result property="isHidden" column="is_hidden"/>
+    <result property="isDeleted" column="is_deleted"/>
+    
+    <result property="categoryDepth1" column="category_depth1"/>
+    <result property="categoryDepth2" column="category_depth2"/>
+    <result property="categoryDepth3" column="category_depth3"/>
+    <result property="level1Id" column="level1_id"/>
+    <result property="level2Id" column="level2_id"/>
+    <result property="level3Id" column="level3_id"/>
+
+    <!-- 판매자 (1:1) -->
+    <association property="seller" resultMap="sellerMap"/>
+
+    <!-- 이미지 (1:N) -->
+    <collection property="images" resultMap="imageMap"/>
+  </resultMap>
+
+  <select id="selectProductDetail"
+    parameterType="java.lang.Long"
+    resultMap="productDetailMap">
+
+    SELECT
+      p.product_id,
+      p.product_title,
+      p.description AS product_description,
+      p.sell_price,
+      p.created_at,
+      p.is_delivery,
+      p.is_direct,
+      p.selling_area,
+      p.view_count,
+      p.sales_status,
+      p.product_status,
+      p.is_hidden,
+      p.is_deleted,
+
+      (SELECT COUNT(*) FROM wish w
+      WHERE w.product_id = p.product_id AND w.is_deleted = false) AS wish_count,
+
+
+    -- 판매자 ID
+    m.member_id AS seller_id,
+    m.nickname AS seller_nickname,
+    m.introduction AS seller_introduction,
+
+    -- 카테고리 이름,ID
+    c1.level1_name AS category_depth1,
+    c2.level2_name AS category_depth2,
+    c3.level3_name AS category_depth3,
+    c1.level1_id AS level1_id,
+    c2.level2_id AS level2_id,
+    c3.level3_id AS level3_id,
+
+    -- 이미지
+    pi.image_id,
+    pi.image_url,
+    pi.is_main,
+    pi.sort_order
+
+    FROM product p
+    LEFT JOIN member m ON m.member_id = p.seller_id
+    LEFT JOIN product_image pi ON pi.product_id = p.product_id
+
+    LEFT JOIN category_level3 c3 ON c3.level3_id = p.level3_id
+    LEFT JOIN category_level2 c2 ON c2.level2_id = c3.parent_id
+    LEFT JOIN category_level1 c1 ON c1.level1_id = c2.parent_id
+
+    WHERE p.product_id = #{productId}
+    AND p.is_deleted = false
+<!--    AND p.is_hidden = false-->
+
+    ORDER BY pi.sort_order
+  </select>
+
+  <update id="updateViewCount" parameterType="long">
+    UPDATE product
+    SET view_count = view_count + 1
+    WHERE product_id = #{productId}
+    AND is_deleted = false
+    AND is_hidden = false
+  </update>
+
+  <select id="selectSimilarProducts"
+    parameterType="long"
+    resultType="com.zeromarket.server.api.dto.product.ProductQueryResponse">
+
+    SELECT
+    p.product_id,
+    p.product_title,
+    p.sell_price,
+    p.selling_area,
+    p.sales_status,
+    p.product_status,
+    p.is_delivery,
+    p.is_direct,
+    p.created_at,
+
+    COALESCE(w.wish_count, 0) AS wish_count,
+    pi.image_url AS thumbnail_url
+
+    FROM product p
+
+    LEFT JOIN (
+    SELECT product_id, COUNT(*) AS wish_count
+    FROM wish
+    WHERE is_deleted = false
+    GROUP BY product_id
+    ) w ON w.product_id = p.product_id
+
+    LEFT JOIN product_image pi
+    ON pi.product_id = p.product_id
+    AND pi.is_main = true
+
+    WHERE p.is_hidden = false
+    AND p.is_deleted = false
+    AND p.sales_status != 'SOLD_OUT'
+    AND p.product_id != #{productId}
+    AND p.level3_id = (
+    SELECT level3_id
+    FROM product
+    WHERE product_id = #{productId}
+    )
+
+    ORDER BY w.wish_count DESC, p.created_at DESC
+    LIMIT 6
+
+  </select>
+
+    <select id="selectBasicInfo"
+        parameterType="java.lang.Long"
+        resultType="com.zeromarket.server.api.dto.product.ProductBasicInfo">
+        SELECT
+            p.product_id,
+            p.seller_id,
+            (SELECT pi.image_url
+             FROM product_image pi
+             WHERE pi.product_id = p.product_id
+             ORDER BY pi.is_main DESC, pi.sort_order ASC
+                            LIMIT 1) AS main_image
+        FROM product p
+        WHERE p.product_id = #{productId}
+          <!-- TODO: 삭제, 숨김 상품에 대한 채팅방 어떻게 할지?
+          AND p.is_deleted = false
+          AND p.is_hidden = false -->
+    </select>
+
+</mapper>

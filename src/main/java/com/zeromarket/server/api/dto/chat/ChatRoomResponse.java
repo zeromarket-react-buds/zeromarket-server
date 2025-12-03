@@ -1,6 +1,5 @@
-package com.zeromarket.server.common.entity;
+package com.zeromarket.server.api.dto.chat;
 
-import com.zeromarket.server.api.dto.chat.ChatRoomRequest;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,11 +10,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ChatRoom {
-
+@NoArgsConstructor
+@Builder
+public class ChatRoomResponse {
     private Long chatRoomId;
     private Long productId;
     private Long buyerId;
@@ -25,13 +23,4 @@ public class ChatRoom {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
-
-    public static ChatRoom of(ChatRoomRequest request) {
-        return ChatRoom.builder()
-            .productId(request.getProductId())
-            .buyerId(request.getBuyerId())
-            .sellerId(request.getSellerId())
-            .productImage(request.getProductImage())
-            .build();
-    }
 }

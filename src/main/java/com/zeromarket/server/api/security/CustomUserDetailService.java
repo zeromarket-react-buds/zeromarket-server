@@ -1,6 +1,6 @@
 package com.zeromarket.server.api.security;
 
-import com.zeromarket.server.api.mapper.MemberMapper;
+import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
