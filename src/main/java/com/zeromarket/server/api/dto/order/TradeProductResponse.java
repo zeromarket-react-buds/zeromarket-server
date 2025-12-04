@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class TradeProductResponse {
-
+    private Long memberId;
     private Long tradeId;
     private Long productId;
 
@@ -36,4 +36,6 @@ public class TradeProductResponse {
     private LocalDateTime updatedAt;
     private LocalDateTime completedAt;   // 거래 완료
     private LocalDateTime canceledAt;    // 거래 취소
+
+    private TradeReviewStatusResponse reviewStatus;
 }

@@ -7,5 +7,7 @@ import lombok.Setter;
 @Setter
 public class TradeHistoryRequest {
     private Long memberId;
+    private String role;
+
     private String keyword;
 }

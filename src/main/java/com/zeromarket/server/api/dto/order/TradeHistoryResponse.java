@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
 @Setter
 public class TradeHistoryResponse {
 
-    private Long tradeId;
     private Long productId;
+    private Long tradeId;
+    private Long buyerId;
 
     private String productTitle;
     private String thumbnailUrl;
@@ -25,6 +26,8 @@ public class TradeHistoryResponse {
     private Boolean isDirect;
     private Boolean isDelivery;
 
+    private Boolean isHidden;
+
     private Boolean sellerDeleted;
     private Boolean buyerDeleted;
 
@@ -32,5 +35,7 @@ public class TradeHistoryResponse {
     private LocalDateTime updatedAt;
     private LocalDateTime completedAt;
     private LocalDateTime canceledAt;
+
+    private TradeReviewStatusResponse reviewStatus;
 
 }

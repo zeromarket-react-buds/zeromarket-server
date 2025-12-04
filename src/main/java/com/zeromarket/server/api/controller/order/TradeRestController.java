@@ -31,21 +31,33 @@ public class TradeRestController {
     @Operation(summary = "거래 목록 조회", description = "검색 포함 거래 목록 조회")
     @GetMapping
     public ResponseEntity<List<TradeHistoryResponse>> getTradeList(
-        @ModelAttribute TradeHistoryRequest tradeHistoryRequest
+        @ModelAttribute TradeHistoryRequest tradeHistoryRequest,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
-        List<TradeHistoryResponse> result = tradeHistoryService.selectTradeList(tradeHistoryRequest);
+        if (userPrincipal != null) {
+            tradeHistoryRequest.setMemberId(userPrincipal.getMemberId());
+        }
+
+        List<TradeHistoryResponse> result =
+            tradeHistoryService.selectTradeList(tradeHistoryRequest);
         return ResponseEntity.ok(result);
     }
-
 
     @Operation(summary = "거래 내역 상세 조회", description = "거래내역 페이지 조회")
     @GetMapping("/{tradeId}")
     public ResponseEntity<TradeProductResponse> getTradeProduct(
         @PathVariable Long tradeId,
-        @ModelAttribute TradeProductRequest tradeProductRequest
+        @ModelAttribute TradeProductRequest tradeProductRequest,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
         tradeProductRequest.setTradeId(tradeId);
-        TradeProductResponse result = tradeHistoryService.selectTradeProduct(tradeProductRequest);
+
+        if (userPrincipal != null) {
+            tradeProductRequest.setMemberId(userPrincipal.getMemberId());
+        }
+
+        TradeProductResponse result =
+            tradeHistoryService.selectTradeProduct(tradeProductRequest);
         return ResponseEntity.ok(result);
     }
 

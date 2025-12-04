@@ -8,8 +8,11 @@
     <resultMap id="TradeHistoryResponseMap"
                type="com.zeromarket.server.api.dto.order.TradeHistoryResponse">
 
-        <id     column="trade_id"      property="tradeId"/>
-        <result column="product_id"    property="productId"/>
+        <id     column="product_id"    property="productId"/>
+
+        <result column="trade_id"      property="tradeId"/>
+        <result column="buyer_id"      property="buyerId"/>
+
         <result column="product_title" property="productTitle"/>
         <result column="thumbnail_url" property="thumbnailUrl"/>
         <result column="sell_price"    property="sellPrice"/>
@@ -23,8 +26,12 @@
 
         <result column="is_direct"     property="isDirect"/>
         <result column="is_delivery"   property="isDelivery"/>
+
+        <result column="is_hidden"     property="isHidden"/>
+
         <result column="seller_deleted" property="sellerDeleted"/>
         <result column="buyer_deleted"  property="buyerDeleted"/>
+
         <result column="created_at"    property="createdAt"/>
         <result column="updated_at"    property="updatedAt"/>
         <result column="completed_at"  property="completedAt"/>
@@ -35,8 +42,9 @@
             parameterType="com.zeromarket.server.api.dto.order.TradeHistoryRequest"
             resultMap="TradeHistoryResponseMap">
         SELECT
+            p.product_id,
             t.trade_id,
-            t.product_id,
+            t.buyer_id,
             p.product_title,
             pi.image_url AS thumbnail_url,
             p.sell_price,
@@ -44,27 +52,46 @@
             t.trade_status,
             p.is_direct,
             p.is_delivery,
+            p.is_hidden,
             t.seller_deleted,
             t.buyer_deleted,
             t.created_at,
             t.updated_at,
             t.completed_at,
             t.canceled_at
-        FROM trade t
+        FROM product p
 
-        JOIN product p
-        ON p.product_id = t.product_id
+        LEFT JOIN trade t
+            ON t.trade_id = (
+                SELECT t.trade_id
+                FROM trade t
+                WHERE t.product_id = p.product_id
+                ORDER BY t.created_at DESC
+                LIMIT 1
+            )
 
         LEFT JOIN product_image pi
-        ON pi.product_id = p.product_id
-        AND pi.is_main = TRUE
-        WHERE 1 = 1
+            ON pi.product_id = p.product_id
+            AND pi.is_main = TRUE
+
+        WHERE
+            p.is_deleted = FALSE
+            AND (
+                <!-- 판매 내역: 판매자 + 숨기기 상품 보임 -->
+                (#{role} = 'SALES'
+                    AND p.seller_id = #{memberId})
+                <!-- 구매 내역: 구매자 -->
+                OR (#{role} = 'PURCHASES'
+                    AND t.buyer_id = #{memberId}
+                    AND p.is_hidden = FALSE)
+            )
 
         <if test="keyword != null and keyword != ''">
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
 
-        ORDER BY t.created_at DESC
+        ORDER BY
+            COALESCE(t.created_at, p.created_at) DESC
 
     </select>
 
@@ -72,8 +99,9 @@
     <resultMap id="TradeProductResponseMap"
                type="com.zeromarket.server.api.dto.order.TradeProductResponse">
 
-        <id     column="trade_id"      property="tradeId"/>
-        <result column="product_id"    property="productId"/>
+        <id     column="product_id"    property="productId"/>
+        <result column="trade_id"      property="tradeId"/>
+
         <result column="product_title" property="productTitle"/>
         <result column="thumbnail_url" property="thumbnailUrl"/>
         <result column="sell_price"    property="sellPrice"/>
