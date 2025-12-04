@@ -26,7 +26,7 @@ public class WishQueryServiceImpl implements WishQueryService {
         return wishMapper.findWishProductIds(memberId, offset, size);
     }
 
-    // ⭐ 여기 수정됨! (memberId 추가)
+    // ⭐ (memberId 추가)
     @Override
     public WishProductResponse selectProductSummary(Long memberId, Long productId) {
 
