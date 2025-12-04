@@ -23,4 +23,8 @@ public enum ProductStatus {
     ProductStatus(String description) {
         this.description = description;
     }
+
+    public String getName() {
+        return this.name();
+    }
 }

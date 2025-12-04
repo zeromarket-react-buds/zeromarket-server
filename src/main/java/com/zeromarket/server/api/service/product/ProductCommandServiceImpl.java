@@ -1,6 +1,8 @@
 package com.zeromarket.server.api.service.product;
 
 import com.zeromarket.server.api.dto.product.ProductCreateRequest;
+import com.zeromarket.server.api.dto.product.ProductDetailImageInfo;
+import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -59,6 +61,44 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     @Override
     public void deleteProduct(Long productId) {
         mapper.softDeleteProduct(productId);
+    }
+
+    //상품수정(텍스트+이미지)
+    @Override
+    @Transactional
+    public void updateProduct(Long productId, ProductUpdateRequest request) {
+
+        //enum 문자열 대문자로 맞추기 위해
+        if(request.getProductStatus() != null){
+            request.setProductStatus(request.getProductStatus().toUpperCase());
+        }
+
+        //텍스트,기본정보수정
+        mapper.updateProduct(productId,request);
+
+        //이미지 수정-이미지 리스트null이면 변경X
+        if(request.getImages()==null){
+            return;
+        }
+
+        //기존이미지 전부 삭제
+        mapper.deleteImagesByProductId(productId);
+
+        //새 이미지 순서대로 다시 삽입
+//        int order =0;
+        for(ProductUpdateRequest.ImageDto img : request.getImages()){
+            mapper.insertProductImage(
+                productId,
+                img.getImageUrl(),
+//                order,
+                img.getSortOrder(),
+                img.getIsMain()//프론트에서 정한 대표이미지
+
+            );
+//            order++;
+        }
+
+
     }
 
 

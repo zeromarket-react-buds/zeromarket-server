@@ -16,22 +16,38 @@ public class WishCommandServiceImpl implements WishCommandService {
 
         Wish existing = wishMapper.findWish(memberId, productId);
 
+        // 1️⃣ 존재하지 않으면 Insert → 찜 생성
         if (existing == null) {
             Wish w = Wish.builder()
                 .memberId(memberId)
                 .productId(productId)
-                .isDeleted(false)
+                .isDeleted(false)   // ⭐ 찜 상태로 새로 생성
                 .build();
             wishMapper.insertWish(w);
-            return true;
+            return true; // 찜됨
         }
 
-        if (existing.getIsDeleted()) {
+        // 2️⃣ soft delete 상태면 → 복원
+        if (Boolean.TRUE.equals(existing.getIsDeleted())) {   // ⭐ null-safe
             wishMapper.restoreWish(existing.getWishId());
             return true;
         }
 
+        // 3️⃣ 현재 찜 상태면 → soft delete
         wishMapper.softDeleteWish(existing.getWishId());
         return false;
+    }
+
+    @Override
+    public boolean deleteWish(Long memberId, Long productId) {
+
+        Wish wish = wishMapper.findWish(memberId, productId);
+
+        if (wish == null) {
+            return false; // 이미 삭제된 상태
+        }
+
+        wishMapper.softDeleteWish(wish.getWishId());
+        return true;
     }
 }

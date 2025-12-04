@@ -1,6 +1,9 @@
 package com.zeromarket.server.api.service.product;
 
 import com.zeromarket.server.api.dto.product.ProductCreateRequest;
+import com.zeromarket.server.api.dto.product.ProductDetailImageInfo;
+import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
+import java.util.List;
 
 public interface ProductCommandService {
 
@@ -9,4 +12,7 @@ public interface ProductCommandService {
     void updateHidden(Long productId, boolean hidden);
 
     void deleteProduct(Long productId);
+
+
+    void updateProduct(Long productId, ProductUpdateRequest request);
 }
