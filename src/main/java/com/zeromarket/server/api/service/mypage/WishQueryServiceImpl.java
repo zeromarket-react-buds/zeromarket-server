@@ -26,11 +26,19 @@ public class WishQueryServiceImpl implements WishQueryService {
         return wishMapper.findWishProductIds(memberId, offset, size);
     }
 
-    // ⭐ 찜 목록용 상품 요약 조회 추가
+    // ⭐ 여기 수정됨! (memberId 추가)
     @Override
-    public WishProductResponse selectProductSummary(Long productId) {
-        return wishMapper.selectProductSummary(productId); // productQueryMapper → mapper 로 변경
+    public WishProductResponse selectProductSummary(Long memberId, Long productId) {
+
+        // ⭐ 기존: wishMapper.selectProductSummary(productId)
+        // ⬇ 수정 후: memberId + productId 동시 전달
+        WishProductResponse product = wishMapper.selectProductSummary(memberId, productId);
+
+        if (product == null) return null;
+
+        // 🔥 거래완료 상품 제외
+        if ("SOLD_OUT".equals(product.getSalesStatus())) return null;
+
+        return product;
     }
-
-
 }

@@ -4,7 +4,6 @@ import com.zeromarket.server.api.dto.mypage.WishProductResponse;
 import com.zeromarket.server.common.entity.Wish;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 
 @Mapper
@@ -19,15 +18,16 @@ public interface WishMapper {
 
     int softDeleteWish(@Param("wishId") Long wishId);
 
-    // 특정 상품 찜 여부 조회
     boolean isWished(@Param("memberId") Long memberId,
         @Param("productId") Long productId);
 
-    // 내 찜 목록 조회
     List<Long> findWishProductIds(@Param("memberId") Long memberId,
         @Param("offset") Integer offset,
         @Param("size") Integer size);
 
-    // 찜 목록용 상품 요약 조회 추가
-    WishProductResponse selectProductSummary(Long productId);
+    // ⭐ 찜 상품 요약 조회 (memberId 조건 추가됨)
+    WishProductResponse selectProductSummary(
+        @Param("memberId") Long memberId,
+        @Param("productId") Long productId
+    );
 }
