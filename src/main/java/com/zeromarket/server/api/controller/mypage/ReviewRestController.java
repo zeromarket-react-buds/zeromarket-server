@@ -1,9 +1,12 @@
 package com.zeromarket.server.api.controller.mypage;
 
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
+import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.mypage.ReviewService;
 import com.zeromarket.server.common.entity.Review;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,37 +24,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
+@Tag(name = "Board API", description = "게시판 CRUD API 콘트라베이스")
 public class ReviewRestController {
 
     private final ReviewService reviewService;
 
     /**
-     * 리뷰 생성
+     * 리뷰 작성
+     * @param dto
+     * @param userDetails
+     * @return
      */
+    @Operation(summary = "리뷰 작성", description = "")
     @PostMapping
     public ResponseEntity<Long> createReview(
         @RequestBody ReviewCreateRequest dto,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        try {
-            dto.setWriterId(userDetails.getMemberId()); // memberId 넣어주기
-            Long reviewId = reviewService.createReview(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(reviewId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        Long reviewId = reviewService.createReview(dto, userDetails.getMemberId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewId);
     }
 
     /**
-     * 리뷰 ID로 조회
+     * review id로 리뷰 단건 조회
+     * @param reviewId
+     * @return
      */
+    @Operation(summary = "review id로 리뷰 단건 조회", description = "")
     @GetMapping("/{reviewId}")
-    public ResponseEntity<Review> getReviewById(@PathVariable Long reviewId) {
-        Review review = reviewService.getReviewById(reviewId);
-        if (review == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(review);
+    public ResponseEntity<ReviewResponse> getReviewById(@PathVariable Long reviewId) {
+        ReviewResponse dto = reviewService.getReviewById(reviewId);
+        return ResponseEntity.ok(dto);
     }
 
     /**
@@ -66,6 +69,7 @@ public class ReviewRestController {
     /**
      * 작성자 ID로 리뷰 조회 (내가 작성한 리뷰)
      */
+    @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 단건 조회")
     @GetMapping("/writer/{writerId}")
     public ResponseEntity<List<Review>> getReviewsByWriterId(@PathVariable Long writerId) {
         List<Review> reviews = reviewService.getReviewsByWriterId(writerId);
@@ -75,6 +79,7 @@ public class ReviewRestController {
     /**
      * 거래 ID로 리뷰 조회
      */
+    @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 단건 조회")
     @GetMapping("/trade/{tradeId}")
     public ResponseEntity<List<Review>> getReviewsByTradeId(@PathVariable Long tradeId) {
         List<Review> reviews = reviewService.getReviewsByTradeId(tradeId);
@@ -84,6 +89,7 @@ public class ReviewRestController {
     /**
      * 특정 회원이 받은 리뷰 조회
      */
+    @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 단건 조회")
     @GetMapping("/member/{memberId}")
     public ResponseEntity<List<Review>> getReviewsByMemberId(@PathVariable Long memberId) {
         List<Review> reviews = reviewService.getReviewsByMemberId(memberId);

@@ -114,7 +114,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
     @Override
     public TradeReviewInfoDto getTradeInfoForReview(Long tradeId, Long loginMemberId) {
         TradeReviewInfoDto dto = mapper.selectTradeInfoForReview(tradeId, loginMemberId);
-
+//        TODO: 접근자가 거래 참여자인지 검증 ?
         if (dto == null) {
             throw new ApiException(ErrorCode.TRADE_NOT_FOUND);
         }

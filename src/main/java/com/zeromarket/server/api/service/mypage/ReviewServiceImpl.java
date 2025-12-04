@@ -1,12 +1,18 @@
 package com.zeromarket.server.api.service.mypage;
 
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
+import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.api.mapper.mypage.ReviewMapper;
 import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
 import com.zeromarket.server.common.entity.Review;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.enums.TradeStatus;
+import com.zeromarket.server.common.exception.ApiException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,20 +27,43 @@ public class ReviewServiceImpl implements ReviewService {
     /**
      * 리뷰 생성
      */
+    @Transactional
     @Override
     public Long createReview(ReviewCreateRequest dto, Long loginMemberId) {
 
-        // 1) 거래 정보에서 seller/buyer 확인
-        Map<String, Long> info = tradeMapper.selectSellerBuyerByTradeId(dto.getTradeId());
-        Long sellerId = info.get("sellerId");
-        Long buyerId  = info.get("buyerId");
+        // 1) 거래 정보 조회
+        Map<String, Object> info = tradeMapper.selectSellerBuyerStatusByTradeId(dto.getTradeId());
+        if (info == null) {
+            throw new ApiException(ErrorCode.TRADE_NOT_FOUND);
+        }
 
-        // 2) 작성자가 판매자인지 구매자인지 판별
+        Long sellerId = ((Number) info.get("sellerId")).longValue();
+        Long buyerId  = ((Number) info.get("buyerId")).longValue();
+        TradeStatus tradeStatus = (TradeStatus) info.get("tradeStatus");
+
+        // 2) 거래 참여자 검증
+        if (!loginMemberId.equals(sellerId) && !loginMemberId.equals(buyerId)) {
+            throw new ApiException(ErrorCode.REVIEW_CREATE_FORBIDDEN);
+//            throw new IllegalArgumentException("거래에 참여한 사용자만 리뷰를 작성할 수 있습니다.");
+        }
+
+        // 2) 거래 상태 검증
+        if (tradeStatus != TradeStatus.COMPLETED) {
+//        if (!TradeStatus.COMPLETED.toString().equals(tradeStatus)) {
+            throw new IllegalArgumentException("완료된 거래만 리뷰를 작성할 수 있습니다.");
+        }
+
+        // 3) 중복 작성 방지
+        if (reviewMapper.existsReviewByWriter(dto.getTradeId(), loginMemberId)) {
+            throw new ApiException(ErrorCode.REVIEW_EXIST);
+        }
+
+        // 4) reviewed_by 판별
         String reviewedBy = loginMemberId.equals(sellerId)
             ? "SELLER"
             : "BUYER";
 
-        // 3) 엔티티 생성 + 값 설정
+        // 5) 저장 로직
         Review entity = new Review();
         entity.setTradeId(dto.getTradeId());
         entity.setWriterId(loginMemberId);
@@ -42,38 +71,22 @@ public class ReviewServiceImpl implements ReviewService {
         entity.setRating(dto.getRating());
         entity.setContent(dto.getContent());
 
-        // 4) 저장
         reviewMapper.insertReview(entity);
-
         return entity.getReviewId();
-    }
-
-//    @Transactional
-//    public Long createReview(ReviewCreateRequest review) {
-//        // 평점 유효성 검사
-//        if (review.getRating() < 1 || review.getRating() > 5) {
-//            throw new IllegalArgumentException("평점은 1-5 사이여야 합니다.");
-//        }
-//
-////        dto -> entity
-//        Review entity = new Review();
-//        BeanUtils.copyProperties(review, entity);
-//
-//        reviewMapper.insertReview(entity);
-//
-//        return entity.getReviewId();
-//    }
-
-    @Override
-    public Long createReview(ReviewCreateRequest review) {
-        return 0L;
     }
 
     /**
      * 리뷰 ID로 조회
      */
-    public Review getReviewById(Long reviewId) {
-        return reviewMapper.selectReviewById(reviewId);
+    public ReviewResponse getReviewById(Long reviewId) {
+        ReviewResponse entity = reviewMapper.selectReviewById(reviewId);
+        if (entity == null) {throw new ApiException(ErrorCode.REVIEW_NOT_FOUND);}
+
+        return entity;
+//        ReviewResponse dto = new ReviewResponse();
+//        BeanUtils.copyProperties(entity, dto);
+//
+//        return dto;
     }
 
     /**
