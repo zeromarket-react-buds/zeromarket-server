@@ -1,6 +1,9 @@
 package com.zeromarket.server.api.controller.mypage;
 
+import com.zeromarket.server.api.dto.PageResponse;
+import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
+import com.zeromarket.server.api.dto.mypage.ReviewListResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.mypage.ReviewService;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -58,6 +62,40 @@ public class ReviewRestController {
     }
 
     /**
+     * 받은 리뷰 요약 조회
+     * @param memberId
+     * @return
+     */
+    @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rate당 3개씩 조회, 최신순, 총 개수")
+    @GetMapping("/received/summary/{memberId}")
+    public ResponseEntity<ReceivedReviewSummaryResponse> getReceivedReviewSummary(
+        @PathVariable Long memberId
+    ) {
+        ReceivedReviewSummaryResponse summaryResponse = reviewService.getReceivedReviewSummary(memberId);
+        return ResponseEntity.ok(summaryResponse);
+    }
+
+    /**
+     * 특정 점수 전체 목록 조회 (페이징)
+     * @param memberId
+     * @param rating
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping("/received/{memberId}")
+    public ResponseEntity<PageResponse<ReviewListResponse>> getReceivedReviewsByRating(
+        @PathVariable Long memberId,
+        @RequestParam Integer rating,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+            reviewService.getReceivedReviewsByRating(memberId, rating, page, size)
+        );
+    }
+
+    /**
      * 모든 리뷰 조회
      */
     @GetMapping
@@ -69,7 +107,6 @@ public class ReviewRestController {
     /**
      * 작성자 ID로 리뷰 조회 (내가 작성한 리뷰)
      */
-    @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 단건 조회")
     @GetMapping("/writer/{writerId}")
     public ResponseEntity<List<Review>> getReviewsByWriterId(@PathVariable Long writerId) {
         List<Review> reviews = reviewService.getReviewsByWriterId(writerId);
@@ -79,20 +116,9 @@ public class ReviewRestController {
     /**
      * 거래 ID로 리뷰 조회
      */
-    @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 단건 조회")
     @GetMapping("/trade/{tradeId}")
     public ResponseEntity<List<Review>> getReviewsByTradeId(@PathVariable Long tradeId) {
         List<Review> reviews = reviewService.getReviewsByTradeId(tradeId);
-        return ResponseEntity.ok(reviews);
-    }
-
-    /**
-     * 특정 회원이 받은 리뷰 조회
-     */
-    @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 단건 조회")
-    @GetMapping("/member/{memberId}")
-    public ResponseEntity<List<Review>> getReviewsByMemberId(@PathVariable Long memberId) {
-        List<Review> reviews = reviewService.getReviewsByMemberId(memberId);
         return ResponseEntity.ok(reviews);
     }
 

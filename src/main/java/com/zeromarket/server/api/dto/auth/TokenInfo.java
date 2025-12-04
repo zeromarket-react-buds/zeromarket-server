@@ -1,4 +1,4 @@
-package com.zeromarket.server.api.dto;
+package com.zeromarket.server.api.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

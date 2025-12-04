@@ -1,6 +1,9 @@
 package com.zeromarket.server.api.service.mypage;
 
+import com.zeromarket.server.api.dto.PageResponse;
+import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
+import com.zeromarket.server.api.dto.mypage.ReviewListResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.common.entity.Review;
 import java.util.List;
@@ -21,6 +24,26 @@ public interface ReviewService {
      * @return 리뷰 정보
      */
     ReviewResponse getReviewById(Long reviewId);
+
+    /**
+     * 특정 회원이 받은 후기 목록 (요약)
+     * - 점수별 3건만, 최신순, 5,4점만
+     * @param memberId
+     * @return
+     */
+    ReceivedReviewSummaryResponse getReceivedReviewSummary(Long memberId);
+
+    /**
+     * 특정 회원이 받은 후기 목록 (점수별 + 페이징)
+     * @param memberId
+     * @param rating
+     * @param page
+     * @param size
+     * @return
+     */
+    PageResponse<ReviewListResponse> getReceivedReviewsByRating(
+        Long memberId, Integer rating, int page, int size
+    );
 
     /**
      * 모든 리뷰 조회

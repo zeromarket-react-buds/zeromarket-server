@@ -50,7 +50,7 @@ public class TradeRestController {
     }
 
     @Operation(summary = "후기용 거래 상세 조회", description = "")
-    @GetMapping("reviews/{tradeId}")
+    @GetMapping("{tradeId}/review")
     public ResponseEntity<TradeReviewInfoDto> getTrade(
         @PathVariable Long tradeId,
         @AuthenticationPrincipal CustomUserDetails userPrincipal

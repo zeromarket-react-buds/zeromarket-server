@@ -1,11 +1,13 @@
 package com.zeromarket.server.api.mapper.mypage;
 
+import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryDto;
+import com.zeromarket.server.api.dto.mypage.ReviewListResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.common.entity.Review;
+import java.util.List;
+import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 @Mapper
 public interface ReviewMapper {
@@ -21,6 +23,20 @@ public interface ReviewMapper {
 
     // 리뷰 ID로 조회
     ReviewResponse selectReviewById(@Param("reviewId") Long reviewId);
+
+    // 특정 회원이 받은 후길 목록 조회 (요약)
+    List<ReceivedReviewSummaryDto> selectReceivedReviewSummary(@Param("memberId") Long memberId);
+
+    // 특정 회원이 받은 후기 목록 총 개수 (4,5점만)
+    int countReceivedReviews(@Param("memberId") Long memberId);
+
+    List<ReviewListResponse> selectReceivedReviewsByRating(
+        Map<String, Object> params
+//        @Param("memberId") Long memberId,
+//        @Param("rating") int rating
+    );
+
+    int countReceivedReviewsByRating(Map<String, Object> params);
 
     // 모든 리뷰 조회
     List<Review> selectAllReviews();
@@ -48,4 +64,5 @@ public interface ReviewMapper {
 
     // 리뷰 완전 삭제
     int hardDeleteReview(@Param("reviewId") Long reviewId);
+
 }
