@@ -163,6 +163,33 @@
 
     </select>
 
+    <!-- 상태 변경용 단건 조회 -->
+    <select id="selectById"
+            parameterType="long"
+            resultType="com.zeromarket.server.api.dto.order.TradeStatusUpdateRow">
+        SELECT
+            t.trade_id      AS tradeId,
+            p.seller_id     AS sellerId,
+            t.buyer_id      AS buyerId,
+            t.trade_status  AS tradeStatus,
+            t.completed_at  AS completedAt
+        FROM trade t
+
+        JOIN product p
+            ON p.product_id = t.product_id
+
+        WHERE t.trade_id = #{tradeId}
+    </select>
+
+    <!-- 상태 및 완료 시간 업데이트 -->
+    <update id="updateTradeStatus">
+        UPDATE trade
+            SET trade_status = #{target},
+                completed_at = #{completedAt},
+                updated_at   = #{updatedAt}
+        WHERE trade_id = #{tradeId}
+    </update>
+
     <resultMap id="TradeReviewInfoMap" type="com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto">
         <id property="tradeId" column="trade_id"/>
 

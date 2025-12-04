@@ -1,22 +1,16 @@
 package com.zeromarket.server.api.controller.order;
 
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
-import com.zeromarket.server.api.dto.order.TradeHistoryRequest;
-import com.zeromarket.server.api.dto.order.TradeHistoryResponse;
-import com.zeromarket.server.api.dto.order.TradeProductRequest;
-import com.zeromarket.server.api.dto.order.TradeProductResponse;
+import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.order.TradeHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -59,6 +53,25 @@ public class TradeRestController {
         TradeProductResponse result =
             tradeHistoryService.selectTradeProduct(tradeProductRequest);
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "거래완료로 거래상태 변경", description = "현재 거래상태를 거래완료(COMPLETED)로 변경")
+    @PatchMapping("/{tradeId}/status")
+    public ResponseEntity<TradeStatusUpdateResponse> updateTradeStatus(
+        @PathVariable Long tradeId,
+        @RequestBody TradeStatusUpdateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        if (userPrincipal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long memberId = userPrincipal.getMemberId();
+
+        TradeStatusUpdateResponse response =
+            tradeHistoryService.updateTradeStatus(tradeId, request, memberId);
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "후기용 거래 상세 조회", description = "")

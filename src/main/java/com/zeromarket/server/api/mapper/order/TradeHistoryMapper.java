@@ -1,11 +1,12 @@
 package com.zeromarket.server.api.mapper.order;
 
-import com.zeromarket.server.api.dto.order.TradeHistoryRequest;
-import com.zeromarket.server.api.dto.order.TradeHistoryResponse;
+import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
-import com.zeromarket.server.api.dto.order.TradeProductRequest;
-import com.zeromarket.server.api.dto.order.TradeProductResponse;
+
+import java.time.LocalDateTime;
 import java.util.Map;
+
+import com.zeromarket.server.common.enums.TradeStatus;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -22,5 +23,9 @@ public interface TradeHistoryMapper {
         @Param("loginMemberId") Long loginMemberId
     );
 
+    TradeStatusUpdateRow selectById(Long tradeId);
+    
     Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
+
+    void updateTradeStatus(Long tradeId, TradeStatus target, LocalDateTime completedAt, LocalDateTime updatedAt);
 }

@@ -10,7 +10,9 @@ import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.exception.ApiException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -110,6 +112,67 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
 
         return product;
     }
+
+    @Override
+    @Transactional
+    public TradeStatusUpdateResponse updateTradeStatus(Long tradeId,
+                                                       TradeStatusUpdateRequest request,
+                                                       Long memberId) {
+
+        // 거래 조회
+        TradeStatusUpdateRow trade = mapper.selectById(tradeId);
+        if (trade == null) {
+            // 존재하지 않으면 예외
+            throw new IllegalArgumentException("존재하지 않는 거래입니다.");
+        }
+
+        // 권한 검증
+        if (!trade.getSellerId().equals(memberId) &&
+            !trade.getBuyerId().equals(memberId)) {
+            throw new IllegalStateException("해당 거래의 당사자가 아닙니다.");
+        }
+
+        // 상태 전이 검증
+        TradeStatus current = trade.getTradeStatus();
+        TradeStatus target = request.getStatus();
+
+        validateStatusTransition(current, target, memberId, trade);
+
+        // 상태 및 시간 컬럼 세팅
+        LocalDateTime updatedAt = LocalDateTime.now();
+        LocalDateTime completedAt = trade.getCompletedAt();
+
+        if (target == TradeStatus.COMPLETED) {
+            completedAt = updatedAt;
+        }
+
+        mapper.updateTradeStatus(tradeId, target, completedAt, updatedAt);
+
+        // 응답 DTO 구성
+        TradeStatusUpdateResponse response = new TradeStatusUpdateResponse();
+        response.setTradeId(tradeId);
+        response.setTradeStatus(target);
+        response.setCompletedAt(completedAt);
+
+        return response;
+    }
+
+    private void validateStatusTransition(TradeStatus current,
+                                          TradeStatus target,
+                                          Long memberId,
+                                          TradeStatusUpdateRow trade) {
+
+        // 예: PENDING → COMPLETED
+        if (current == TradeStatus.PENDING) {
+            if (target == TradeStatus.COMPLETED) {
+                return;
+            }
+        }
+
+        // 그 외에는 불허
+        throw new IllegalStateException("허용되지 않는 상태 변경입니다.");
+    }
+
 
     @Override
     public TradeReviewInfoDto getTradeInfoForReview(Long tradeId, Long loginMemberId) {
