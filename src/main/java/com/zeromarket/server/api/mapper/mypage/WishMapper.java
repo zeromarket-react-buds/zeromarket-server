@@ -30,4 +30,7 @@ public interface WishMapper {
         @Param("memberId") Long memberId,
         @Param("productId") Long productId
     );
+
+    // ⭐ 추가됨: 찜 개수 조회
+    int countWish(@Param("memberId") Long memberId);
 }

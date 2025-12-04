@@ -57,6 +57,11 @@ public class WishController {
 
         return ResponseEntity.ok(result);
     }
+        // ⭐ 추가됨: 찜 개수 조회 API
+        @GetMapping("/wishlist/count")
+        public int getWishCount() {
+            return wishQueryService.getWishCount(TEMP_MEMBER_ID);
+    }
 }
 
 

@@ -22,11 +22,13 @@ public class WishProductResponse {
     private LocalDateTime createdAt; // 찜한 날짜
 
     // 🔥 거래 방식 표시용
-//    private Boolean direct;   // 직거래 가능?
-//    private Boolean delivery; // 택배 거래 가능?
+    private Boolean direct;   // 직거래 거래
+    private Boolean delivery; // 택배 거래
 
-    private TradeType tradeType; //enums_Trade Type
-    private TradeStatus tradeStatus;
+ //   private TradeType tradeType; //enums_Trade Type 직거래/택배거래
+//private TradeType direct;   
+//private TradeType delivery; //이 둘도 비권장
+//Enum은 상품의 거래방식이 하나만 선택되는 구조일 때만 맞다고함
 
     // 🔥 프론트에서 표시할 문자열
     private String tradeTypeDisplay; // ex) "직거래 · 택배거래" or "직거래" or "택배"

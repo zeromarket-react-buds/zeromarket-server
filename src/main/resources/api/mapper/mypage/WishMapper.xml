@@ -39,6 +39,7 @@
     </update>
 
     <!-- 찜 여부 -->
+    <!-- soft delete db에는 남음-->
     <select id="isWished" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM wish
@@ -46,6 +47,16 @@
         AND product_id = #{productId}
         AND is_deleted = false
     </select>
+    <!--완전삭제 구문-->
+    <!--
+    <delete id="deleteWishPermanent">
+    DELETE FROM wish
+    WHERE wish_id = #{wishId}
+    </delete>
+
+    WishCommandServiceImpl:
+    wishMapper.deleteWishPermanent(wish.getWishId());
+    -->
 
     <!-- 찜한 상품 목록 -->
     <select id="findWishProductIds" resultType="long">
@@ -106,6 +117,14 @@
         AND p.sales_status != 'SOLD_OUT'
 
         LIMIT 1
+    </select>
+
+    <!-- ⭐ 추가됨: 찜 개수 조회 -->
+    <select id="countWish" resultType="int">
+        SELECT COUNT(*)
+        FROM wish
+        WHERE member_id = #{memberId}
+        AND is_deleted = FALSE
     </select>
 
 </mapper>
