@@ -7,6 +7,7 @@ import com.zeromarket.server.api.dto.product.ProductCreateResponse;
 import com.zeromarket.server.api.dto.product.ProductDetailResponse;
 import com.zeromarket.server.api.dto.product.ProductQueryRequest;
 import com.zeromarket.server.api.dto.product.ProductQueryResponse;
+import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
 import com.zeromarket.server.api.service.product.ProductCommandService;
 import com.zeromarket.server.api.service.product.ProductQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,6 +80,7 @@ public class ProductRestController {
     }
     
     //상품 숨기기
+    @Operation(summary = "상품 숨기기", description = "현재 노출중 상품 숨기기")
     @PatchMapping("/{productId}/hide")
     public ResponseEntity<Void> updateHidden(
         @PathVariable Long productId,
@@ -87,9 +89,21 @@ public class ProductRestController {
         return ResponseEntity.ok().build();
     }
 
-    //상품 수정
-    
+
+    //상품수정(텍스트,이미지 통합)
+    @Operation(summary = "상품 수정", description = "등록된 상품상세 수정")
+    @PatchMapping("/{productId}")
+    public ResponseEntity<Void> updateProduct(
+        @PathVariable Long productId,
+        @RequestBody ProductUpdateRequest request
+    ){
+//        request.setProductId(productId);//url으로부터 productId를 가져옴
+        productCommandService.updateProduct(productId,request);
+        return ResponseEntity.ok().build();
+    }
+
     //상품 삭제-soft delete 방식
+    @Operation(summary = "상품 삭제", description = "등록된 상품 삭제")
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId){
         productCommandService.deleteProduct(productId);

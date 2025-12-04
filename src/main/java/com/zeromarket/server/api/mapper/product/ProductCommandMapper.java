@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.mapper.product;
 
 import com.zeromarket.server.api.dto.product.ProductCreateRequest;
+import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,4 +21,8 @@ public interface ProductCommandMapper {
     void updateHidden(Long productId, boolean hidden);
 
     void softDeleteProduct(Long productId);
+
+    void updateProduct(@Param("productId") Long productId, @Param("request") ProductUpdateRequest request);
+
+    void deleteImagesByProductId(Long productId);
 }

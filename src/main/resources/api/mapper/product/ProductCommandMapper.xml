@@ -51,6 +51,7 @@
     #{imageUrl},
     #{sortOrder},
     #{isMain},
+<!--    #{isMain, jdbcType=BOOLEAN},-->
     NOW()
     )
   </insert>
@@ -72,5 +73,44 @@
     updated_at=NOW()
     WHERE product_id = #{productId};
   </update>
+
+<!--  상품 텍스트 수정-->
+  <update id="updateProduct" parameterType="map">
+    UPDATE product
+    <set>
+      <if test="request.productTitle!=null">
+        product_title =#{request.productTitle},
+      </if>
+      <if test="request.productDescription!= null">
+        description=#{request.productDescription},
+      </if>
+      <if test="request.sellPrice != null">
+        sell_price=#{request.sellPrice},
+      </if>
+      <if test="request.categoryDepth3!=null">
+        level3_id=#{request.categoryDepth3},
+      </if>
+      <if test="request.productStatus!=null">
+        product_status=#{request.productStatus},
+      </if>
+      <if test="request.direct!=null">
+        is_direct=#{request.direct},
+      </if>
+      <if test="request.delivery!=null">
+        is_delivery=#{request.delivery},
+      </if>
+      <if test="request.sellingArea!=null">
+        selling_area=#{request.sellingArea},
+      </if>
+      updated_at = NOW()
+    </set>
+    WHERE product_id = #{productId}
+  </update>
+
+<!--  기존첨부이미지 전부삭제-->
+  <delete id="deleteImagesByProductId">
+    DELETE FROM product_image
+    WHERE product_id = #{productId}
+  </delete>
 
 </mapper>
