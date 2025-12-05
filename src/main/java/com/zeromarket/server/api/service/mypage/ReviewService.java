@@ -23,7 +23,7 @@ public interface ReviewService {
      * @param reviewId 리뷰 ID
      * @return 리뷰 정보
      */
-    ReviewResponse getReviewById(Long reviewId);
+    ReviewResponse getReviewById(Long reviewId, Long memberId);
 
     /**
      * 특정 회원이 받은 후기 목록 (요약)

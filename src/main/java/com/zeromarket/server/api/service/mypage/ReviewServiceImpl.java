@@ -84,9 +84,19 @@ public class ReviewServiceImpl implements ReviewService {
     /**
      * 리뷰 ID로 조회
      */
-    public ReviewResponse getReviewById(Long reviewId) {
+    public ReviewResponse getReviewById(Long reviewId, Long memberId) {
+        // 1) 리뷰 조회
         ReviewResponse entity = reviewMapper.selectReviewById(reviewId);
         if (entity == null) {throw new ApiException(ErrorCode.REVIEW_NOT_FOUND);}
+
+        // 2) 거래 조회
+        Map<String, Object> sellerBuyerStatus = tradeMapper.selectSellerBuyerStatusByTradeId(entity.getTradeId());
+        if(sellerBuyerStatus == null){throw new ApiException(ErrorCode.TRADE_NOT_FOUND);}
+
+        // 3) 거래 참여자인지 확인
+        if(sellerBuyerStatus.get("sellerId") == memberId || sellerBuyerStatus.get("buyerId") == memberId){
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
 
         return entity;
 //        ReviewResponse dto = new ReviewResponse();
@@ -105,11 +115,9 @@ public class ReviewServiceImpl implements ReviewService {
         Member member = memberMapper.selectMemberById(memberId);
         if(member == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
 
+        // 리스트 조회 (rating5 + rating4 혼합 형태)
         List<ReceivedReviewSummaryDto> list =
             reviewMapper.selectReceivedReviewSummary(memberId);
-
-        // 총 개수
-//        int totalCount = reviewMapper.countReceivedReviews(memberId);
 
         // 분리
         List<ReceivedReviewSummaryDto> rating5 =
@@ -119,10 +127,8 @@ public class ReviewServiceImpl implements ReviewService {
             list.stream().filter(r -> r.getRating() == 4).toList();
 
         ReceivedReviewSummaryResponse response = new ReceivedReviewSummaryResponse();
-
         response.setRating5(new RatingReviewGroup(5, rating5.size(), rating5));
         response.setRating4(new RatingReviewGroup(4, rating4.size(), rating4));
-//        response.setTotalCount(totalCount);
         response.setNickname(member.getNickname());
 
         return response;

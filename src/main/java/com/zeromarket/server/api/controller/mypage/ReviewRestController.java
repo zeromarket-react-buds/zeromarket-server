@@ -56,8 +56,11 @@ public class ReviewRestController {
      */
     @Operation(summary = "review id로 리뷰 단건 조회", description = "")
     @GetMapping("/{reviewId}")
-    public ResponseEntity<ReviewResponse> getReviewById(@PathVariable Long reviewId) {
-        ReviewResponse dto = reviewService.getReviewById(reviewId);
+    public ResponseEntity<ReviewResponse> getReviewById(
+        @PathVariable Long reviewId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        ReviewResponse dto = reviewService.getReviewById(reviewId, userDetails.getMemberId());
         return ResponseEntity.ok(dto);
     }
 

@@ -26,4 +26,7 @@ public class ReviewResponse {
 
     private String opponentNickname; // 추가
     private String productTitle;     // 추가
+
+    private String productImage;            // 추가
+    private String OpponentProfileImage;    // 추가
 }

@@ -68,27 +68,35 @@
 
             p.product_title,
 
-            CASE
-            WHEN r.reviewed_by = 'SELLER'
-                THEN buyer.nickname
-                ELSE seller.nickname
-            END AS opponent_nickname
+            pi.image_url AS product_image,
+
+        CASE WHEN r.reviewed_by = 'SELLER'
+            THEN buyer.nickname
+            ELSE seller.nickname
+        END AS opponent_nickname,
+
+        CASE WHEN r.reviewed_by = 'SELLER'
+            THEN buyer.profile_image
+            ELSE seller.profile_image
+        END AS opponent_profile_image
 
         FROM review r
         JOIN trade t ON r.trade_id = t.trade_id
         JOIN product p ON t.product_id = p.product_id
+        LEFT JOIN product_image pi
+            ON pi.product_id = p.product_id
+            AND pi.is_main = TRUE
         JOIN member seller ON p.seller_id = seller.member_id
         JOIN member buyer ON t.buyer_id = buyer.member_id
-
         WHERE r.review_id = #{reviewId}
-        AND r.is_deleted = FALSE
+            AND r.is_deleted = FALSE
     </select>
 
     <!--  특정 회원이 받은 후기 목록 조회 (5,4점만, 최신순 3건만)  -->
     <select id="selectReceivedReviewSummary"
         parameterType="long"
         resultType="com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryDto">
-
+        <![CDATA[
         WITH received_reviews AS (
         SELECT
             r.review_id,
@@ -110,8 +118,9 @@
         )
         SELECT *
         FROM received_reviews
-        WHERE rn &gt;= 3
+        WHERE rn <= 3
         ORDER BY rating DESC, created_at DESC;
+        ]]>
     </select>
 
     <!--  특정 회원이 받은 후기 목록 총 개수 (5,4점만)  -->
