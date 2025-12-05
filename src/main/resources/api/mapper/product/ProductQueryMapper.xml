@@ -138,8 +138,9 @@
     <collection property="images" resultMap="imageMap"/>
   </resultMap>
 
+<!--⭐ parameterTyp을 "java.lang.Long"에서 map으로 변경 -->
   <select id="selectProductDetail"
-    parameterType="java.lang.Long"
+    parameterType="map"
     resultMap="productDetailMap">
 
     SELECT
@@ -159,6 +160,14 @@
 
       (SELECT COUNT(*) FROM wish w
       WHERE w.product_id = p.product_id AND w.is_deleted = false) AS wish_count,
+      -- ⭐ 추가: 현재 로그인한 사용자가 찜했는지 여부
+      COALESCE(
+      (SELECT COUNT(*) FROM wish w2
+      WHERE w2.product_id = p.product_id
+      AND w2.member_id = #{memberId}
+      AND w2.is_deleted = false),
+      0
+      ) > 0 AS is_wished,
 
 
     -- 판매자 ID

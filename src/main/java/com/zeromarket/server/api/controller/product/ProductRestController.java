@@ -48,7 +48,11 @@ public class ProductRestController {
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId){
 
-        ProductDetailResponse result = productQueryService.getProductDetail(productId);
+        // 임시 로그인/미구현 상태라면 TEMP_MEMBER_ID 사용
+        // 추후 Spring Security 로그인 적용되면 SecurityContext에서 memberId를 가져오면 됨
+        Long TEMP_MEMBER_ID = 1L;
+
+        ProductDetailResponse result = productQueryService.getProductDetail(TEMP_MEMBER_ID, productId);
 
         return ResponseEntity.ok(result);
     }

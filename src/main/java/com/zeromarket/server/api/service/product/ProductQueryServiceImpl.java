@@ -7,7 +7,9 @@ import com.zeromarket.server.api.dto.product.ProductQueryResponse;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +55,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     @Override
     @Transactional
-    public ProductDetailResponse getProductDetail(Long productId) {
+    public ProductDetailResponse getProductDetail(Long memberId,Long productId) {
 
 //        ProductBasicInfo basic = mapper.selectBasicInfo(productId);
 //
@@ -66,10 +68,17 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 //        if(basic.isHidden()){
 //            throw new ApiException(ErrorCode.HIDDEN_PRODUCT);
 //        }
-
+        //조회수 증가
         mapper.updateViewCount(productId);
+        // 🔥 변경된 부분: Map으로 두 개의 파라미터 전달
+        // 🔥 memberId + productId 두 개를 map으로 넘겨서 XML에서 #{memberId} 사용 가능하게 함
+        Map<String, Object> params = new HashMap<>();
+        params.put("productId", productId);
+        params.put("memberId", memberId);
 
-        ProductDetailResponse detail = mapper.selectProductDetail(productId);
+        // ⭐ Map을 넘겨야 XML에서 #{memberId} 사용 가능
+        ProductDetailResponse detail = mapper.selectProductDetail(params);
+        // ProductDetailResponse detail = mapper.selectProductDetail(productId);
 
         if(detail==null){
             throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND);
