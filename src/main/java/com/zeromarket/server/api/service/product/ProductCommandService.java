@@ -11,8 +11,11 @@ public interface ProductCommandService {
 
     void updateHidden(Long productId, boolean hidden);
 
+//    void updateHidden(Long productId, boolean hidden, Long loggedInUserId);
+
     void deleteProduct(Long productId);
 
-
     void updateProduct(Long productId, ProductUpdateRequest request);
+
+    void validateProductOwnership(Long productId, Long memberId);
 }
