@@ -2,7 +2,7 @@ package com.zeromarket.server.api.controller.auth;
 
 import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
-import com.zeromarket.server.api.dto.TokenInfo;
+import com.zeromarket.server.api.dto.auth.TokenInfo;
 import com.zeromarket.server.api.service.auth.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

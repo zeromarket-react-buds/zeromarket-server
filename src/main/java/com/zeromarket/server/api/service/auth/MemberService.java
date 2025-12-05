@@ -3,7 +3,7 @@ package com.zeromarket.server.api.service.auth;
 import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
-import com.zeromarket.server.api.dto.TokenInfo;
+import com.zeromarket.server.api.dto.auth.TokenInfo;
 
 public interface MemberService {
 
