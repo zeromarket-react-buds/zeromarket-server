@@ -8,8 +8,11 @@ import com.zeromarket.server.api.dto.product.ProductDetailResponse;
 import com.zeromarket.server.api.dto.product.ProductQueryRequest;
 import com.zeromarket.server.api.dto.product.ProductQueryResponse;
 import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
+import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.product.ProductCommandService;
 import com.zeromarket.server.api.service.product.ProductQueryService;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -17,6 +20,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -60,12 +64,19 @@ public class ProductRestController {
     //상품 등록
     @Operation(summary = "상품 등록", description = "상품 정보 + Supabase 이미지 URL")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ProductCreateResponse> createProduct(@RequestBody ProductCreateRequest request
+    public ResponseEntity<ProductCreateResponse> createProduct
+    (   @RequestBody ProductCreateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails)
         //@RequestPart : 아래처럼 작성하여, JSON + 파일을 각각 분리하여 받을수있게함
 //        @RequestPart("data") ProductCreateRequest request,
 //        // required = false : 스프링이 특정 요청 파트를 반드시 필요로 하지 않게 만드는 옵션,이미지가 없어도 에러를 내지 말고 images = null 로 (상품등록을)처리하라는 의미.
 //        @RequestPart(value = "images",required = false) List<MultipartFile> images
-    ){
+    {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        request.setSellerId(userDetails.getMemberId());//로그인 중 사용자id를 자동으로 sellerId로 설정
+
         Long newProductId = productCommandService.createProduct(request);
         ProductCreateResponse response =
             new ProductCreateResponse(newProductId, "상품이 정상적으로 등록되었습니다.");
@@ -83,25 +94,39 @@ public class ProductRestController {
         return ResponseEntity.ok(productQueryService.findSimilarProducts(productId));
     }
     
-    //상품 숨기기
+    //상품 숨기기 //숨기기도 상품상태 update의 일종이므로 command로
     @Operation(summary = "상품 숨기기", description = "현재 노출중 상품 숨기기")
     @PatchMapping("/{productId}/hide")
     public ResponseEntity<Void> updateHidden(
         @PathVariable Long productId,
-        @RequestBody HideRequest request){//숨기기도 상품상태 update의 일종이므로 command로
+        @RequestBody HideRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        //로긴 상태확인
+        if(userDetails==null){
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        //해당 상품 sellerId = 로그인Id 비교
+        productCommandService.validateProductOwnership(productId,userDetails.getMemberId());
+
         productCommandService.updateHidden(productId, request.isHidden());
         return ResponseEntity.ok().build();
     }
-
 
     //상품수정(텍스트,이미지 통합)
     @Operation(summary = "상품 수정", description = "등록된 상품상세 수정")
     @PatchMapping("/{productId}")
     public ResponseEntity<Void> updateProduct(
         @PathVariable Long productId,
-        @RequestBody ProductUpdateRequest request
+        @RequestBody ProductUpdateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-//        request.setProductId(productId);//url으로부터 productId를 가져옴
+        if(userDetails==null){
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        productCommandService.validateProductOwnership(productId,userDetails.getMemberId());
+
         productCommandService.updateProduct(productId,request);
         return ResponseEntity.ok().build();
     }
@@ -109,11 +134,16 @@ public class ProductRestController {
     //상품 삭제-soft delete 방식
     @Operation(summary = "상품 삭제", description = "등록된 상품 삭제")
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId){
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId,
+        @AuthenticationPrincipal CustomUserDetails userDetails){
+        if(userDetails==null){
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        productCommandService.validateProductOwnership(productId,userDetails.getMemberId());
+
         productCommandService.deleteProduct(productId);
         return ResponseEntity.ok().build();
     }
-
-
 
 }
