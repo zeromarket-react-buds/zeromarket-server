@@ -90,6 +90,42 @@
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
 
+        <!-- 상태 / 숨기기 조합 -->
+        <choose>
+            <!-- 상태도 있고 isHidden도 선택된 경우 -->
+            <when test="tradeStatus != null and tradeStatus.size() > 0
+                        and isHidden != null and isHidden == true">
+                AND (
+                    t.trade_status IN
+                    <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
+                        #{ts}
+                    </foreach>
+                    OR p.is_hidden = TRUE
+                )
+            </when>
+
+            <!-- 상태만 선택된 경우 -->
+            <when test="tradeStatus != null and tradeStatus.size() > 0">
+                AND t.trade_status IN
+                <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
+                    #{ts}
+                </foreach>
+            </when>
+
+            <!-- isHidden만 선택된 경우 -->
+            <when test="isHidden != null and isHidden == true">
+                AND p.is_hidden = TRUE
+            </when>
+        </choose>
+
+        <if test="fromDate != null">
+            AND COALESCE(t.created_at, p.created_at) >= #{fromDate}
+        </if>
+
+        <if test="toDate != null">
+            AND COALESCE(t.created_at, p.created_at) &lt; (#{toDate} + 1)
+        </if>
+
         ORDER BY
             COALESCE(t.created_at, p.created_at) DESC
 

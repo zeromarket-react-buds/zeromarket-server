@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +23,61 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
 
     private final TradeHistoryMapper mapper;
     private final ReviewMapper reviewMapper;
+
+    @Override
+    public List<TradeHistoryResponse> selectTradeList(TradeHistoryRequest req) {
+
+        // 컨트롤러에서 세팅해준 로그인 회원 id
+        Long loginMemberId = req.getMemberId();
+
+        // 상태 / 숨기기 필터 가공
+        applyStatusFilter(req);
+
+        // id랑 role에 의하 검색/필터용
+        List<TradeHistoryResponse> histories = mapper.selectTradeList(req);
+
+        // 각 거래별로 리뷰 상태 계산해서 붙이기
+        for (TradeHistoryResponse history : histories) {
+            TradeReviewStatusResponse status = buildReviewStatus(
+                history.getTradeId(),
+                history.getTradeStatus(),
+                loginMemberId
+            );
+            history.setReviewStatus(status);
+        }
+
+        return histories;
+    }
+
+    // 상태/숨기기 필터 가공 메서드
+    private void applyStatusFilter(TradeHistoryRequest req) {
+
+        List<String> status = req.getStatus();
+
+        if (status != null && !status.isEmpty()) {
+
+            // 문자열 상태 리스트를 TradeStatus enum 리스트로 변환 (매칭 안 되는 값은 무시)
+            List<TradeStatus> tradeStatus =
+                status.stream()
+                    .map(s -> Arrays.stream(TradeStatus.values())
+                        .filter(ts -> ts.name().equals(s))
+                        .findFirst()
+                        .orElse(null))
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            // isHidden은 별도 Boolean으로 처리
+            boolean hidden = status.contains("isHidden");
+
+            // 가공된 값들을 Request에 반영
+            req.setTradeStatus(tradeStatus.isEmpty() ? null : tradeStatus);
+            req.setIsHidden(hidden);
+
+        } else {
+            req.setTradeStatus(null);
+            req.setIsHidden(null);
+        }
+    }
 
     // 리뷰 상태 공통 계산 메서드
     private TradeReviewStatusResponse buildReviewStatus(
@@ -59,34 +116,6 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
         status.setCanWriteReview(isCompleted && my == null);
 
         return status;
-    }
-
-    @Override
-    public List<TradeHistoryResponse> selectTradeList(TradeHistoryRequest req) {
-
-        // 컨트롤러에서 세팅해준 로그인 회원 id
-        Long loginMemberId = req.getMemberId();
-
-        // id랑 role에 의하 검색/필터용
-        TradeHistoryRequest tradeReq = new TradeHistoryRequest();
-        tradeReq.setMemberId(loginMemberId);
-        tradeReq.setRole(req.getRole());
-        tradeReq.setKeyword(req.getKeyword());
-
-        // 거래 목록 조회
-        List<TradeHistoryResponse> histories = mapper.selectTradeList(tradeReq);
-
-        // 각 거래별로 리뷰 상태 계산해서 붙이기
-        for (TradeHistoryResponse history : histories) {
-            TradeReviewStatusResponse status = buildReviewStatus(
-                history.getTradeId(),
-                history.getTradeStatus(),
-                loginMemberId
-            );
-            history.setReviewStatus(status);
-        }
-
-        return histories;
     }
 
     @Override
