@@ -90,9 +90,10 @@
   <resultMap id="sellerMap" type="com.zeromarket.server.api.dto.product.ProductDetailSellerInfo">
     <id property="sellerId" column="seller_id"/>
     <result property="sellerNickName" column="seller_nickname"/>
+    <result property="profileImage" column="profile_image"/>
     <result property="sellerIntroduction" column="seller_introduction"/>
+    <result property="trustScore" column="trust_score"/>
   </resultMap>
-
 
   <resultMap id="imageMap" type="com.zeromarket.server.api.dto.product.ProductDetailImageInfo">
     <id property="imageId" column="image_id"/>
@@ -169,11 +170,21 @@
       0
       ) > 0 AS is_wished,
 
-
     -- 판매자 ID
     m.member_id AS seller_id,
     m.nickname AS seller_nickname,
+    m.profile_image AS profile_image,
     m.introduction AS seller_introduction,
+
+    -- 판매자 신뢰점수(rating 평균점수)
+    (
+    SELECT ROUND(AVG(r.rating), 1)
+    FROM review r
+    JOIN trade t ON t.trade_id =r.trade_id
+    JOIN product p ON p.product_id = t.product_id
+    WHERE p.seller_id = m.member_id
+    AND r.is_deleted = false
+    )AS trust_score,
 
     -- 카테고리 이름,ID
     c1.level1_name AS category_depth1,
