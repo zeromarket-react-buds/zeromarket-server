@@ -32,7 +32,7 @@ public class ProductDetailResponse {
     private SalesStatus salesStatus;
     private ProductStatus productStatus;
 
-    private boolean isWished;
+    private Boolean isWished;//boolean기본형에서 Boolean: Wrapper 타입으로 변경
     private int wishCount;
 
     private int viewCount;

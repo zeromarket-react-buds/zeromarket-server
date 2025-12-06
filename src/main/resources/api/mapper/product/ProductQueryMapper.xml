@@ -138,7 +138,7 @@
     <collection property="images" resultMap="imageMap"/>
   </resultMap>
 
-<!--⭐ parameterTyp을 "java.lang.Long"에서 map으로 변경 -->
+    <!-- ⭐ parameterType을 Long에서 map으로 변경 -->
   <select id="selectProductDetail"
     parameterType="map"
     resultMap="productDetailMap">
@@ -158,24 +158,34 @@
       p.is_hidden,
       p.is_deleted,
 
-      (SELECT COUNT(*) FROM wish w
-      WHERE w.product_id = p.product_id AND w.is_deleted = false) AS wish_count,
-      -- ⭐ 추가: 현재 로그인한 사용자가 찜했는지 여부
-      COALESCE(
-      (SELECT COUNT(*) FROM wish w2
-      WHERE w2.product_id = p.product_id
-      AND w2.member_id = #{memberId}
-      AND w2.is_deleted = false),
-      0
-      ) > 0 AS is_wished,
+      <!--찜 개수 -->
+      (SELECT COUNT(*)
+      FROM wish w
+      WHERE w.product_id = p.product_id
+      AND w.is_deleted = false
+      ) AS wish_count,
+
+      --⭐ 추가: 현재 로그인한 사용자가 찜했는지 여부
+      -- 명확한 boolean 값을 반환하기 위한 CASE WHEN EXISTS, THEN TRUE, ELSE FALSE, END 추가
+      -- 0 AS is_wished 수정 boolean 타입을 확실하게 반환해야 매핑이 정상 처리
+      CASE
+      WHEN EXISTS (
+          SELECT 1 FROM wish w2
+          WHERE w2.product_id = p.product_id
+          AND w2.member_id = #{memberId}
+          AND w2.is_deleted = false
+      )
+          THEN TRUE
+          ELSE FALSE
+      END AS is_wished,
 
 
-    -- 판매자 ID
+    --판매자 ID
     m.member_id AS seller_id,
     m.nickname AS seller_nickname,
     m.introduction AS seller_introduction,
 
-    -- 카테고리 이름,ID
+    --카테고리 이름,ID
     c1.level1_name AS category_depth1,
     c2.level2_name AS category_depth2,
     c3.level3_name AS category_depth3,
@@ -183,7 +193,7 @@
     c2.level2_id AS level2_id,
     c3.level3_id AS level3_id,
 
-    -- 이미지
+    --이미지
     pi.image_id,
     pi.image_url,
     pi.is_main,
@@ -199,7 +209,6 @@
 
     WHERE p.product_id = #{productId}
     AND p.is_deleted = false
-<!--    AND p.is_hidden = false-->
 
     ORDER BY pi.sort_order
   </select>

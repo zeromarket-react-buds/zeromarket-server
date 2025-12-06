@@ -108,5 +108,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         return mapper.selectSimilarProducts(productId);
     }
 
+    //여기서부터 타고가면 될거 같은...?? 느낌..??
+
 
 }

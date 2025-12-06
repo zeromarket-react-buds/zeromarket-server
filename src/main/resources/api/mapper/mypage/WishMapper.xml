@@ -13,6 +13,7 @@
     </select>
 
     <!-- 찜 생성 -->
+    <!-- useGeneratedKeys → wish_id 자동 증가값을 DTO에 넣어줌 -->
     <insert id="insertWish"
         parameterType="com.zeromarket.server.common.entity.Wish"
         useGeneratedKeys="true"
@@ -27,11 +28,12 @@
         UPDATE wish
         SET is_deleted = false,
         updated_at = CURRENT_TIMESTAMP,
-        created_at = CURRENT_TIMESTAMP   <!-- 소프트 딜리트후 다시들어온 찜상품 최신순으로 들어오게-->
+        created_at = CURRENT_TIMESTAMP   <!-- 소프트 딜리트후 다시들어온 찜상품 최신순으로 들어오게: created_at = NOW() 로 최신순으로 정렬되게 재등록 효과-->
         WHERE wish_id = #{wishId}
     </update>
 
     <!-- 찜 삭제 -->
+    <!-- 찜 soft delete (DB에는 남겨두고 숨김 처리) -->
     <update id="softDeleteWish">
         UPDATE wish
         SET is_deleted = true,
@@ -40,7 +42,8 @@
     </update>
 
     <!-- 찜 여부 -->
-    <!--⭐ soft delete db에는 남음-->
+    <!-- 해당 회원이 상품을 찜한 상태인지 boolean으로 응답 -->
+    <!-- SELECT COUNT(*) > 0 → true / false 반환 -->
     <select id="isWished" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM wish
@@ -61,6 +64,7 @@
     -->
 
     <!-- 찜한 상품 목록 -->
+    <!-- 찜한 productId 목록만 가져오기 (페이징) -->
     <select id="findWishProductIds" resultType="long">
         SELECT product_id
         FROM wish
@@ -71,7 +75,8 @@
         OFFSET #{offset}
     </select>
 
-    <!-- ⭐ 추가됨: 찜 전체 목록 조회 (최신 찜순) -->
+    <!-- ⭐ 찜 전체 목록 조회 (최신 찜순) (WishProductResponse 형태) -->
+    <!--  wishlist 화면에 노출되는 모든 데이터 -->
     <select id="findWishProducts"
         resultType="com.zeromarket.server.api.dto.mypage.WishProductResponse">
 
@@ -98,9 +103,10 @@
         p.created_at AS productCreatedAt,   <!-- ⭐박스 안 상품등록일 표시 -->
         w.created_at AS wishCreatedAt,      <!-- ⭐박스 밖 찜등록 날짜 -->
 
+        <!-- 거래 방식 (직거래 / 택배) -->
         p.is_direct AS direct,
         p.is_delivery AS delivery,
-
+        <!-- 표시용 문자열 만들기 -->
         CASE
         WHEN p.is_direct = TRUE AND p.is_delivery = TRUE THEN '직거래 · 택배거래'
         WHEN p.is_direct = TRUE THEN '직거래'
@@ -122,7 +128,8 @@
         OFFSET #{offset}
     </select>
 
-    <!-- ⭐찜 상품 요약 조회 → memberId + productId 둘 다 받아야 함 -->
+    <!--특정 상품 1개 요약 조회 (상세 → 찜 여부 판단용)-->
+    <!-- 찜 상품 요약 조회 → memberId + productId 둘 다 받아야 함 -->
     <select id="selectProductSummary"
         resultType="com.zeromarket.server.api.dto.mypage.WishProductResponse">
 

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.WishMapper">
+
+    <select id="findWish" resultType="com.zeromarket.server.common.entity.Wish">
+        SELECT *
+        FROM wish
+        WHERE member_id = #{memberId}
+        AND product_id = #{productId}
+    </select>
+
+    <!--여기서 productQuery-->
+    <insert id="insertWish"
+        parameterType="com.zeromarket.server.common.entity.Wish"
+        useGeneratedKeys="true"
+        keyProperty="wishId"
+        keyColumn="wish_id">
+        INSERT INTO wish (member_id, product_id, is_deleted)
+        VALUES (#{memberId}, #{productId}, false)
+    </insert>
+
+    <update id="restoreWish">
+        UPDATE wish
+        SET is_deleted = false,
+        updated_at = CURRENT_TIMESTAMP
+        WHERE wish_id = #{wishId}
+    </update>
+
+    <update id="softDeleteWish">
+        UPDATE wish
+        SET is_deleted = true,
+        updated_at = CURRENT_TIMESTAMP
+        WHERE wish_id = #{wishId}
+    </update>
+
+    <!--여기까지-->
+
+    <!-- 특정 회원이 특정 상품 찜했는지 -->
+    <select id="isWished" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM wish
+        WHERE member_id = #{memberId}
+        AND product_id = #{productId}
+        AND is_deleted = false
+    </select>
+
+    <!-- 내 찜 목록 product_id 리스트 조회 -->
+    <select id="findWishProductIds" resultType="long">
+        SELECT product_id
+        FROM wish
+        WHERE member_id = #{memberId}
+        AND is_deleted = false
+        ORDER BY updated_at DESC
+        LIMIT #{size}
+        OFFSET #{offset}
+    </select>
+
+    <resultMap id="WishProductSummaryMap"
+        type="com.zeromarket.server.api.dto.WishProductResponse">
+
+        <id property="productId" column="product_id"/>
+
+        <result property="productTitle" column="product_title"/>
+        <result property="sellPrice" column="sell_price"/>
+
+        <!-- ⭐ ENUM 매핑 -->
+        <result property="salesStatus" column="sales_status"
+            javaType="com.zeromarket.server.common.enums.SalesStatus"/>
+
+        <result property="thumbnailUrl" column="thumbnail_url"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 찜 목록용 상품 정보: 상품 요약 조회-->
+    <select id="selectProductSummary"
+        parameterType="long"
+        resultMap="WishProductSummaryMap">
+
+        SELECT
+        p.product_id,
+        p.product_title,
+        p.sell_price,
+        p.sales_status,
+        p.product_status,
+        p.created_at,
+        pi.image_url AS thumbnail_url
+        FROM product p
+
+        LEFT JOIN product_image pi
+        ON pi.product_id = p.product_id
+        AND pi.is_main = true
+
+        <!-- wish 테이블에 있는 created_at을 join으로 가져와서 wishCreatedAt 여기에다 매치! -->
+
+        WHERE p.product_id = #{productId}
+        AND p.is_deleted = false
+        AND p.is_hidden = false
+
+        <!-- ⭐ 거래완료 상품 제외 -->
+        AND p.sales_status != 'SOLD_OUT'
+    </select>
+
+</mapper>

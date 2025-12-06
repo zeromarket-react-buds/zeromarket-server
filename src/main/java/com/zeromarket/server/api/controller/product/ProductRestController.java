@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -50,13 +51,27 @@ public class ProductRestController {
     //상품 상세 조회
     @Operation(summary = "상품 상세조회", description = "상세조회 화면 - 상품id로 개별조회 + 조회수 증가 + 찜 수 조회")
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId){
+    public ResponseEntity<ProductDetailResponse> getProductDetail(
+        @PathVariable Long productId,
+        @RequestParam(required = false) Long memberId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        // 1️⃣ 로그인 사용자 정보가 있으면 memberId 재설정
+        if (userDetails != null) {
+            memberId = userDetails.getMemberId();
+        }
+
+        // 2️⃣ 로그인 상태가 아니면 TEMP_MEMBER_ID 사용 (비로그인 조회 가능)
+        if (memberId == null) {
+            memberId = 0L; // 비로그인 → 항상 찜해제 상태로 보여줌
+        }
 
         // 임시 로그인/미구현 상태라면 TEMP_MEMBER_ID 사용
         // 추후 Spring Security 로그인 적용되면 SecurityContext에서 memberId를 가져오면 됨
-        Long TEMP_MEMBER_ID = 1L;
+        //Long TEMP_MEMBER_ID = 1L;
 
-        ProductDetailResponse result = productQueryService.getProductDetail(TEMP_MEMBER_ID, productId);
+        //TEMP_MEMBER_ID->memberId
+        ProductDetailResponse result = productQueryService.getProductDetail(memberId, productId);
 
         return ResponseEntity.ok(result);
     }
