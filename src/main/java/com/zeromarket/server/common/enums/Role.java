@@ -16,4 +16,8 @@ public enum Role {
     public String getDescription() {
         return description;
     }
+
+    public String getName() {
+        return this.name();
+    }
 }

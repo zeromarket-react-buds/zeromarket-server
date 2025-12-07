@@ -19,4 +19,8 @@ public enum TradeType {
     TradeType(String description) {
         this.description = description;
     }
+
+    public String getName() {
+        return this.name();
+    }
 }
