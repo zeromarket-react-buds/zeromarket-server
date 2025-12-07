@@ -33,4 +33,6 @@ public interface TradeHistoryMapper {
     int createTrade(TradeRequest tradeRequest);
 
     Trade existValidTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);
+
+    void updateSoftDelete(Long tradeId, boolean sellerDeleted, boolean buyerDeleted, LocalDateTime updatedAt);
 }

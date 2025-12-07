@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -33,6 +32,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
     private final ProductQueryMapper productQueryMapper;
     private final ProductCommandMapper productCommandMapper;
 
+    // 거래 목록 조회
     @Override
     public List<TradeHistoryResponse> selectTradeList(TradeHistoryRequest req) {
 
@@ -127,6 +127,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
         return status;
     }
 
+    // 거래 상세 내역 조회
     @Override
     public TradeProductResponse selectTradeProduct(TradeProductRequest req) {
 
@@ -151,6 +152,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
         return product;
     }
 
+    // 거래 상태 업데이트
     @Override
     @Transactional
     public TradeStatusUpdateResponse updateTradeStatus(Long tradeId,
@@ -206,6 +208,52 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
 
         return response;
     }
+
+    // 거래 내역 소프트 딜리트
+    @Override
+    @Transactional
+    public void softDeleteTrade(Long tradeId,
+                                String deletedBy,
+                                Long memberId) {
+
+        // 거래 조회
+        TradeStatusUpdateRow trade = mapper.selectById(tradeId);
+        if (trade == null) {
+            throw new IllegalArgumentException("존재하지 않는 거래입니다.");
+        }
+
+        // 권한 검증
+        if (!trade.getSellerId().equals(memberId) &&
+            !trade.getBuyerId().equals(memberId)) {
+            throw new IllegalStateException("해당 거래의 당사자가 아닙니다.");
+        }
+
+        // 현재 삭제한 사람 읽어오기
+        boolean sellerDeleted = Boolean.TRUE.equals(trade.getSellerDeleted());
+        boolean buyerDeleted = Boolean.TRUE.equals(trade.getBuyerDeleted());
+
+        if ("SELLER".equals(deletedBy)) {
+            // 판매자로서 삭제하는 경우는 seller_deleted 세팅
+            if (!trade.getSellerId().equals(memberId)) {
+                throw new IllegalStateException("판매자만 판매내역 삭제를 요청할 수 있습니다.");
+            }
+            sellerDeleted = true;
+        } else if ("BUYER".equals(deletedBy)) {
+            // 구매자로서 삭제하는 경우는 buyer_deleted 세팅
+            if (!trade.getBuyerId().equals(memberId)) {
+                throw new IllegalStateException("구매자만 구매내역 삭제를 요청할 수 있습니다.");
+            }
+            buyerDeleted = true;
+        } else {
+            throw new IllegalArgumentException("deletedBy 값이 올바르지 않습니다. SELLER 또는 BUYER 여야 합니다.");
+        }
+
+        LocalDateTime updatedAt = LocalDateTime.now();
+
+        // 실제 업데이트 쿼리 호출
+        mapper.updateSoftDelete(tradeId, sellerDeleted, buyerDeleted, updatedAt);
+    }
+
 
     @Override
     @Transactional

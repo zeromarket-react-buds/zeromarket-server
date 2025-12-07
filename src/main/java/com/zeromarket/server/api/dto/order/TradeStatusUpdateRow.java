@@ -20,4 +20,6 @@ public class TradeStatusUpdateRow {
     private LocalDateTime canceledAt;
     private String canceledBy; // SELLER / BUYER
 
+    private Boolean sellerDeleted; // 판매자 삭제 여부
+    private Boolean buyerDeleted; //구매자 삭제 여부
 }

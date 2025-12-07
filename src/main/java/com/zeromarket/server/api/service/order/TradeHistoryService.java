@@ -17,4 +17,6 @@ public interface TradeHistoryService {
 
     Long processTradePendingBySeller(TradeRequest tradeRequest, Long memberId);
     Long processTradeCompleteBySeller(TradeRequest tradeRequest, Long memberId);
+
+    void softDeleteTrade(Long tradeId, String deletedBy, Long memberId);
 }

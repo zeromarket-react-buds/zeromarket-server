@@ -87,7 +87,7 @@ public class TradeRestController {
         return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "거래완료로 거래상태 변경", description = "현재 거래상태를 거래완료(COMPLETED)로 변경")
+    @Operation(summary = "거래완료/취소로 거래상태 변경", description = "현재 거래상태를 거래완료(COMPLETED)/취소(CANCELED)로 변경")
     @PatchMapping("/{tradeId}/status")
     public ResponseEntity<TradeStatusUpdateResponse> updateTradeStatus(
         @PathVariable Long tradeId,
@@ -104,6 +104,22 @@ public class TradeRestController {
             tradeHistoryService.updateTradeStatus(tradeId, request, memberId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "거래내역을 소프트 딜리트", description = "현재 거래상태를 seller_deleted/buyer_deleted로 해서 목록에서 안보이게 변경")
+    @PatchMapping("/{tradeId}/delete")
+    public ResponseEntity<Void> softDeleteTrade(
+        @PathVariable Long tradeId,
+        @RequestBody TradeSoftDeleteRequest request,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        if (userPrincipal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long memberId = userPrincipal.getMemberId();
+
+        tradeHistoryService.softDeleteTrade(tradeId, request.getDeletedBy(), memberId);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "후기용 거래 상세 조회", description = "")
