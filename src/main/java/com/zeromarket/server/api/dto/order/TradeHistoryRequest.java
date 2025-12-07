@@ -10,6 +10,9 @@ import java.util.List;
 @Getter
 @Setter
 public class TradeHistoryRequest {
+
+    private Long tradeId;
+
     private Long memberId;
     private String role;
 

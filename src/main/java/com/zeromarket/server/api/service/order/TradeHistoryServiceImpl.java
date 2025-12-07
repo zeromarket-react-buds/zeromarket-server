@@ -2,12 +2,17 @@ package com.zeromarket.server.api.service.order;
 
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 import com.zeromarket.server.api.dto.order.*;
+import com.zeromarket.server.api.dto.product.ProductBasicInfo;
 import com.zeromarket.server.api.mapper.mypage.ReviewMapper;
 import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
+import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
 import com.zeromarket.server.common.entity.Review;
+import com.zeromarket.server.common.entity.Trade;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.TradeStatus;
+import com.zeromarket.server.common.enums.TradeType;
 import com.zeromarket.server.common.exception.ApiException;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +28,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
 
     private final TradeHistoryMapper mapper;
     private final ReviewMapper reviewMapper;
+    private final ProductQueryMapper productQueryMapper;
 
     @Override
     public List<TradeHistoryResponse> selectTradeList(TradeHistoryRequest req) {
@@ -184,6 +190,98 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
         response.setCompletedAt(completedAt);
 
         return response;
+    }
+
+    @Override
+    @Transactional
+    public Long processTradePendingBySeller(TradeRequest tradeRequest, Long memberId) {
+        validateProductAndSeller(tradeRequest.getProductId(), memberId);
+
+        Trade existTrade = mapper.existValidTradeByProductIdSellerId(
+            tradeRequest.getProductId(),
+            memberId,
+            tradeRequest.getBuyerId()
+        );
+
+        if (existTrade != null && existTrade.getTradeId() > 0) {
+            throw new ApiException(ErrorCode.TRADE_ALREADY_EXIST);
+        }
+
+        tradeRequest.setTradeType(TradeType.DIRECT);      // TODO: 지금은 일단 직거래!!! 확장 가능
+        tradeRequest.setTradeStatus(TradeStatus.PENDING); // 예약 상태로 생성
+
+        int result = mapper.createTrade(tradeRequest);
+        if (result <= 0) {
+            throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+        }
+
+        Long createdTradeId = tradeRequest.getTradeId();
+        if (createdTradeId == null || createdTradeId <= 0) {
+            throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+        }
+
+        return createdTradeId;
+    }
+
+    @Override
+    @Transactional
+    public Long processTradeCompleteBySeller(TradeRequest tradeRequest, Long memberId) {
+
+        validateProductAndSeller(tradeRequest.getProductId(), memberId);
+
+        Trade existTrade = mapper.existValidTradeByProductIdSellerId(
+                tradeRequest.getProductId(),
+                memberId,
+                tradeRequest.getBuyerId()
+            );
+
+        if (existTrade != null && existTrade.getTradeStatus() == TradeStatus.COMPLETED) {
+            // 이미 완료된 거래
+            throw new ApiException(ErrorCode.TRADE_ALREADY_EXIST);
+        }
+
+        if (existTrade == null || existTrade.getTradeId() <= 0) {
+            tradeRequest.setTradeType(TradeType.DIRECT);
+            tradeRequest.setTradeStatus(TradeStatus.COMPLETED); // 바로 완료 상태로 생성
+
+            int result = mapper.createTrade(tradeRequest);
+
+            if (result <= 0) {
+                throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+            }
+
+            Long createdTradeId = tradeRequest.getTradeId();
+            if (createdTradeId == null || createdTradeId <= 0) {
+                throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+            }
+
+            return createdTradeId; // 이미 COMPLETED로 생성했으니 여기서 끝낼 수도 있음
+        }
+
+        // 기존 거래가 있으면 상태만 COMPLETED로 변경
+        mapper.updateTradeStatus(
+            existTrade.getTradeId(),
+            TradeStatus.COMPLETED,
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+
+        return existTrade.getTradeId();
+    }
+
+    private ProductBasicInfo validateProductAndSeller(Long productId, Long memberId) {
+        ProductBasicInfo productBasicInfo =
+            productQueryMapper.selectBasicInfo(productId);
+
+        if (productBasicInfo == null) {
+            throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        if (!Objects.equals(productBasicInfo.getSellerId(), memberId)) {
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
+
+        return productBasicInfo;
     }
 
     private void validateStatusTransition(TradeStatus current,

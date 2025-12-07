@@ -30,10 +30,6 @@ public class ChatRestController {
     @GetMapping("/room")
     public ResponseEntity<Long> getChatRoomId(@RequestParam Long productId,
         @AuthenticationPrincipal CustomUserDetails userDetail) {
-//        Long memberId = 18L; // TODO: SecurityContext에서 받아와야 됨.
-//        Long chatRoomId = chatService.selectChatRoomByProductIdBuyerId(productId, memberId);S
-
-        // TODO: memberId없으면 예외처리
         if (userDetail == null || userDetail.getMemberId() == null || userDetail.getMemberId() <= 0L) {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
@@ -45,9 +41,6 @@ public class ChatRestController {
     @Operation(summary = "채팅 정보 및 메시지 목록 조회", description = "채팅방 ID로 채팅 정보 및 메시지 목록 조회")
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<ChatInfoWithMessageResponse> getChatInfoWithMessages(@PathVariable Long chatRoomId, @AuthenticationPrincipal CustomUserDetails userDetail) {
-//        Long memberId = 18L; // TODO: SecurityContext에서 받아와야 됨.
-//        ChatInfoWithMessageResponse chatInfoWithMessages = chatService.selectChatInfoWithMessages(chatRoomId, memberId);
-        // TODO: memberId없으면 예외처리
         if (userDetail == null || userDetail.getMemberId() == null || userDetail.getMemberId() <= 0L) {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
@@ -59,9 +52,6 @@ public class ChatRestController {
     @Operation(summary = "채팅메시지 조회", description = "채팅방 ID로 채팅메시지 조회")
     @GetMapping("/messages/{chatRoomId}")
     public ResponseEntity<List<ChatMessageResponse>> getChatMessages(@PathVariable Long chatRoomId, @AuthenticationPrincipal CustomUserDetails userDetail) {
-//        Long memberId = 18L; // TODO: SecurityContext에서 받아와야 됨.
-//        List<ChatMessageResponse> chatMessages = chatService.selectChatMessages(chatRoomId, memberId);
-        // TODO: memberId없으면 예외처리
         if (userDetail == null || userDetail.getMemberId() == null || userDetail.getMemberId() <= 0L) {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
         }

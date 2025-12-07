@@ -38,6 +38,37 @@
         <result column="canceled_at"   property="canceledAt"/>
     </resultMap>
 
+    <insert id="createTrade" parameterType="com.zeromarket.server.common.entity.Trade"
+        useGeneratedKeys="true"
+        keyProperty="tradeId"
+        keyColumn="trade_id">
+        INSERT INTO public.trade
+        (
+         product_id,
+         buyer_id,
+         trade_type,
+         trade_status,
+         canceled_by,
+         seller_deleted,
+         buyer_deleted,
+         created_at,
+         updated_at,
+         completed_at,
+         canceled_at)
+        VALUES (
+                #{productId},
+                #{buyerId},
+                #{tradeType},
+                #{tradeStatus},
+                null,
+                false,
+                false,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP,
+                null,
+                null);
+    </insert>
+
     <select id="selectTradeList"
             parameterType="com.zeromarket.server.api.dto.order.TradeHistoryRequest"
             resultMap="TradeHistoryResponseMap">
@@ -287,5 +318,19 @@
         JOIN product p ON t.product_id = p.product_id
         JOIN member seller ON p.seller_id = seller.member_id
         WHERE t.trade_id = #{tradeId}
+    </select>
+
+    <select id="existValidTradeByProductIdSellerId" resultType="com.zeromarket.server.common.entity.Trade">
+        SELECT
+            t.trade_id,
+            t.trade_status
+        FROM
+            trade t
+        INNER JOIN product p on t.product_id = p.product_id
+        WHERE
+            t.product_id = #{productId}
+        AND t.buyer_id = #{buyerId}
+        AND p.seller_id = #{sellerId}
+        AND t.canceled_at is null
     </select>
 </mapper>

@@ -14,4 +14,7 @@ public interface TradeHistoryService {
     TradeReviewInfoDto getTradeInfoForReview(Long tradeId, Long loginMemberId);
 
     TradeStatusUpdateResponse updateTradeStatus(Long tradeId, TradeStatusUpdateRequest request, Long memberId);
+
+    Long processTradePendingBySeller(TradeRequest tradeRequest, Long memberId);
+    Long processTradeCompleteBySeller(TradeRequest tradeRequest, Long memberId);
 }

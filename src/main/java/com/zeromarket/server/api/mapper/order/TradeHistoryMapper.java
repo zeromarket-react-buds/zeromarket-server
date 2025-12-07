@@ -3,6 +3,7 @@ package com.zeromarket.server.api.mapper.order;
 import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 
+import com.zeromarket.server.common.entity.Trade;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -28,4 +29,8 @@ public interface TradeHistoryMapper {
     Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
 
     void updateTradeStatus(Long tradeId, TradeStatus target, LocalDateTime completedAt, LocalDateTime updatedAt);
+
+    int createTrade(TradeRequest tradeRequest);
+
+    Trade existValidTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);
 }
