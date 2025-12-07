@@ -24,19 +24,18 @@ public interface ReviewMapper {
     // 리뷰 ID로 조회
     ReviewResponse selectReviewById(@Param("reviewId") Long reviewId);
 
-    // 특정 회원이 받은 후길 목록 조회 (요약)
+    // 특정 회원이 받은 후기 목록 (요약, 5/4점, 최신순, 3건)
     List<ReceivedReviewSummaryDto> selectReceivedReviewSummary(@Param("memberId") Long memberId);
 
-    // 특정 회원이 받은 후기 목록 총 개수 (4,5점만)
-    int countReceivedReviews(@Param("memberId") Long memberId);
-
+    // 특정 회원이 받은 후기 목록 (점수별)
     List<ReviewListResponse> selectReceivedReviewsByRating(
         Map<String, Object> params
-//        @Param("memberId") Long memberId,
-//        @Param("rating") int rating
     );
 
+    // 특정 회원이 받은 후기 목록 (점수별) - 총 개수
     int countReceivedReviewsByRating(Map<String, Object> params);
+
+    Double getAvgRating(@Param("memberId") Long memberId);
 
     // 모든 리뷰 조회
     List<Review> selectAllReviews();

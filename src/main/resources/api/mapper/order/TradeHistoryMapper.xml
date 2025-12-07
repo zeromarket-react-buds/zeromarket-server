@@ -245,8 +245,8 @@
         parameterType="long"
         resultMap="TradeStatusMap">
         SELECT seller.member_id AS sellerId,
-        t.buyer_id AS buyerId,
-        t.trade_status AS tradeStatus
+            t.buyer_id AS buyerId,
+            t.trade_status AS tradeStatus
         FROM trade t
         JOIN product p ON t.product_id = p.product_id
         JOIN member seller ON p.seller_id = seller.member_id

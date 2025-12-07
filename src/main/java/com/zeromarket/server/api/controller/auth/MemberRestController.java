@@ -3,6 +3,8 @@ package com.zeromarket.server.api.controller.auth;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.MemberService;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +22,14 @@ public class MemberRestController {
 
     private final MemberService memberService;
 
-    //    인증 관련 사용 (프로필 조회 API)
+    //    인증 관련 사용 (인증 정보 조회 API)
     @Operation(summary = "내 정보 조회", description = "")
     @GetMapping("/me")
     public ResponseEntity<MemberResponse> getMyInfo(
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-//        서버는 UserDetails.principal.memberId를 가지고
-//        DB에서 Member 엔티티 가져오기
+        if(userDetails == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
 
-//        TODO: principal null 검사해야 하나??
         MemberResponse response = memberService.getMyInfo(userDetails.getLoginId());
 
         return ResponseEntity.ok(response);
