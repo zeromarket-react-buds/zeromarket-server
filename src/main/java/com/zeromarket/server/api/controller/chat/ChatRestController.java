@@ -2,6 +2,7 @@ package com.zeromarket.server.api.controller.chat;
 
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.chat.ChatService;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -25,6 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatRestController {
 
     private final ChatService chatService;
+
+    @Operation(summary = "채팅방 목록 조회", description = "유저의 채팅방 목록 조회")
+    @GetMapping
+    public ResponseEntity<List<ChatRecentMessageResponse>> getChatRooms(
+        @AuthenticationPrincipal CustomUserDetails userDetail) {
+        if (userDetail == null || userDetail.getMemberId() == null || userDetail.getMemberId() <= 0L) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        List<ChatRecentMessageResponse> list = chatService.selectRecentChatMessages(userDetail.getMemberId());
+
+        return ResponseEntity.ok(list);
+    }
 
     @Operation(summary = "채팅방 번호 조회", description = "상품 ID로 채팅방 번호 조회")
     @GetMapping("/room")

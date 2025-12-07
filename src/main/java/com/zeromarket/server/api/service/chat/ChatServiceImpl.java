@@ -2,6 +2,7 @@ package com.zeromarket.server.api.service.chat;
 
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRoomRequest;
 import com.zeromarket.server.api.dto.product.ProductBasicInfo;
 import com.zeromarket.server.api.mapper.chat.ChatMapper;
@@ -77,6 +78,11 @@ public class ChatServiceImpl implements ChatService{
         }
 
         return chatMapper.selectChatMessages(chatRoomId, memberId);
+    }
+
+    @Override
+    public List<ChatRecentMessageResponse> selectRecentChatMessages(Long memberId) {
+        return chatMapper.selectRecentChatMessages(memberId);
     }
 
     private Long createNewChatRoom(ChatRoomRequest chatRoomRequest) {
