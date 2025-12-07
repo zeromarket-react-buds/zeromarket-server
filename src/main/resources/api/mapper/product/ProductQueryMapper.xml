@@ -21,39 +21,58 @@
         <result column="created_at" property="createdAt" />
         <result column="wish_count" property="wishCount" />
         <result column="thumbnail_url" property="thumbnailUrl" />
+
+        <result column="is_wished" property="isWished" />
     </resultMap>
 
     <select id="selectProductsOffset"
-            resultMap="ProductQueryResponseMap">
+        resultMap="ProductQueryResponseMap">
+
         SELECT
-            p.product_id,
-            p.product_title,
-            p.sell_price,
-            p.selling_area,
-            p.sales_status,
-            p.is_delivery,
-            p.is_direct,
-            p.created_at,
-           <!-- ⭐ 찜 개수 집계 서브쿼리 -->
-            COALESCE(wc.wish_count, 0) AS wish_count,
-            pi.image_url AS thumbnail_url
+        p.product_id,
+        p.product_title,
+        p.sell_price,
+        p.selling_area,
+        p.sales_status,
+        p.is_delivery,
+        p.is_direct,
+        p.created_at,
+
+        -- ⭐ 찜 개수
+        COALESCE(wc.wish_count, 0) AS wish_count,
+
+        pi.image_url AS thumbnail_url,
+
+        -- ⭐ 현재 로그인한 사용자가 찜한 여부
+        CASE
+        WHEN EXISTS (
+        SELECT 1
+        FROM wish w
+        WHERE w.product_id = p.product_id
+        AND w.member_id = #{memberId}
+        AND w.is_deleted = FALSE
+        )
+        THEN TRUE
+        ELSE FALSE
+        END AS is_wished
 
         FROM product p
-        <!-- ⭐ 찜 집계 테이블: 삭제되지 않은 wish 수를 productId 별로 카운트 -->
+
+        -- ⭐ 찜 개수 집계 서브쿼리
         LEFT JOIN (
-            SELECT product_id, COUNT(product_id) AS wish_count
-            FROM wish
-            WHERE is_deleted = false
-            GROUP BY product_id
+        SELECT product_id, COUNT(*) AS wish_count
+        FROM wish
+        WHERE is_deleted = false
+        GROUP BY product_id
         ) wc ON wc.product_id = p.product_id
 
         LEFT JOIN product_image pi
-            ON pi.product_id = p.product_id
-            AND pi.is_main = true
+        ON pi.product_id = p.product_id
+        AND pi.is_main = TRUE
 
-        WHERE p.is_hidden = false
-            AND p.is_deleted = false
-            AND p.sales_status != 'SOLD_OUT'
+        WHERE p.is_hidden = FALSE
+        AND p.is_deleted = FALSE
+        AND p.sales_status != 'SOLD_OUT'
 
         <if test="keyword != null and keyword != ''">
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
@@ -76,15 +95,17 @@
         </if>
 
         ORDER BY
-            CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END DESC,
-            CASE WHEN #{sort} = 'latest'     THEN p.created_at END DESC,
-            CASE WHEN #{sort} = 'priceAsc'   THEN p.sell_price END ASC,
-            CASE WHEN #{sort} = 'priceDesc'  THEN p.sell_price END DESC,
-            p.created_at DESC,
-            p.product_id DESC
+        CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END DESC,
+        CASE WHEN #{sort} = 'latest'     THEN p.created_at END DESC,
+        CASE WHEN #{sort} = 'priceAsc'   THEN p.sell_price END ASC,
+        CASE WHEN #{sort} = 'priceDesc'  THEN p.sell_price END DESC,
+        p.created_at DESC,
+        p.product_id DESC
+
         LIMIT #{size}
         OFFSET COALESCE(#{offset}, 0)
     </select>
+
 
     <!-- 판매자 정보 resultMap -->
     <resultMap id="sellerMap" type="com.zeromarket.server.api.dto.product.ProductDetailSellerInfo">

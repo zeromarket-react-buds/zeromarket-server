@@ -41,13 +41,32 @@ public class ProductRestController {
     private ProductQueryService productQueryService;
     private ProductCommandService productCommandService;
 
+//    @Operation(summary = "상품 목록 조회", description = "검색 포함 상품 목록 조회")
+//    @GetMapping
+//    public ResponseEntity<LoadMoreResponse<ProductQueryResponse>> getProductList(@ModelAttribute ProductQueryRequest productQueryRequest) {
+//       LoadMoreResponse<ProductQueryResponse> result = productQueryService.selectProductList(productQueryRequest);
+//       return ResponseEntity.ok(result);
+//    }
     @Operation(summary = "상품 목록 조회", description = "검색 포함 상품 목록 조회")
     @GetMapping
-    public ResponseEntity<LoadMoreResponse<ProductQueryResponse>> getProductList(@ModelAttribute ProductQueryRequest productQueryRequest) {
-       LoadMoreResponse<ProductQueryResponse> result = productQueryService.selectProductList(productQueryRequest);
-       return ResponseEntity.ok(result);
+    public ResponseEntity<LoadMoreResponse<ProductQueryResponse>> getProductList(
+        @ModelAttribute ProductQueryRequest productQueryRequest,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        // ⭐ 로그인한 사용자라면 memberId 전달
+        if (userDetails != null) {
+            productQueryRequest.setMemberId(userDetails.getMemberId());
+        } else {
+            // ⭐ 비로그인 → memberId = 0 (항상 찜 false)
+            productQueryRequest.setMemberId(0L);
+        }
+
+        LoadMoreResponse<ProductQueryResponse> result =
+            productQueryService.selectProductList(productQueryRequest);
+
+        return ResponseEntity.ok(result);
     }
-    
+
     //상품 상세 조회
     @Operation(summary = "상품 상세조회", description = "상세조회 화면 - 상품id로 개별조회 + 조회수 증가 + 찜 수 조회")
     @GetMapping("/{productId}")

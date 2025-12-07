@@ -1,3 +1,4 @@
+//찜상태 변경: 찜 등록, 해제, soft delete 적용/복원, 찜토글 기능
 package com.zeromarket.server.api.service.mypage;
 
 import com.zeromarket.server.api.mapper.mypage.WishMapper;

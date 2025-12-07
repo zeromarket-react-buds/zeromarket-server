@@ -74,7 +74,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         // 🔥 memberId + productId 두 개를 map으로 넘겨서 XML에서 #{memberId} 사용 가능하게 함
         Map<String, Object> params = new HashMap<>();
         params.put("productId", productId);
-        params.put("memberId", memberId);
+        params.put("memberId", memberId); //이게 null이면 XML에서 null 바인딩
 
         // ⭐ Map을 넘겨야 XML에서 #{memberId} 사용 가능
         ProductDetailResponse detail = mapper.selectProductDetail(params);

@@ -14,4 +14,5 @@ public class ProductQueryRequest {
     private Long minPrice;
     private Long maxPrice;
     private String area;
+    private Long memberId;// 찜용
 }
