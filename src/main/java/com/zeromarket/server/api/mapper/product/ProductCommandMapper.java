@@ -3,6 +3,7 @@ package com.zeromarket.server.api.mapper.product;
 import com.zeromarket.server.api.dto.product.ProductCreateRequest;
 import com.zeromarket.server.api.dto.product.ProductDetailResponse;
 import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
+import com.zeromarket.server.common.enums.SalesStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -29,4 +30,6 @@ public interface ProductCommandMapper {
 
     //상품 판매자id조회 메서드
     Long getProductSellerId(Long productId);
+
+    int updateProductStatus(@Param("productId") Long productId, @Param("salesStatus") SalesStatus salesStatus);
 }

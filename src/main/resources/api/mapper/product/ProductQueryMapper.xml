@@ -278,6 +278,7 @@
             p.product_id,
             p.seller_id,
             /** p.trade_type, **/
+            p.sales_status,
             (SELECT pi.image_url
              FROM product_image pi
              WHERE pi.product_id = p.product_id
