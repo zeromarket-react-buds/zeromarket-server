@@ -9,13 +9,12 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.zeromarket.server.api.service.product.ProductQueryService;
 
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
-public class WishController {
+public class WishRestController {
 
     //생성자 주입 (Lombok @RequiredArgsConstructor 활용)
     private final WishCommandService wishCommandService;

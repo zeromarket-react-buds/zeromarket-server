@@ -12,7 +12,7 @@
         AND product_id = #{productId}
     </select>
 
-    <!-- 찜 생성 -->
+    <!-- 찜 생성. 여기서 productQuery -->
     <!-- useGeneratedKeys → wish_id 자동 증가값을 DTO에 넣어줌 -->
     <insert id="insertWish"
         parameterType="com.zeromarket.server.common.entity.Wish"

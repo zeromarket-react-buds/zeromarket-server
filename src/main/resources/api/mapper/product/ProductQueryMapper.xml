@@ -24,7 +24,7 @@
 
         <result column="is_wished" property="isWished" />
     </resultMap>
-
+    <!--상품목록-->
     <select id="selectProductsOffset"
         resultMap="ProductQueryResponseMap">
 
@@ -41,20 +41,19 @@
         -- ⭐ 찜 개수
         COALESCE(wc.wish_count, 0) AS wish_count,
 
-        pi.image_url AS thumbnail_url,
-
-        -- ⭐ 현재 로그인한 사용자가 찜한 여부
+        <!-- ⭐ 로그인한 회원이 찜했는지 여부 -->
         CASE
-        WHEN EXISTS (
-        SELECT 1
-        FROM wish w
-        WHERE w.product_id = p.product_id
-        AND w.member_id = #{memberId}
-        AND w.is_deleted = FALSE
-        )
-        THEN TRUE
-        ELSE FALSE
-        END AS is_wished
+            WHEN EXISTS (
+            SELECT 1 FROM wish w
+            WHERE w.product_id = p.product_id
+            AND w.member_id = #{memberId}
+            AND w.is_deleted = false
+            )
+            THEN TRUE
+            ELSE FALSE
+        END AS is_wished,
+
+        pi.image_url AS thumbnail_url
 
         FROM product p
 
