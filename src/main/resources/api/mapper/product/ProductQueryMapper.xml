@@ -95,7 +95,7 @@
         </if>
 
         ORDER BY
-        CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END DESC,
+        CASE WHEN #{sort} = 'popularity' THEN wc.wish_count END ASC,
         CASE WHEN #{sort} = 'latest'     THEN p.created_at END DESC,
         CASE WHEN #{sort} = 'priceAsc'   THEN p.sell_price END ASC,
         CASE WHEN #{sort} = 'priceDesc'  THEN p.sell_price END DESC,
