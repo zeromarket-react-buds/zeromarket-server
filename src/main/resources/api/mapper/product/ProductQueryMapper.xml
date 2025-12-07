@@ -113,7 +113,7 @@
         <result property="sellerNickName" column="seller_nickname"/>
         <result property="profileImage" column="profile_image"/>
         <result property="sellerIntroduction" column="seller_introduction"/>
-        <result property="trustScore" column="trust_score"/>
+      <result property="trustScore" column="trust_score" javaType="java.lang.Double"/>
     </resultMap>
 
     <!-- 이미지 리스트 resultMap -->
@@ -207,8 +207,8 @@
                 SELECT ROUND(AVG(r.rating), 1)
                 FROM review r
                 JOIN trade t ON t.trade_id = r.trade_id
-                JOIN product p ON p.product_id = t.product_id
-                WHERE p.seller_id = m.member_id
+                JOIN product p2 ON p2.product_id = t.product_id
+                WHERE p2.seller_id = m.member_id
                   AND r.is_deleted = false
             ) AS trust_score,
 
@@ -299,6 +299,7 @@
             p.product_id,
             p.seller_id,
             /** p.trade_type, **/
+            p.sales_status,
             (SELECT pi.image_url
              FROM product_image pi
              WHERE pi.product_id = p.product_id

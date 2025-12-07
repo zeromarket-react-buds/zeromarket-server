@@ -2,6 +2,7 @@ package com.zeromarket.server.api.mapper.chat;
 
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRoomRequest;
 import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.entity.ChatRoom;
@@ -29,4 +30,6 @@ public interface ChatMapper {
     boolean existsParticipant(@Param("chatRoomId") Long chatRoomId, @Param("memberId")  Long memberId);
 
     ChatInfoWithMessageResponse selectChatInfo(Long chatRoomId);
+
+    List<ChatRecentMessageResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
 }

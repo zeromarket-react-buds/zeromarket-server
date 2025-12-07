@@ -179,6 +179,15 @@
         )
     </select>
 
+    <select id="getAvgRating" resultType="double">
+        SELECT ROUND(AVG(r.rating)::numeric, 1)
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN product p ON t.product_id = p.product_id
+        WHERE p.seller_id = #{memberId}
+            AND r.is_deleted = FALSE
+    </select>
+
     <!-- 특정 회원이 받은 리뷰 조회 -->
     <select id="selectReviewsByMemberId" resultMap="ReviewResultMap">
         SELECT r.*

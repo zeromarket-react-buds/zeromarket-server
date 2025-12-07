@@ -170,6 +170,17 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     /**
+     * 신뢰점수
+     * @param memberId
+     * @return
+     */
+    @Override
+    public double getTrustScore(Long memberId) {
+        Double avgRating = reviewMapper.getAvgRating(memberId);
+        return avgRating != null ? avgRating : 0.0;
+    }
+
+    /**
      * 모든 리뷰 조회
      */
     public List<Review> getAllReviews() {

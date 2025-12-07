@@ -10,7 +10,7 @@ public class ProductDetailSellerInfo {
     private String sellerNickName; // seller_nickname
     private String profileImage; // profile_image
     private String sellerIntroduction;  // seller_introduction
-    private Integer trustScore; // review 테이블의 rating
+    private Double trustScore; // review 테이블의 rating
 
 
 }

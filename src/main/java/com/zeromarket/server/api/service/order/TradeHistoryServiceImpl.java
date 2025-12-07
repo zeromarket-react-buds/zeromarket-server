@@ -5,10 +5,12 @@ import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.dto.product.ProductBasicInfo;
 import com.zeromarket.server.api.mapper.mypage.ReviewMapper;
 import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
+import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
 import com.zeromarket.server.common.entity.Review;
 import com.zeromarket.server.common.entity.Trade;
 import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.enums.SalesStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.enums.TradeType;
 import com.zeromarket.server.common.exception.ApiException;
@@ -29,6 +31,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
     private final TradeHistoryMapper mapper;
     private final ReviewMapper reviewMapper;
     private final ProductQueryMapper productQueryMapper;
+    private final ProductCommandMapper productCommandMapper;
 
     @Override
     public List<TradeHistoryResponse> selectTradeList(TradeHistoryRequest req) {
@@ -222,8 +225,13 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
         tradeRequest.setTradeType(TradeType.DIRECT);      // TODO: 지금은 일단 직거래!!! 확장 가능
         tradeRequest.setTradeStatus(TradeStatus.PENDING); // 예약 상태로 생성
 
-        int result = mapper.createTrade(tradeRequest);
-        if (result <= 0) {
+        int tradeResult = mapper.createTrade(tradeRequest);
+        if (tradeResult <= 0) {
+            throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+        }
+
+        int salesResult = productCommandMapper.updateProductStatus(tradeRequest.getProductId(), SalesStatus.RESERVED);
+        if (salesResult <= 0) {
             throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
         }
 
@@ -262,6 +270,13 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
                 throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
             }
 
+            int salesResult = productCommandMapper.updateProductStatus(
+                tradeRequest.getProductId(),
+                SalesStatus.SOLD_OUT);
+            if (salesResult <= 0) {
+                throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+            }
+
             Long createdTradeId = tradeRequest.getTradeId();
             if (createdTradeId == null || createdTradeId <= 0) {
                 throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
@@ -280,6 +295,13 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
             LocalDateTime.now()
         );
 
+        int salesResult = productCommandMapper.updateProductStatus(
+            tradeRequest.getProductId(),
+            SalesStatus.SOLD_OUT);
+        if (salesResult <= 0) {
+            throw new ApiException(ErrorCode.TRADE_CREATE_FAILED);
+        }
+
         return existTrade.getTradeId();
     }
 
@@ -288,6 +310,10 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
             productQueryMapper.selectBasicInfo(productId);
 
         if (productBasicInfo == null) {
+            throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        if (productBasicInfo.getSalesStatus() == SalesStatus.SOLD_OUT) {
             throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 

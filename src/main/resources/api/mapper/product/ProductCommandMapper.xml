@@ -120,4 +120,13 @@
     WHERE product_id = #{productId}
   </select>
 
+    <update id="updateProductStatus">
+        UPDATE
+            product
+        SET
+            sales_status = #{salesStatus}
+        WHERE
+            product_id = #{productId}
+    </update>
+
 </mapper>
