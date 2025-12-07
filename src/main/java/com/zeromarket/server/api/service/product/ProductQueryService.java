@@ -10,7 +10,8 @@ public interface ProductQueryService {
     LoadMoreResponse<ProductQueryResponse> selectProductList(ProductQueryRequest productQueryRequest);
 
     //상품상세 통합 메서드
-    ProductDetailResponse getProductDetail(Long productId);
+    // memberId 추가
+    ProductDetailResponse getProductDetail(Long memberId,Long productId);
 
     List<ProductQueryResponse> findSimilarProducts(Long productId);
 

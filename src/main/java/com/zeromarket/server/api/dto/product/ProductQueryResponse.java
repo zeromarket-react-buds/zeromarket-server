@@ -24,4 +24,6 @@ public class ProductQueryResponse {
     private String thumbnailUrl;
     private LocalDateTime createdAt;
     private int wishCount;
+    //찜목록에 넣기
+    private boolean isWished;
 }

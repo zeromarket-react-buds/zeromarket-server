@@ -4,6 +4,8 @@ import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.order.TradeHistoryService;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,36 @@ import java.util.List;
 public class TradeRestController {
 
     private TradeHistoryService tradeHistoryService;
+
+    @Operation(summary = "판매자에 의한 예약 중 상태의 거래 내역 생성", description = "판매자에 의한 예약 중 상태의 거래 내역 생성")
+    @PostMapping("/pending")
+    public ResponseEntity<Long> processTradePendingBySeller(
+        @RequestBody TradeRequest tradeRequest,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
+
+        Long tradeId =
+            tradeHistoryService.processTradePendingBySeller(tradeRequest, userPrincipal.getMemberId());
+        return ResponseEntity.ok(tradeId);
+    }
+
+    @Operation(summary = "판매자에 의한 거래 완료 상태의 거래 내역 생성 혹은 상태 변경", description = "판매자에 의한 거래 완료 상태의 거래 내역 생성 혹은 상태 변경")
+    @PostMapping("/complete")
+    public ResponseEntity<Long> processTradeCompleteBySeller(
+        @RequestBody TradeRequest tradeRequest,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
+
+        Long tradeId =
+            tradeHistoryService.processTradeCompleteBySeller(tradeRequest, userPrincipal.getMemberId());
+        return ResponseEntity.ok(tradeId);
+    }
 
     @Operation(summary = "거래 목록 조회", description = "검색 포함 거래 목록 조회")
     @GetMapping

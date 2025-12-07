@@ -1,5 +1,7 @@
 package com.zeromarket.server.api.dto.product;
 
+import com.zeromarket.server.common.enums.TradeStatus;
+import com.zeromarket.server.common.enums.TradeType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,5 +14,6 @@ import lombok.Setter;
 public class ProductBasicInfo {
     private Long productId;
     private Long sellerId;
+    private TradeType tradeType;
     private String mainImage;
 }

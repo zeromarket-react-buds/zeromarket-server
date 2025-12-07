@@ -11,7 +11,7 @@ public class ProductQueryRequest {
     private String keyword;
     private String sort;
     private Long categoryId;
-    private Integer minPrice;
-    private Integer maxPrice;
+    private Long minPrice;
+    private Long maxPrice;
     private String area;
 }

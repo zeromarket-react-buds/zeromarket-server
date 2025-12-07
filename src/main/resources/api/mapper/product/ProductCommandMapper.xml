@@ -113,4 +113,11 @@
     WHERE product_id = #{productId}
   </delete>
 
+<!--상품소유자id확인-->
+  <select id="getProductSellerId" resultType="Long">
+    SELECT seller_id
+    FROM product
+    WHERE product_id = #{productId}
+  </select>
+
 </mapper>

@@ -21,5 +21,8 @@ public enum MessageType {
         return description;
     }
 
+    public String getName() {
+        return this.name();
+    }
 
 }

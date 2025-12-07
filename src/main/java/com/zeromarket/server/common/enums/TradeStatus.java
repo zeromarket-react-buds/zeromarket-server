@@ -22,5 +22,9 @@ public enum TradeStatus {
     TradeStatus(String description) {
         this.description = description;
     }
+
+    public String getName() {
+        return this.name();
+    }
 }
 

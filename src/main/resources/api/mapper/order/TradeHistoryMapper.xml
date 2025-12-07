@@ -38,6 +38,37 @@
         <result column="canceled_at"   property="canceledAt"/>
     </resultMap>
 
+    <insert id="createTrade" parameterType="com.zeromarket.server.common.entity.Trade"
+        useGeneratedKeys="true"
+        keyProperty="tradeId"
+        keyColumn="trade_id">
+        INSERT INTO public.trade
+        (
+         product_id,
+         buyer_id,
+         trade_type,
+         trade_status,
+         canceled_by,
+         seller_deleted,
+         buyer_deleted,
+         created_at,
+         updated_at,
+         completed_at,
+         canceled_at)
+        VALUES (
+                #{productId},
+                #{buyerId},
+                #{tradeType},
+                #{tradeStatus},
+                null,
+                false,
+                false,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP,
+                null,
+                null);
+    </insert>
+
     <select id="selectTradeList"
             parameterType="com.zeromarket.server.api.dto.order.TradeHistoryRequest"
             resultMap="TradeHistoryResponseMap">
@@ -88,6 +119,42 @@
 
         <if test="keyword != null and keyword != ''">
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
+        </if>
+
+        <!-- 상태 / 숨기기 조합 -->
+        <choose>
+            <!-- 상태도 있고 isHidden도 선택된 경우 -->
+            <when test="tradeStatus != null and tradeStatus.size() > 0
+                        and isHidden != null and isHidden == true">
+                AND (
+                    t.trade_status IN
+                    <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
+                        #{ts}
+                    </foreach>
+                    OR p.is_hidden = TRUE
+                )
+            </when>
+
+            <!-- 상태만 선택된 경우 -->
+            <when test="tradeStatus != null and tradeStatus.size() > 0">
+                AND t.trade_status IN
+                <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
+                    #{ts}
+                </foreach>
+            </when>
+
+            <!-- isHidden만 선택된 경우 -->
+            <when test="isHidden != null and isHidden == true">
+                AND p.is_hidden = TRUE
+            </when>
+        </choose>
+
+        <if test="fromDate != null">
+            AND COALESCE(t.created_at, p.created_at) >= #{fromDate}
+        </if>
+
+        <if test="toDate != null">
+            AND COALESCE(t.created_at, p.created_at) &lt; (#{toDate} + 1)
         </if>
 
         ORDER BY
@@ -186,6 +253,8 @@
         UPDATE trade
             SET trade_status = #{target},
                 completed_at = #{completedAt},
+                canceled_at  = #{canceledAt},
+                canceled_by  = #{canceledBy},
                 updated_at   = #{updatedAt}
         WHERE trade_id = #{tradeId}
     </update>
@@ -251,5 +320,19 @@
         JOIN product p ON t.product_id = p.product_id
         JOIN member seller ON p.seller_id = seller.member_id
         WHERE t.trade_id = #{tradeId}
+    </select>
+
+    <select id="existValidTradeByProductIdSellerId" resultType="com.zeromarket.server.common.entity.Trade">
+        SELECT
+            t.trade_id,
+            t.trade_status
+        FROM
+            trade t
+        INNER JOIN product p on t.product_id = p.product_id
+        WHERE
+            t.product_id = #{productId}
+        AND t.buyer_id = #{buyerId}
+        AND p.seller_id = #{sellerId}
+        AND t.canceled_at is null
     </select>
 </mapper>

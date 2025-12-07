@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.dto.order;
 
 import com.zeromarket.server.common.enums.TradeStatus;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,5 +17,7 @@ public class TradeStatusUpdateRow {
     private TradeStatus tradeStatus;
     private LocalDateTime updatedAt;
     private LocalDateTime completedAt;
+    private LocalDateTime canceledAt;
+    private String canceledBy; // SELLER / BUYER
 
 }

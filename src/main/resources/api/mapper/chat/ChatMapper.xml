@@ -126,6 +126,7 @@
             cr.product_id,
             p.product_title,
             p.sell_price,
+            /** p.trade_type, **/
             t.trade_status ,
             cr.buyer_id ,
             buyer.profile_image as buyer_profile_image,
