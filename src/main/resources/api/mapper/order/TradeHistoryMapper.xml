@@ -222,6 +222,8 @@
         UPDATE trade
             SET trade_status = #{target},
                 completed_at = #{completedAt},
+                canceled_at  = #{canceledAt},
+                canceled_by  = #{canceledBy},
                 updated_at   = #{updatedAt}
         WHERE trade_id = #{tradeId}
     </update>

@@ -27,5 +27,5 @@ public interface TradeHistoryMapper {
     
     Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
 
-    void updateTradeStatus(Long tradeId, TradeStatus target, LocalDateTime completedAt, LocalDateTime updatedAt);
+    void updateTradeStatus(Long tradeId, TradeStatus target, LocalDateTime completedAt, LocalDateTime canceledAt, String canceledBy, LocalDateTime updatedAt);
 }

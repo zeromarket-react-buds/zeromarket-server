@@ -170,18 +170,30 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
         // 상태 및 시간 컬럼 세팅
         LocalDateTime updatedAt = LocalDateTime.now();
         LocalDateTime completedAt = trade.getCompletedAt();
+        LocalDateTime canceledAt = trade.getCanceledAt();
+        String canceledBy  = trade.getCanceledBy();
 
         if (target == TradeStatus.COMPLETED) {
             completedAt = updatedAt;
+        } else if (target == TradeStatus.CANCELED) {
+            canceledAt = updatedAt;
+
+            if (memberId.equals(trade.getSellerId())) {
+                canceledBy = "SELLER";
+            } else if (memberId.equals(trade.getBuyerId())) {
+                canceledBy = "BUYER";
+            }
         }
 
-        mapper.updateTradeStatus(tradeId, target, completedAt, updatedAt);
+        mapper.updateTradeStatus(tradeId, target, completedAt, canceledAt, canceledBy,updatedAt);
 
         // 응답 DTO 구성
         TradeStatusUpdateResponse response = new TradeStatusUpdateResponse();
         response.setTradeId(tradeId);
         response.setTradeStatus(target);
+        response.setCanceledAt(canceledAt);
         response.setCompletedAt(completedAt);
+        response.setCanceledBy(canceledBy);
 
         return response;
     }
@@ -191,9 +203,10 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
                                           Long memberId,
                                           TradeStatusUpdateRow trade) {
 
-        // 예: PENDING → COMPLETED
+        // 예: PENDING > COMPLETED, PENDING > CANCELED 둘 다 허용
         if (current == TradeStatus.PENDING) {
-            if (target == TradeStatus.COMPLETED) {
+            if (target == TradeStatus.COMPLETED ||
+                target == TradeStatus.CANCELED) {
                 return;
             }
         }
