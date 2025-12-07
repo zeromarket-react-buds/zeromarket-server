@@ -275,6 +275,8 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
             existTrade.getTradeId(),
             TradeStatus.COMPLETED,
             LocalDateTime.now(),
+            LocalDateTime.now(),
+            null,
             LocalDateTime.now()
         );
 
