@@ -5,6 +5,8 @@ import com.zeromarket.server.api.dto.product.ProductDetailResponse;
 import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.enums.ProductStatus;
+import com.zeromarket.server.common.enums.SalesStatus;
 import com.zeromarket.server.common.exception.ApiException;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -23,15 +25,43 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         //로그인한 사람의 id를 sellerId 로 설정
         if(request.getSellerId() == null){
-            throw new IllegalArgumentException("sellerId is required");
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
+        if (request.getProductTitle() == null || request.getProductTitle().isBlank()) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (request.getSellPrice() == null || request.getSellPrice() < 0) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+
+         if (request.getCategoryDepth1() == null ||
+             request.getCategoryDepth2() == null ||
+             request.getCategoryDepth3() == null ) {
+             throw new ApiException(ErrorCode.INVALID_REQUEST);
+         }
+
         if (request.getProductStatus() != null) {
-            request.setProductStatus(request.getProductStatus().toUpperCase());
+            String status = request.getProductStatus().toUpperCase();
+            try{
+                ProductStatus.valueOf(status);//존재하는enum인지 검증
+            }catch (Exception e){
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
+            }
+            request.setProductStatus(status);
         }
 
         if (request.getSalesStatus() == null || request.getSalesStatus().isEmpty()) {
             request.setSalesStatus("FOR_SALE"); //기본값
+        }else{
+            String sales = request.getSalesStatus().toUpperCase();
+            try{
+                SalesStatus.valueOf(sales);
+            }catch (Exception e){
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
+            }
+            request.setSalesStatus(sales);
         }
 
         //상품정보 저장
@@ -44,8 +74,10 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         if (images == null || images.isEmpty()) {
             return newProductId;
         }
+
         //이미지 있는 상품등록 - 디비에 insert
-        if (request.getImages() != null) {
+        if (images != null) {
+//        if (request.getImages() != null) {
             for (ProductCreateRequest.ProductImageDto img : images) {
                 mapper.insertProductImage(
                     newProductId,
@@ -75,9 +107,22 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     @Transactional
     public void updateProduct(Long productId, ProductUpdateRequest request) {
 
-        //enum 문자열 대문자로 맞추기 위해
-        if(request.getProductStatus() != null){
-            request.setProductStatus(request.getProductStatus().toUpperCase());
+        if (request.getProductTitle() != null && request.getProductTitle().isBlank()) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (request.getSellPrice() != null && request.getSellPrice() < 0) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (request.getProductStatus() != null) {
+            String status = request.getProductStatus().toUpperCase();
+            try {
+                ProductStatus.valueOf(status);
+            } catch (Exception e) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
+            }
+            request.setProductStatus(status);
         }
 
         //텍스트,기본정보수정
@@ -102,15 +147,12 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         }
 
-
     }
     //상품 소유자 확인 메서드
+    @Override
     public void validateProductOwnership(Long productId,Long loggedInUserId){
-
         //상품상세정보 조회
-//        ProductDetailResponse productDetail =mapper.getProductDetail(productId);
         Long sellerId = mapper.getProductSellerId(productId);
-
         //상품소유자, 로그인 사용자id 비교
         if(!sellerId.equals(loggedInUserId)){
             throw new ApiException(ErrorCode.FORBIDDEN);

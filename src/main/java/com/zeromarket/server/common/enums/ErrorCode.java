@@ -23,8 +23,11 @@ public enum ErrorCode {
 
     // DB
     DB_INSERT_FAILED(500, "DB 내부 오류 (SQL 오류)"),
-    DUPLICATE_RESOURCE(500, "중복된 정보가 존재합니다."), 
-    
+    DUPLICATE_RESOURCE(500, "중복된 정보가 존재합니다."),
+
+    // 요청 json필드가 null
+    INVALID_REQUEST(400,"잘못된 요청입니다."),
+
     // 상품
     PRODUCT_NOT_FOUND(404, "상품 정보를 찾을 수 없습니다."),
     DELETED_PRODUCT(410, "삭제된 상품입니다."),
@@ -43,6 +46,8 @@ public enum ErrorCode {
     REVIEW_EXIST(409, "이미 리뷰를 작성한 거래입니다."),
     REVIEW_CREATE_FORBIDDEN(403, "거래에 참여한 사용자만 리뷰를 작성할 수 있습니다."),
     REVIEW_NOT_FOUND(404, "후기 정보를 찾을 수 없습니다.");
+
+
 
     private final int status;
     private final String message;
