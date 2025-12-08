@@ -186,6 +186,10 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
 
         if (target == TradeStatus.COMPLETED) {
             completedAt = updatedAt;
+            Long productId = trade.getProductId();
+            if (productId != null) {
+                mapper.updateProductSalesStatus(productId, SalesStatus.SOLD_OUT);
+            }
         } else if (target == TradeStatus.CANCELED) {
             canceledAt = updatedAt;
 

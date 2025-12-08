@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class TradeStatusUpdateRow {
 
     private Long tradeId;
+    private Long productId;
     private Long sellerId;
     private Long buyerId;
     private TradeStatus tradeStatus;

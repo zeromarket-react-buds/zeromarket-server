@@ -237,11 +237,17 @@
             parameterType="long"
             resultType="com.zeromarket.server.api.dto.order.TradeStatusUpdateRow">
         SELECT
-            t.trade_id      AS tradeId,
-            p.seller_id     AS sellerId,
-            t.buyer_id      AS buyerId,
-            t.trade_status  AS tradeStatus,
-            t.completed_at  AS completedAt
+            t.trade_id       AS tradeId,
+            p.product_id     AS productId,
+            p.seller_id      AS sellerId,
+            t.buyer_id       AS buyerId,
+            t.trade_status   AS tradeStatus,
+            t.updated_at     AS updatedAt,
+            t.completed_at   AS completedAt,
+            t.canceled_at    AS canceledAt,
+            t.canceled_by    AS canceledBy,
+            t.seller_deleted AS sellerDeleted,
+            t.buyer_deleted  AS buyerDeleted
         FROM trade t
 
         JOIN product p
@@ -259,6 +265,14 @@
                 canceled_by  = #{canceledBy},
                 updated_at   = #{updatedAt}
         WHERE trade_id = #{tradeId}
+    </update>
+
+    <!-- 상품 판매 상태 변경 -->
+    <update id="updateProductSalesStatus">
+        UPDATE product
+            SET sales_status = #{salesStatus},
+            updated_at   = #{updatedAt}
+        WHERE product_id = #{productId}
     </update>
 
     <!-- seller_deleted / buyer_deleted 소프트 딜리트로 업데이트 -->
