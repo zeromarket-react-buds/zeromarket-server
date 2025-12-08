@@ -11,12 +11,14 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -121,6 +123,8 @@ public class JwtFilter extends OncePerRequestFilter {
         errorResponse.put("code", code);  // 🔑 핵심: 에러 코드
         errorResponse.put("message", message);
         errorResponse.put("timestamp", LocalDateTime.now().toString());
+
+        log.error("JwtFilter errorResponse: {}", errorResponse);
 
         ObjectMapper mapper = new ObjectMapper();
         response.getWriter().write(mapper.writeValueAsString(errorResponse));
