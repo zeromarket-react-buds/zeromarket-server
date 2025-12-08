@@ -44,6 +44,10 @@ public class JwtFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (path.contains("swagger-ui") || path.contains("api-docs")) {
+            return true;
+        }
+
         return false; // 그 외 요청은 필터 적용
     }
 
