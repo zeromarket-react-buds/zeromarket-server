@@ -21,6 +21,7 @@ public class MemberResponse {
     private String phone;
     private String introduction;
     private String role;
+    private String profileImage;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;

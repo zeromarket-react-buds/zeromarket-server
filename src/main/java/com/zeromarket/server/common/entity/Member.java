@@ -25,6 +25,7 @@ public class Member {
     private String introduction;
     private String withdrawalReasonDetail;
     private String role; // USER, ADMIN
+    private String profileImage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime withdrawnAt;
