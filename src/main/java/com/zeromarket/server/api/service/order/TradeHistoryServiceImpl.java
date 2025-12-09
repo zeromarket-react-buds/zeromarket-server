@@ -198,6 +198,12 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
             } else if (memberId.equals(trade.getBuyerId())) {
                 canceledBy = "BUYER";
             }
+
+            // 거래취소시 상품상태를 다시 FOR_SALE로 돌려서 뱃지가 예약중으로 안보이게
+            Long productId = trade.getProductId();
+            if (productId != null) {
+                mapper.updateProductSalesStatus(productId, SalesStatus.FOR_SALE);
+            }
         }
 
         mapper.updateTradeStatus(tradeId, target, completedAt, canceledAt, canceledBy,updatedAt);
