@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.controller.mypage;
 
 import com.zeromarket.server.api.dto.mypage.WishProductResponse;
+import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.mypage.WishCommandService;
 import com.zeromarket.server.api.service.mypage.WishQueryService;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,14 +23,21 @@ public class WishRestController {
     private final WishQueryService wishQueryService;
 
     //로그인 기능 미구현 → 임시 사용자 ID 고정
-    private static final Long TEMP_MEMBER_ID = 1L;
+    //private static final Long TEMP_MEMBER_ID = 1L; 이제안씀
 
     // ⭐ 찜 토글 API (POST)
     // URL: POST /api/products/{productId}/wish
     // 기능: 찜 상태가 없으면 INSERT, 있으면 DELETE → boolean 반환
     @PostMapping("/{productId}/wish")
-    public boolean toggleWish(@PathVariable Long productId) {
-        return wishCommandService.toggleWish(TEMP_MEMBER_ID, productId);
+//    public boolean toggleWish(@PathVariable Long productId) {
+//        return wishCommandService.toggleWish(TEMP_MEMBER_ID, productId);
+//    }
+    public boolean toggleWish(
+        @PathVariable Long productId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : 0L;
+        return wishCommandService.toggleWish(memberId, productId);
     }
 
     // ⭐ 찜 삭제 전용 API (DELETE)
@@ -37,16 +46,30 @@ public class WishRestController {
     // 기능: 찜을 강제로 삭제하는 전용 메서드
     // toggle 방식이 아님 → deleteWish 서비스 사용
     @DeleteMapping("/{productId}/wish")
-    public boolean removeWish(@PathVariable Long productId) {
-        return wishCommandService.deleteWish(TEMP_MEMBER_ID, productId);
+//    public boolean removeWish(@PathVariable Long productId) {
+//        return wishCommandService.deleteWish(TEMP_MEMBER_ID, productId);
+//    }
+    public boolean removeWish(
+        @PathVariable Long productId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : 0L;
+        return wishCommandService.deleteWish(memberId, productId);
     }
 
     // ⭐ 특정 상품이 찜 되어 있는지 여부 조회 (GET)
     // URL: GET /api/products/{productId}/wish
     // 기능: true(찜 O) / false(찜 X)
     @GetMapping("/{productId}/wish")
-    public boolean isWish(@PathVariable Long productId) {
-        return wishQueryService.isWished(TEMP_MEMBER_ID, productId);
+//    public boolean isWish(@PathVariable Long productId) {
+//        return wishQueryService.isWished(TEMP_MEMBER_ID, productId);
+//    }
+    public boolean isWish(
+        @PathVariable Long productId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : 0L;
+        return wishQueryService.isWished(memberId, productId);
     }
 
     // ⭐ 나의 찜한 상품 목록 조회 API (페이징 지원)
@@ -58,14 +81,19 @@ public class WishRestController {
     @GetMapping("/wishlist")
     public ResponseEntity<List<WishProductResponse>> getMyWishlist(
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal CustomUserDetails userDetails //임시1말고 로그인 사용자id받도록
     ) {
         // 1) 찜한 상품의 ID 목록 가져오기
-        List<Long> ids = wishQueryService.getWishProductIds(TEMP_MEMBER_ID, page, size);
+       // List<Long> ids = wishQueryService.getWishProductIds(TEMP_MEMBER_ID, page, size);
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : 0L;
+
+        List<Long> ids = wishQueryService.getWishProductIds(memberId, page, size);
 
         // 2) 각 상품 ID에 대해 요약 정보 조회 + null 방지 filter
         List<WishProductResponse> result = ids.stream()
-            .map(productId -> wishQueryService.selectProductSummary(TEMP_MEMBER_ID, productId))
+            .map(productId -> wishQueryService.selectProductSummary(memberId, productId))
+            //TEMP_MEMBER_ID대신 memberId
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
@@ -77,8 +105,11 @@ public class WishRestController {
         // 기능: 유저가 찜한 상품 총 개수 반환
         // → MyPage 상단에서 "찜 n개" 표시용
         @GetMapping("/wishlist/count")
-        public int getWishCount() {
-            return wishQueryService.getWishCount(TEMP_MEMBER_ID);
+//        public int getWishCount() {
+//            return wishQueryService.getWishCount(TEMP_MEMBER_ID);
+        public int getWishCount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+            Long memberId = (userDetails != null) ? userDetails.getMemberId() : 0L;
+            return wishQueryService.getWishCount(memberId);
     }
 }
 
