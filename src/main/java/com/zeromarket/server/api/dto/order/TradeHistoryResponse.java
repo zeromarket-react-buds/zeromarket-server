@@ -18,7 +18,7 @@ public class TradeHistoryResponse {
     private String productTitle;
     private String thumbnailUrl;
 
-    private Integer sellPrice;
+    private Long sellPrice;
 
     private TradeType tradeType;
     private TradeStatus tradeStatus;

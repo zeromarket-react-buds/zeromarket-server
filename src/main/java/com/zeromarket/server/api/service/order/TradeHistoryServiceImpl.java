@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @AllArgsConstructor
@@ -270,14 +271,24 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
     public Long processTradePendingBySeller(TradeRequest tradeRequest, Long memberId) {
         validateProductAndSeller(tradeRequest.getProductId(), memberId);
 
-        Trade existTrade = mapper.existValidTradeByProductIdSellerId(
+        Trade existTradeOfThisBuyer = mapper.existValidTradeByProductIdSellerId(
             tradeRequest.getProductId(),
             memberId,
             tradeRequest.getBuyerId()
         );
 
-        if (existTrade != null && existTrade.getTradeId() > 0) {
+        if (existTradeOfThisBuyer != null && existTradeOfThisBuyer.getTradeId() > 0) {
             throw new ApiException(ErrorCode.TRADE_ALREADY_EXIST);
+        }
+
+        List<Trade> existProcessingTrades= mapper.existValidProcessingTradeByProductIdSellerId(
+            tradeRequest.getProductId(),
+            memberId,
+            tradeRequest.getBuyerId()
+        );
+
+        if (!CollectionUtils.isEmpty(existProcessingTrades)) {
+            throw new ApiException(ErrorCode.TRADE_PROCESSING_ALREADY_EXIST);
         }
 
         tradeRequest.setTradeType(TradeType.DIRECT);      // TODO: 지금은 일단 직거래!!! 확장 가능
@@ -315,7 +326,17 @@ public class TradeHistoryServiceImpl implements TradeHistoryService{
 
         if (existTrade != null && existTrade.getTradeStatus() == TradeStatus.COMPLETED) {
             // 이미 완료된 거래
-            throw new ApiException(ErrorCode.TRADE_ALREADY_EXIST);
+            throw new ApiException(ErrorCode.TRADE_COMPLETED_ALREADY_EXIST);
+        }
+
+        List<Trade> existProcessingTrades= mapper.existValidProcessingTradeByProductIdSellerId(
+            tradeRequest.getProductId(),
+            memberId,
+            tradeRequest.getBuyerId()
+        );
+
+        if (!CollectionUtils.isEmpty(existProcessingTrades)) {
+            throw new ApiException(ErrorCode.TRADE_PROCESSING_ALREADY_EXIST);
         }
 
         if (existTrade == null || existTrade.getTradeId() <= 0) {
