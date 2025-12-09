@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -54,8 +55,10 @@ public class ReportRestController {
 
     @Operation(summary = "신고 사유 조회", description = "신고 사유 모달창에 불러오기")
     @GetMapping("/reasons")
-    public List<ReportReasonCodeResponse> getReportReasons(){
-        return reportQueryService.getActiveReasons();
+    public List<ReportReasonCodeResponse> getReportReasons(
+        @RequestParam("targetType") String targetType //신고사유테이블의 targetType컬럼
+    ){
+        return reportQueryService.getActiveReasons(targetType);
     }
 
 

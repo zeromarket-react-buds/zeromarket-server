@@ -22,5 +22,6 @@ public interface ReportMapper {
     );
 
     //신고사유들
-    List<ReportReasonCodeResponse> getActiveReasons();
+    List<ReportReasonCodeResponse> selectActiveReasons(
+        @Param("targetType") String targetType);
 }

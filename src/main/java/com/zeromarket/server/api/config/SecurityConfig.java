@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -38,17 +39,17 @@ public class SecurityConfig {
         http
             // 1. HTTP 요청에 대한 접근 권한 설정
             .authorizeHttpRequests(authorize -> authorize
-                // ⬇️ 여기를 수정해야 합니다. ⬇️
-                // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
-//                .requestMatchers("/**").permitAll()
-                // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
-                .requestMatchers("/api/auth/**", "/api/products/**").permitAll()
-                .requestMatchers(
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html"
-                ).permitAll()
-                // 나머지 모든 요청은 인증(로그인)이 필요함
+                // 1. GET /api/products/** (목록, 상세 조회)는 인증 없이 접근 허용
+                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+
+                // 2. POST, PATCH, DELETE 등 나머지 /api/products/** 요청은 인증 필요
+                // 상품 등록 (POST), 수정 (PATCH), 삭제 (DELETE)
+                .requestMatchers("/api/products/**").authenticated()
+
+                // 3. 로그인, 회원가입 관련은 인증 없이 접근 허용
+                .requestMatchers("/api/auth/**").permitAll()
+
+                // 4. 나머지 모든 요청은 인증이 필요함
                 .anyRequest().authenticated()
             )
             // 2. 폼 로그인 설정 (기본값)
