@@ -203,12 +203,23 @@
 
             -- 판매자 신뢰점수(rating 평균점수)
             (
-                SELECT ROUND(AVG(r.rating), 1)
-                FROM review r
-                JOIN trade t ON t.trade_id = r.trade_id
-                JOIN product p2 ON p2.product_id = t.product_id
-                WHERE p2.seller_id = m.member_id
-                  AND r.is_deleted = false
+                SELECT ROUND(AVG(ratings.rating)::numeric, 1)
+                FROM (SELECT t.trade_id, r.rating, r.is_deleted, p.seller_id AS member_id, p.product_title, 'sell' AS type
+                      FROM review r
+                           INNER JOIN trade t
+                                ON r.trade_id = t.trade_id AND t.trade_status = 'COMPLETED'
+                           INNER JOIN product p
+                               ON t.product_id = p.product_id
+                      WHERE p.seller_id = m.member_id
+                        AND r.reviewed_by = 'BUYER'
+                      UNION ALL
+                      SELECT t.trade_id, r.rating, r.is_deleted, t.buyer_id AS member_id, p.product_title,  'buy' AS type
+                      FROM review r
+                           INNER JOIN trade t
+                               ON r.trade_id = t.trade_id AND t.trade_status = 'COMPLETED'
+                           INNER JOIN product p ON t.product_id = p.product_id
+                      WHERE t.buyer_id = m.member_id
+                        AND r.reviewed_by = 'SELLER') ratings where ratings.is_deleted = false
             ) AS trust_score,
 
             -- 카테고리 이름,ID
