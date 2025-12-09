@@ -7,4 +7,6 @@ public interface ProfileService {
     ProfileSettingResponse selectProfileSetting(Long memberId);
 
     ProfileSettingResponse updateProfileSetting(Long memberId, ProfileSettingRequest request);
+
+    boolean existsByNicknameExcludingMe(String nickname, Long memberId);
 }

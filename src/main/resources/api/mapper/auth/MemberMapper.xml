@@ -68,4 +68,12 @@
         AND withdrawn_at IS NULL
     </select>
 
+    <select id="existsByNicknameExcludingMe" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE nickname = #{nickname}
+        AND member_id != #{memberId}
+        AND withdrawn_at IS NULL
+    </select>
+
 </mapper>
