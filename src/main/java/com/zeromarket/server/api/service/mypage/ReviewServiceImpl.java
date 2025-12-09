@@ -97,15 +97,11 @@ public class ReviewServiceImpl implements ReviewService {
         if(sellerBuyerStatus == null){throw new ApiException(ErrorCode.TRADE_NOT_FOUND);}
 
         // 3) 거래 참여자인지 확인
-        if (!memberId.equals(sellerBuyerStatus.get("sellerId")) && !memberId.equals(sellerBuyerStatus.get("buyerId"))) {
-            throw new ApiException(ErrorCode.FORBIDDEN);
-        }
+//        if (!memberId.equals(sellerBuyerStatus.get("sellerId")) && !memberId.equals(sellerBuyerStatus.get("buyerId"))) {
+//            throw new ApiException(ErrorCode.FORBIDDEN);
+//        }
 
         return entity;
-//        ReviewResponse dto = new ReviewResponse();
-//        BeanUtils.copyProperties(entity, dto);
-//
-//        return dto;
     }
 
     /**

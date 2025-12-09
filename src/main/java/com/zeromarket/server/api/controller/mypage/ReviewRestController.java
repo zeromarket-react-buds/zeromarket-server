@@ -65,11 +65,11 @@ public class ReviewRestController {
     }
 
     /**
-     * 받은 리뷰 요약 조회
+     * 마이페이지 > 받은 리뷰 요약
      * @param userDetails
      * @return
      */
-    @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rate당 3개씩 조회, 최신순, 총 개수")
+    @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rating당 3개씩 조회, 최신순")
     @GetMapping("/received/summary") // /received/summary/{memberId}
     public ResponseEntity<ReceivedReviewSummaryResponse> getReceivedReviewSummary(
         @AuthenticationPrincipal CustomUserDetails userDetails
@@ -79,7 +79,7 @@ public class ReviewRestController {
     }
 
     /**
-     * 특정 점수 전체 목록 조회 (페이징)
+     * 마이페이지 > 받은 리뷰 - 점수별
      * @param userDetails
      * @param rating
      * @param size
