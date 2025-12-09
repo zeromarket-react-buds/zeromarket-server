@@ -271,7 +271,7 @@
     <update id="updateProductSalesStatus">
         UPDATE product
             SET sales_status = #{salesStatus},
-            updated_at   = #{updatedAt}
+            updated_at   = CURRENT_TIMESTAMP
         WHERE product_id = #{productId}
     </update>
 
