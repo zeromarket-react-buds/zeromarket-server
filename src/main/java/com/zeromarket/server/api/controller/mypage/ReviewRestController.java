@@ -60,12 +60,7 @@ public class ReviewRestController {
         return ResponseEntity.ok(dto);
     }
 
-    /**
-     * 받은 리뷰 요약 조회
-     * @param memberId
-     * @return
-     */
-    @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rate당 3개씩 조회, 최신순, 총 개수")
+     @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rate당 3개씩 조회, 최신순, 총 개수")
     @GetMapping("/received/summary/{memberId}")
     public ResponseEntity<ReceivedReviewSummaryResponse> getReceivedReviewSummary(
         @PathVariable Long memberId
@@ -92,5 +87,19 @@ public class ReviewRestController {
         return ResponseEntity.ok(
             reviewService.getReceivedReviewsByRating(memberId, rating, page, size)
         );
+    }
+
+    /**
+     * 신뢰점수
+     * @param memberId
+     * @return
+     */
+    @Operation(summary = "신뢰점수", description = "후기 점수 평균")
+    @GetMapping("/member/{memberId}/average-rating")
+    public ResponseEntity<Double> getTrustScore(
+        @PathVariable Long memberId
+    ) {
+        Double trustScore = reviewService.getTrustScore(memberId);
+        return ResponseEntity.ok(trustScore);
     }
 }
