@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.controller.mypage;
 
 import com.zeromarket.server.api.dto.PageResponse;
+import com.zeromarket.server.api.dto.mypage.ReceivedReviewCursorResponse;
 import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
 import com.zeromarket.server.api.dto.mypage.ReviewListResponse;
@@ -9,7 +10,10 @@ import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.mypage.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -62,35 +66,37 @@ public class ReviewRestController {
 
     /**
      * 받은 리뷰 요약 조회
-     * @param memberId
+     * @param userDetails
      * @return
      */
     @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rate당 3개씩 조회, 최신순, 총 개수")
-    @GetMapping("/received/summary/{memberId}")
+    @GetMapping("/received/summary") // /received/summary/{memberId}
     public ResponseEntity<ReceivedReviewSummaryResponse> getReceivedReviewSummary(
-        @PathVariable Long memberId
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        ReceivedReviewSummaryResponse summaryResponse = reviewService.getReceivedReviewSummary(memberId);
+        ReceivedReviewSummaryResponse summaryResponse = reviewService.getReceivedReviewSummary(userDetails.getMemberId());
         return ResponseEntity.ok(summaryResponse);
     }
 
     /**
      * 특정 점수 전체 목록 조회 (페이징)
-     * @param memberId
+     * @param userDetails
      * @param rating
-     * @param page
      * @param size
      * @return
      */
-    @GetMapping("/received/{memberId}")
-    public ResponseEntity<PageResponse<ReviewListResponse>> getReceivedReviewsByRating(
-        @PathVariable Long memberId,
+    @GetMapping("/received") // /received/{memberId}
+    public ResponseEntity<ReceivedReviewCursorResponse> getReceivedReviewsByRating(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestParam Integer rating,
-        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(required = false) Long cursorReviewId,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime cursorCreatedAt,
         @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-            reviewService.getReceivedReviewsByRating(memberId, rating, page, size)
+            reviewService.getReceivedReviewsByRating(
+                userDetails.getMemberId(), rating, cursorReviewId, cursorCreatedAt, size)
         );
     }
 }

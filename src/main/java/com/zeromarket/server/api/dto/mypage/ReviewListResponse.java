@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto.mypage;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,5 +11,5 @@ public class ReviewListResponse {
     private Integer rating;
     private String content;
     private String writerNickname;
-    private String createdAt;
+    private LocalDateTime createdAt;
 }

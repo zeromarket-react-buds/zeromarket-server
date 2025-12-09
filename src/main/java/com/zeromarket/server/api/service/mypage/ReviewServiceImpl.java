@@ -2,6 +2,7 @@ package com.zeromarket.server.api.service.mypage;
 
 import com.zeromarket.server.api.dto.PageResponse;
 import com.zeromarket.server.api.dto.mypage.RatingReviewGroup;
+import com.zeromarket.server.api.dto.mypage.ReceivedReviewCursorResponse;
 import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryDto;
 import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
@@ -15,6 +16,8 @@ import com.zeromarket.server.common.entity.Review;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.exception.ApiException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -139,34 +142,40 @@ public class ReviewServiceImpl implements ReviewService {
      * (점수별 + 페이징)
      */
     @Override
-    public PageResponse<ReviewListResponse> getReceivedReviewsByRating(
+    public ReceivedReviewCursorResponse getReceivedReviewsByRating(
         Long memberId,
         Integer rating,
-        int page,
+        Long cursorReviewId,
+        LocalDateTime cursorCreatedAt,
         int size
     ) {
-        int offset = (page - 1) * size;
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberId", memberId);
+        params.put("rating", rating);
+        params.put("cursorReviewId", cursorReviewId);
+        params.put("cursorCreatedAt", cursorCreatedAt);
+        params.put("size", size);
 
-        Map<String, Object> params = Map.of(
-            "memberId", memberId,
-            "rating", rating,
-            "offset", offset,
-            "size", size
-        );
-
-        List<ReviewListResponse> list =
+        List<ReviewListResponse> items =
             reviewMapper.selectReceivedReviewsByRating(params);
 
-        int totalCount = reviewMapper.countReceivedReviewsByRating(params);
+        boolean hasNext = items.size() == size;
 
-        PageResponse<ReviewListResponse> response = new PageResponse<>(
-            list,
-            totalCount,
-            size,
-            page
+        Long nextCursorReviewId = null;
+        LocalDateTime nextCursorCreatedAt = null;
+
+        if (hasNext) {
+            ReviewListResponse last = items.get(items.size() - 1);
+            nextCursorReviewId = last.getReviewId();
+            nextCursorCreatedAt = last.getCreatedAt();
+        }
+
+        return new ReceivedReviewCursorResponse(
+            items,
+            nextCursorReviewId,
+            nextCursorCreatedAt,
+            hasNext
         );
-
-        return response;
     }
 
     /**

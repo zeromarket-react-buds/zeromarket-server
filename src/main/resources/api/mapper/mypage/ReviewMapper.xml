@@ -143,24 +143,35 @@
     <select id="selectReceivedReviewsByRating"
         parameterType="map"
         resultType="com.zeromarket.server.api.dto.mypage.ReviewListResponse">
+
         SELECT
             r.review_id,
             r.rating,
             r.content,
             m.nickname AS writerNickname,
             r.created_at
+
         FROM review r
         JOIN trade t ON r.trade_id = t.trade_id
         JOIN member m ON r.writer_id = m.member_id
         JOIN product p ON t.product_id = p.product_id
         WHERE r.is_deleted = FALSE
-        AND r.rating = #{rating}
-        AND (
-            (r.reviewed_by = 'SELLER' AND t.buyer_id = #{memberId})
-            OR (r.reviewed_by = 'BUYER' AND p.seller_id = #{memberId})
-        )
-        ORDER BY r.created_at DESC
-        LIMIT #{size} OFFSET #{offset}
+            AND r.rating = #{rating}
+            AND (
+                (r.reviewed_by = 'SELLER' AND t.buyer_id = #{memberId})
+                OR (r.reviewed_by = 'BUYER' AND p.seller_id = #{memberId})
+            )
+
+        <if test="cursorCreatedAt != null">
+            AND (
+            r.created_at &lt; #{cursorCreatedAt}
+            OR (r.created_at = #{cursorCreatedAt}
+            AND r.review_id &lt; #{cursorReviewId})
+            )
+        </if>
+
+        ORDER BY r.created_at DESC, r.review_id DESC
+        LIMIT #{size}
     </select>
 
     <!--  특정 회원이 받은 후기 총 개수 (rating별)  -->

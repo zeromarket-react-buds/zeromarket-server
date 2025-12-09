@@ -1,10 +1,12 @@
 package com.zeromarket.server.api.service.mypage;
 
 import com.zeromarket.server.api.dto.PageResponse;
+import com.zeromarket.server.api.dto.mypage.ReceivedReviewCursorResponse;
 import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewCreateRequest;
 import com.zeromarket.server.api.dto.mypage.ReviewListResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewResponse;
+import java.time.LocalDateTime;
 
 public interface ReviewService {
 
@@ -35,12 +37,16 @@ public interface ReviewService {
      * 특정 회원이 받은 후기 목록 (점수별 + 페이징)
      * @param memberId
      * @param rating
-     * @param page
+     * @param cursorReviewId
      * @param size
      * @return
      */
-    PageResponse<ReviewListResponse> getReceivedReviewsByRating(
-        Long memberId, Integer rating, int page, int size
+    ReceivedReviewCursorResponse getReceivedReviewsByRating(
+        Long memberId,
+        Integer rating,
+        Long cursorReviewId,
+        LocalDateTime cursorCreatedAt,
+        int size
     );
 
     /**
