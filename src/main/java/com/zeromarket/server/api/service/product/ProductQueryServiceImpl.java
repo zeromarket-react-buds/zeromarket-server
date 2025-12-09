@@ -87,7 +87,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         if(detail.isDeleted()){
             throw new ApiException(ErrorCode.DELETED_PRODUCT);
         }
-        if(detail.isHidden()){
+        if(detail.isHidden() && !detail.getSellerId().equals(memberId)){
             throw new ApiException(ErrorCode.HIDDEN_PRODUCT);
         }
 

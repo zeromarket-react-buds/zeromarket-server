@@ -99,4 +99,32 @@ public class ReviewRestController {
                 userDetails.getMemberId(), rating, cursorReviewId, cursorCreatedAt, size)
         );
     }
+
+    /**
+     * 신뢰점수
+     * @param memberId
+     * @return
+     */
+    @Operation(summary = "신뢰점수", description = "후기 점수 평균")
+    @GetMapping("/member/{memberId}/average-rating")
+    public ResponseEntity<Double> getTrustScore(
+        @PathVariable Long memberId
+    ) {
+        Double trustScore = reviewService.getTrustScore(memberId);
+        return ResponseEntity.ok(trustScore);
+    }
+
+    /**
+     * 마이페이지에서 보여줄 받은 후기 숫자 카운트
+     * @param memberId
+     * @return
+     */
+    @Operation(summary = "마이페이지에서 보여줄 받은 후기 숫자 카운트", description = "마이페이지에서 보여줄 받은 후기 숫자 카운트")
+    @GetMapping("/received/count/{memberId}")
+    public ResponseEntity<Integer> getCountReceivedReviewsOnMyPage(
+        @PathVariable Long memberId
+    ) {
+        Integer count = reviewService.getCountReceivedReviewsOnMyPage(memberId);
+        return ResponseEntity.ok(count);
+    }
 }

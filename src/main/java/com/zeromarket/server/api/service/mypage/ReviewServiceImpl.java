@@ -189,6 +189,11 @@ public class ReviewServiceImpl implements ReviewService {
         return avgRating != null ? avgRating : 0.0;
     }
 
+    @Override
+    public int getCountReceivedReviewsOnMyPage(Long memberId) {
+        return reviewMapper.countReceivedReviewsOnMyPage(memberId);
+    }
+
     /**
      * 모든 리뷰 조회
      */

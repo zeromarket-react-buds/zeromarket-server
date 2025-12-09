@@ -124,7 +124,7 @@
     </select>
 
     <!--  특정 회원이 받은 후기 목록 총 개수 (5,4점만)  -->
-    <select id="countReceivedReviews"
+    <select id="countReceivedReviewsOnMyPage"
         parameterType="long"
         resultType="int">
         SELECT COUNT(*)

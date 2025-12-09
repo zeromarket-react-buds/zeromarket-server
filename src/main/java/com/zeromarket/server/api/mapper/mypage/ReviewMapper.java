@@ -35,6 +35,8 @@ public interface ReviewMapper {
     // 특정 회원이 받은 후기 목록 (점수별) - 총 개수
     int countReceivedReviewsByRating(Map<String, Object> params);
 
+    int countReceivedReviewsOnMyPage(Long memberId);
+
     Double getAvgRating(@Param("memberId") Long memberId);
 
     // 모든 리뷰 조회
