@@ -50,4 +50,10 @@ public interface ReviewService {
      */
     public double getTrustScore(Long memberId);
 
+    /**
+     * 마이페이지에서 보여줄 받은 후기 갯수
+     * @param memberId
+     * @return
+     */
+    public int getCountReceivedReviewsOnMyPage(Long memberId);
 }
