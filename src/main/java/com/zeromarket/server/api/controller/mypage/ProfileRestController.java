@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.controller.mypage;
 
+import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.mypage.ProfileService;
@@ -24,5 +25,15 @@ public class ProfileRestController {
     ) {
         Long memberId = userPrincipal.getMemberId();
         return profileService.selectProfileSetting(memberId);
+    }
+
+    @Operation(summary = "프로필 설정 수정", description = "프로필 이미지, 닉네임, 한줄소개 수정")
+    @PatchMapping
+    public ProfileSettingResponse updateProfileSetting(
+        @AuthenticationPrincipal CustomUserDetails userPrincipal,
+        @RequestBody ProfileSettingRequest request
+    ) {
+        Long memberId = userPrincipal.getMemberId();
+        return profileService.updateProfileSetting(memberId, request);
     }
 }
