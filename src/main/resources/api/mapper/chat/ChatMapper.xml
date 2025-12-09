@@ -25,7 +25,7 @@
                     nickname
                  FROM member
                  WHERE member_id =
-                     CASE WHEN cr.buyer_id = #{memberId} THEN cr.buyer_id ELSE cr.seller_id END
+                     CASE WHEN cr.buyer_id = #{memberId} THEN cr.seller_id ELSE cr.buyer_id END
                  ) AS your_nickname,
                  cm.message_id,
                  cm.content,
