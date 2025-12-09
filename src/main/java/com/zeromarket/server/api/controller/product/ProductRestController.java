@@ -61,6 +61,10 @@ public class ProductRestController {
             productQueryRequest.setMemberId(0L);
         }
 
+        //userDetails가 null이라면 항상 0L이 들어감 → 찜 = false
+        //여기서 0 나오면 → 로그인 정보가 안 들어온 것.
+        System.out.println("로그인 ID = " + productQueryRequest.getMemberId());
+
         LoadMoreResponse<ProductQueryResponse> result =
             productQueryService.selectProductList(productQueryRequest);
 

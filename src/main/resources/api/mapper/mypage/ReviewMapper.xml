@@ -180,12 +180,23 @@
     </select>
 
     <select id="getAvgRating" resultType="double">
-        SELECT ROUND(AVG(r.rating)::numeric, 1)
-        FROM review r
-        JOIN trade t ON r.trade_id = t.trade_id
-        JOIN product p ON t.product_id = p.product_id
-        WHERE p.seller_id = #{memberId}
-            AND r.is_deleted = FALSE
+        SELECT ROUND(AVG(ratings.rating)::numeric, 1)
+        FROM (SELECT t.trade_id, r.rating, r.is_deleted, p.seller_id AS member_id, p.product_title, 'sell' AS type
+              FROM review r
+                   INNER JOIN trade t
+                        ON r.trade_id = t.trade_id AND t.trade_status = 'COMPLETED'
+                   INNER JOIN product p
+                       ON t.product_id = p.product_id
+              WHERE p.seller_id = #{memberId}
+                AND r.reviewed_by = 'BUYER'
+              UNION ALL
+              SELECT t.trade_id, r.rating, r.is_deleted, t.buyer_id AS member_id, p.product_title,  'buy' AS type
+              FROM review r
+                   INNER JOIN trade t
+                       ON r.trade_id = t.trade_id AND t.trade_status = 'COMPLETED'
+                   INNER JOIN product p ON t.product_id = p.product_id
+              WHERE t.buyer_id = #{memberId}
+                AND r.reviewed_by = 'SELLER') ratings where ratings.is_deleted = false
     </select>
 
     <!-- 특정 회원이 받은 리뷰 조회 -->

@@ -41,6 +41,9 @@ public enum ErrorCode {
     TRADE_NOT_FOUND(404, "거래 정보를 찾을 수 없습니다."),
     TRADE_CREATE_FAILED(901, "거래 정보를 생성하는 데 실패했습니다."),
     TRADE_ALREADY_EXIST(409, "거래 정보가 이미 존재합니다."),
+    TRADE_PENDING_ALREADY_EXIST(409, "예약중인 거래가 이미 존재합니다."),
+    TRADE_COMPLETED_ALREADY_EXIST(409, "이미 완료된 거래입니다."),
+    TRADE_PROCESSING_ALREADY_EXIST(409, "이미 예약중이거나 거래가 완료된 상품입니다."),
 
     // 후기
     REVIEW_EXIST(409, "이미 리뷰를 작성한 거래입니다."),

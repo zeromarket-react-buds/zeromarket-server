@@ -90,16 +90,10 @@
             t.updated_at,
             t.completed_at,
             t.canceled_at
-        FROM product p
+        FROM trade t
 
-        LEFT JOIN trade t
-            ON t.trade_id = (
-                SELECT t.trade_id
-                FROM trade t
-                WHERE t.product_id = p.product_id
-                ORDER BY t.created_at DESC
-                LIMIT 1
-            )
+        LEFT JOIN product p
+            ON t.product_id = p.product_id
 
         LEFT JOIN product_image pi
             ON pi.product_id = p.product_id
@@ -271,7 +265,7 @@
     <update id="updateProductSalesStatus">
         UPDATE product
             SET sales_status = #{salesStatus},
-            updated_at   = #{updatedAt}
+            updated_at   = CURRENT_TIMESTAMP
         WHERE product_id = #{productId}
     </update>
 
@@ -359,5 +353,22 @@
         AND t.buyer_id = #{buyerId}
         AND p.seller_id = #{sellerId}
         AND t.canceled_at is null
+    </select>
+
+    <select id="existValidProcessingTradeByProductIdSellerId"
+            resultType="com.zeromarket.server.common.entity.Trade">
+        SELECT
+            t.trade_id,
+            t.trade_status
+        FROM
+            trade t
+                INNER JOIN product p on t.product_id = p.product_id
+        WHERE
+            t.product_id = #{productId}
+          AND t.buyer_id != #{buyerId}
+          AND p.seller_id = #{sellerId}
+          AND t.trade_status != 'CANCELED'
+          AND t.canceled_at is null
+
     </select>
 </mapper>

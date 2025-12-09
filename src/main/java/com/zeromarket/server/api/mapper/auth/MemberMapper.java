@@ -2,6 +2,7 @@ package com.zeromarket.server.api.mapper.auth;
 
 import com.zeromarket.server.common.entity.Member;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface MemberMapper {
@@ -35,4 +36,7 @@ public interface MemberMapper {
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);
     boolean existsByPhone(String phone);
+
+    boolean existsByNicknameExcludingMe(@Param("nickname") String nickname,
+                                        @Param("memberId") Long memberId);
 }

@@ -41,7 +41,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // /api/products, /api/products/{productId} → GET 요청만 예외
         if (path.startsWith("/api/products") && "GET".equalsIgnoreCase(method)) {
-            return true;
+
+            String token = extractToken(request);
+
+            // 토큰이 없으면 필터링 건너뛰기 (익명 접근 허용)
+            if (token == null) {
+                return true;
+            }
+
+            // 토큰이 있으면 필터링 적용 (CustomUserDetails 저장 시도)
+            return false;
         }
 
         if (path.contains("swagger-ui") || path.contains("api-docs")) {
@@ -51,18 +60,29 @@ public class JwtFilter extends OncePerRequestFilter {
         return false; // 그 외 요청은 필터 적용
     }
 
-
     @Override
     protected void doFilterInternal(
         HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
+
         try {
+            String path = request.getRequestURI();
+            String method = request.getMethod();
+            boolean isPublicGetProducts = path.startsWith("/api/products") && "GET".equalsIgnoreCase(method);
+
             String token = extractToken(request);
 
 //            1. 토큰 없음 -> TOKEN_MISSING
             if(token == null){
+                // "/api/products" GET 요청은 토큰이 없어도 통과
+                if (isPublicGetProducts) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                // 그 외 요청은 401 에러 반환 (기존 로직 유지)
                 sendError(response, 401, "TOKEN_MISSING", "토큰이 없습니다.");
                 return;
             }

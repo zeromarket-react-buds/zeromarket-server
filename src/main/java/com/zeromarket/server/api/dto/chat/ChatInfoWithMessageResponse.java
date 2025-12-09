@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto.chat;
 
+import com.zeromarket.server.common.enums.SalesStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.enums.TradeType;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class ChatInfoWithMessageResponse {
     private Long productId;
     private String productTitle;
     private Long sellPrice;
+    private SalesStatus salesStatus;
     private TradeType tradeType;
     private TradeStatus tradeStatus; // TODO: 따로 객체로 가지고 있을지 고민중
     private Long buyerId;
