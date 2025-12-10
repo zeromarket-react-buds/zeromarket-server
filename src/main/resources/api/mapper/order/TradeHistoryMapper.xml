@@ -101,16 +101,14 @@
 
         WHERE
             p.is_deleted = FALSE
-            AND (
-                <!-- 판매 내역: 판매자 + 숨기기 상품 보임 + 판매자가 삭제하지 않은 거래만 -->
+        AND (
                 (#{role} = 'SALES'
-                    AND p.seller_id = #{memberId})
-                    AND COALESCE(t.seller_deleted, FALSE) = FALSE
-                <!-- 구매 내역: 구매자 + 숨기기 상품은 안 보임 + 구매자가 삭제하지 않은 거래만 -->
-                OR (#{role} = 'PURCHASES'
+                    AND p.seller_id = #{memberId}
+                    AND COALESCE(t.seller_deleted, FALSE) = FALSE )
+                OR
+                (#{role} = 'PURCHASES'
                     AND t.buyer_id = #{memberId}
-                    AND p.is_hidden = FALSE)
-                    AND COALESCE(t.buyer_deleted, FALSE) = FALSE
+                    AND COALESCE(t.buyer_deleted, FALSE) = FALSE)
             )
 
         <if test="keyword != null and keyword != ''">
