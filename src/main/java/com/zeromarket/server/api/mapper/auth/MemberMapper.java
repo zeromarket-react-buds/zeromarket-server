@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.mapper.auth;
 
+import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.common.entity.Member;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -13,6 +14,7 @@ public interface MemberMapper {
     // 회원 조회
     Member selectMemberById(Long memberId);
     Member selectMemberByLoginId(String loginId);
+    MemberProfileDto selectMemberProfile(Long memberId);
 //    Optional<Member> selectMemberByEmail(String email);
 //    Optional<Member> selectMemberByNickname(String nickname);
 //
