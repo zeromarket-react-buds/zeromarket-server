@@ -137,12 +137,12 @@
             <when test="(isHidden != null and isHidden == true)
                         and (tradeStatus != null and tradeStatus.size() > 0)">
                 AND (
-                COALESCE(p.is_hidden, FALSE) = TRUE
-                OR t.trade_status IN
-                <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
-                    #{ts}
-                </foreach>
-                )
+                    COALESCE(p.is_hidden, FALSE) = TRUE
+                    OR t.trade_status IN
+                    <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
+                        #{ts}
+                    </foreach>
+                    )
             </when>
         </choose>
 
