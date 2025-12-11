@@ -103,43 +103,46 @@
             p.is_deleted = FALSE
         AND (
                 (#{role} = 'SALES'
-                    AND p.seller_id = #{memberId}
-                    AND COALESCE(t.seller_deleted, FALSE) = FALSE )
+                    AND p.seller_id = #{memberId})
+                    AND COALESCE(t.seller_deleted, FALSE) = FALSE
                 OR
                 (#{role} = 'PURCHASES'
-                    AND t.buyer_id = #{memberId}
-                    AND COALESCE(t.buyer_deleted, FALSE) = FALSE)
+                    AND t.buyer_id = #{memberId})
+                    AND COALESCE(t.buyer_deleted, FALSE) = FALSE
             )
 
         <if test="keyword != null and keyword != ''">
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
 
-        <!-- 상태 / 숨기기 조합 -->
+        <!-- 숨기기 / 상태 필터 조합 -->
         <choose>
-            <!-- 상태도 있고 isHidden도 선택된 경우 -->
-            <when test="tradeStatus != null and tradeStatus.size() > 0
-                        and isHidden != null and isHidden == true">
-                AND (
-                    t.trade_status IN
-                    <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
-                        #{ts}
-                    </foreach>
-                    OR p.is_hidden = TRUE
-                )
+            <!-- 숨기기만 선택-->
+            <when test="(isHidden != null and isHidden == true)
+                        and (tradeStatus == null or tradeStatus.size() == 0)">
+                AND COALESCE(p.is_hidden, FALSE) = TRUE
             </when>
 
-            <!-- 상태만 선택된 경우 -->
-            <when test="tradeStatus != null and tradeStatus.size() > 0">
+            <!-- 상태들만 선택: 숨김 제외 + 선택한 상태만 -->
+            <when test="(isHidden == null or isHidden == false)
+                        and (tradeStatus != null and tradeStatus.size() > 0)">
+                AND COALESCE(p.is_hidden, FALSE) = FALSE
                 AND t.trade_status IN
                 <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
                     #{ts}
                 </foreach>
             </when>
 
-            <!-- isHidden만 선택된 경우 -->
-            <when test="isHidden != null and isHidden == true">
-                AND p.is_hidden = TRUE
+            <!-- 숨기기 + 상태 같이 선택 -->
+            <when test="(isHidden != null and isHidden == true)
+                        and (tradeStatus != null and tradeStatus.size() > 0)">
+                AND (
+                COALESCE(p.is_hidden, FALSE) = TRUE
+                OR t.trade_status IN
+                <foreach item="ts" collection="tradeStatus" open="(" separator="," close=")">
+                    #{ts}
+                </foreach>
+                )
             </when>
         </choose>
 
