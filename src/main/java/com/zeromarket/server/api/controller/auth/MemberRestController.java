@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.controller.auth;
 
+import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.MemberService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,5 +35,19 @@ public class MemberRestController {
         MemberResponse response = memberService.getMyInfo(userDetails.getLoginId());
 
         return ResponseEntity.ok(response);
+    }
+
+//    프로필 정보 조회 (셀러샵 사용)
+    @Operation(summary = "프로필 정보 조회", description = "")
+    @GetMapping("{memberId}/profile")
+    public ResponseEntity<MemberProfileDto> getMyProfile(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long memberId
+    ) {
+        MemberProfileDto dto = memberService.getMemberProfile(
+            memberId,                   // 셀러샵 회원
+            userDetails.getMemberId()   // 로그인 회원 (좋아요 확인용)
+        );
+        return ResponseEntity.ok(dto);
     }
 }

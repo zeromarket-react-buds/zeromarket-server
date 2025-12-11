@@ -28,15 +28,17 @@
 
   <!-- 회원 조회 -->
   <select id="selectMemberById" resultType="com.zeromarket.server.common.entity.Member">
-    SELECT * FROM member
+    SELECT *
+    FROM member
     WHERE member_id = #{memberId}
-    AND withdrawn_at IS NULL
+        AND withdrawn_at IS NULL
   </select>
 
   <select id="selectMemberByLoginId" resultType="com.zeromarket.server.common.entity.Member">
-    SELECT * FROM member
+    SELECT *
+    FROM member
     WHERE login_id = #{loginId}
-    AND withdrawn_at IS NULL
+        AND withdrawn_at IS NULL
   </select>
 
   <!-- 중복 체크 -->
@@ -46,6 +48,18 @@
     WHERE login_id = #{loginId}
     AND withdrawn_at IS NULL
   </select>
+
+    <!-- 회원 프로필 조회 -->
+    <select id="selectMemberProfile" resultType="com.zeromarket.server.api.dto.auth.MemberProfileDto">
+        SELECT
+            m.member_id AS memberId,
+            m.nickname AS nickname,
+            m.profile_image AS profileImage,
+            m.introduction AS description
+        FROM member m
+        WHERE m.member_id = #{memberId}
+            AND m.withdrawn_at IS NULL
+    </select>
 
     <select id="existsByNickname" resultType="boolean">
         SELECT COUNT(*) > 0

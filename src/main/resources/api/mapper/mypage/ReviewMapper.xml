@@ -190,7 +190,7 @@
         )
     </select>
 
-    <select id="getAvgRating" resultType="double">
+    <select id="getAvgRating" resultType="Double">
         SELECT ROUND(AVG(ratings.rating)::numeric, 1)
         FROM (SELECT t.trade_id, r.rating, r.is_deleted, p.seller_id AS member_id, p.product_title, 'sell' AS type
               FROM review r

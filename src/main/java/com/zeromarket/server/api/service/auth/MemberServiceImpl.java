@@ -1,11 +1,16 @@
 package com.zeromarket.server.api.service.auth;
 
 import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
+import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
+import com.zeromarket.server.api.dto.mypage.WishSellerDto;
+import com.zeromarket.server.api.dto.mypage.WishToggleResponse;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
+import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
 import com.zeromarket.server.api.security.JwtUtil;
+import com.zeromarket.server.api.service.mypage.ReviewService;
 import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.Role;
@@ -30,8 +35,8 @@ public class MemberServiceImpl implements MemberService {
     private final MemberMapper memberMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-
-//    email, loginId, nickname, phone (unique)
+    private final ReviewService reviewService;
+    private final WishSellerMapper wishSellerMapper;
 
     @Override
     @Transactional
@@ -139,4 +144,27 @@ public class MemberServiceImpl implements MemberService {
 
         return  existsByLoginId;
     }
+
+    // 회원 프로필 정보 조회 (셀러샵 사용)
+    @Override
+    public MemberProfileDto getMemberProfile(Long memberId, Long authMemberId) {
+        // 프로필 정보 조회
+        MemberProfileDto dto = memberMapper.selectMemberProfile(memberId);
+        if (dto == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+
+        // 신뢰점수 추가
+        double trustScore = reviewService.getTrustScore(memberId);
+        dto.setTrustScore(Double.toString(trustScore));
+
+        // 좋아요 여부 추가
+        WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId, memberId);
+        boolean liked = false;
+        if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())) {
+            liked = true;
+        };
+        dto.setLiked(liked);
+
+        return dto;
+    }
+
 }
