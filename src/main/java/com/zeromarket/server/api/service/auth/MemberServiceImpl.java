@@ -5,9 +5,7 @@ import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
-import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
-import com.zeromarket.server.api.dto.mypage.WishSellerDto;
-import com.zeromarket.server.api.dto.mypage.WishToggleResponse;
+import com.zeromarket.server.api.dto.mypage.*;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
 import com.zeromarket.server.api.security.JwtUtil;
@@ -172,6 +170,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberEditResponse getMemberEdit(Long memberId) {
         return memberMapper.getMemberEdit(memberId);
+    }
+
+    // 회원정보 설정 페이지에서 해당 회원 정보 수정
+    @Override
+    public MemberEditResponse updateMemberEdit(Long memberId, MemberEditRequest request) {
+        memberMapper.updateMemberEdit(memberId, request);
+
+            // 수정 후 최신 값 다시 조회해서 반환
+            return memberMapper.getMemberEdit(memberId);
     }
 
 }

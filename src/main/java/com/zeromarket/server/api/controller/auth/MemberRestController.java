@@ -2,7 +2,10 @@ package com.zeromarket.server.api.controller.auth;
 
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
+import com.zeromarket.server.api.dto.mypage.MemberEditRequest;
 import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
+import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
+import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.MemberService;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -12,10 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/members")
@@ -60,5 +60,16 @@ public class MemberRestController {
     ) {
         Long memberId = userPrincipal.getMemberId();
         return memberService.getMemberEdit(memberId);
+    }
+
+    // 회원정보 설정 페이지 정보 수정
+    @Operation(summary = "회원정보 설정 페이지 수정", description = "핸드폰 번호, 이메일 수정")
+    @PatchMapping("me/edit")
+    public MemberEditResponse updateMemberEdit(
+        @AuthenticationPrincipal CustomUserDetails userPrincipal,
+        @RequestBody MemberEditRequest request
+    ) {
+        Long memberId = userPrincipal.getMemberId();
+        return memberService.updateMemberEdit(memberId, request);
     }
 }

@@ -104,4 +104,19 @@
         WHERE m.member_id = #{memberId}
     </select>
 
+    <!-- 회원정보 설정 페이지에서 해당 회원 정보 수정 -->
+    <update id="updateMemberEdit">
+        UPDATE member
+        <set>
+            <if test="request.phone != null">
+                phone = #{request.phone},
+            </if>
+            <if test="request.email != null">
+                email = #{request.email},
+            </if>
+            updated_at = CURRENT_TIMESTAMP
+        </set>
+        WHERE member_id = #{memberId}
+    </update>
+
 </mapper>
