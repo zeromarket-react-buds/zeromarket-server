@@ -159,5 +159,11 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         }
     }
 
+    @Override
+    public void createProductLocation(Long newProductId, ProductCreateRequest request) {
+        mapper.insertProductLocation(newProductId,request);
+
+    }
+
 
 }

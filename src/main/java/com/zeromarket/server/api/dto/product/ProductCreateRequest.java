@@ -27,6 +27,18 @@ public class ProductCreateRequest {
 
     private List<ProductImageDto> images;//첨부 이미지 객체 형태,내부클래스public static
 
+    //위치정보
+    private Long referenceAreaId;
+    private Double latitude;
+    private Double longitude;
+    private String roadAddress;
+    private String jibunAddress;
+    private String buildingName;
+    private String zipCode;
+    private String legalDongCode;
+    private String adminDongCode;
+    private String adminDongName;
+
     @Getter
     @Setter
     public static class ProductImageDto {

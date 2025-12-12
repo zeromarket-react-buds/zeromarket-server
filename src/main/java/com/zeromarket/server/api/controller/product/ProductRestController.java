@@ -116,6 +116,12 @@ public class ProductRestController {
         request.setSellerId(userDetails.getMemberId());//로그인 중 사용자id를 자동으로 sellerId로 설정
 
         Long newProductId = productCommandService.createProduct(request);
+
+        //직거래 상품등록시 product_location 테이블에 위치 정보 삽입
+        if(request.isDirect()){
+            productCommandService.createProductLocation(newProductId,request);
+        }
+
         ProductCreateResponse response =
             new ProductCreateResponse(newProductId, "상품이 정상적으로 등록되었습니다.");
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
