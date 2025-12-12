@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.controller.mypage;
 
+import com.zeromarket.server.api.dto.mypage.ProfileEditResponse;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.dto.mypage.NicknameCheckResponse;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/me/profile")
 @RequiredArgsConstructor
-@Tag(name = "마이페이지 API", description = "마이페이지 관련 API")
+@Tag(name = "회원 프로필 수정 관련 API", description = "프로필 설정 페이지 / 회원정보 설정 페이지 관련 API")
 public class ProfileRestController {
 
     private final ProfileService profileService;
@@ -50,5 +51,14 @@ public class ProfileRestController {
         NicknameCheckResponse response = new NicknameCheckResponse();
         response.setExists(exists);
         return response;
+    }
+
+    @Operation(summary = "회원정보 설정 페이지 조회", description = "회원정보 설정 페이지 멤버 조회")
+    @GetMapping("edit")
+    public ProfileEditResponse getProfileEdit(
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        Long memberId = userPrincipal.getMemberId();
+        return profileService.selectProfileEdit(memberId);
     }
 }
