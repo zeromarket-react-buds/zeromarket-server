@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProfileEditResponse {
+public class MemberEditResponse {
     private String profileImage;
     private String nickname;
     private String phone;

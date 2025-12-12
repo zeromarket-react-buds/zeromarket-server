@@ -90,4 +90,18 @@
         AND withdrawn_at IS NULL
     </select>
 
+    <!-- 회원정보 설정 페이지에서 해당 회원 정보 조회 -->
+    <select id="getMemberEdit"
+            parameterType="long"
+            resultType="com.zeromarket.server.api.dto.mypage.MemberEditResponse">
+        SELECT
+            m.member_id      AS memberId,
+            m.profile_image  AS profileImage,
+            m.nickname       AS nickname,
+            m.phone          AS phone,
+            m.email          AS email
+        FROM member m
+        WHERE m.member_id = #{memberId}
+    </select>
+
 </mapper>

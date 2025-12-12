@@ -2,6 +2,7 @@ package com.zeromarket.server.api.controller.auth;
 
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
+import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.MemberService;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -49,5 +50,15 @@ public class MemberRestController {
             userDetails.getMemberId()   // 로그인 회원 (좋아요 확인용)
         );
         return ResponseEntity.ok(dto);
+    }
+
+    // 회원정보 설정 페이지 정보 조회
+    @Operation(summary = "회원정보 설정 페이지 조회", description = "회원정보 설정 페이지 멤버 조회")
+    @GetMapping("me/edit")
+    public MemberEditResponse getProfileEdit(
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        Long memberId = userPrincipal.getMemberId();
+        return memberService.getMemberEdit(memberId);
     }
 }

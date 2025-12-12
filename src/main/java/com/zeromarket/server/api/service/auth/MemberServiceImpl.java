@@ -5,6 +5,7 @@ import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
+import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.dto.mypage.WishToggleResponse;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
@@ -165,6 +166,12 @@ public class MemberServiceImpl implements MemberService {
         dto.setLiked(liked);
 
         return dto;
+    }
+
+    // 회원정보 설정 페이지에서 해당 회원 정보 조회
+    @Override
+    public MemberEditResponse getMemberEdit(Long memberId) {
+        return memberMapper.getMemberEdit(memberId);
     }
 
 }

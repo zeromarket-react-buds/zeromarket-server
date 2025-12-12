@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.mapper.auth;
 
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
+import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.common.entity.Member;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -41,4 +42,6 @@ public interface MemberMapper {
 
     boolean existsByNicknameExcludingMe(@Param("nickname") String nickname,
                                         @Param("memberId") Long memberId);
+
+    MemberEditResponse getMemberEdit(Long memberId);
 }
