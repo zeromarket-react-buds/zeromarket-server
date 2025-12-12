@@ -55,7 +55,7 @@ public class MemberRestController {
     // 회원정보 설정 페이지 정보 조회
     @Operation(summary = "회원정보 설정 페이지 조회", description = "회원정보 설정 페이지 멤버 조회")
     @GetMapping("me/edit")
-    public MemberEditResponse getProfileEdit(
+    public MemberEditResponse getMemberEdit(
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
         Long memberId = userPrincipal.getMemberId();
