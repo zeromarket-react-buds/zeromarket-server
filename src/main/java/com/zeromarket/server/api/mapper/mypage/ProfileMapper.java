@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.mapper.mypage;
 
+import com.zeromarket.server.api.dto.mypage.ProfileEditResponse;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import org.apache.ibatis.annotations.Mapper;
@@ -11,4 +12,6 @@ public interface ProfileMapper {
 
     void updateProfileSetting(@Param("memberId") Long memberId,
                               @Param("request") ProfileSettingRequest request);
+
+    ProfileEditResponse selectProfileEdit(Long memberId);
 }

@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.service.mypage;
 
+import com.zeromarket.server.api.dto.mypage.ProfileEditResponse;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
@@ -34,5 +35,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public boolean existsByNicknameExcludingMe(String nickname, Long memberId) {
         return memberMapper.existsByNicknameExcludingMe(nickname, memberId);
+    }
+
+    @Override
+    public ProfileEditResponse selectProfileEdit(Long memberId)  {
+        return mapper.selectProfileEdit(memberId);
     }
 }

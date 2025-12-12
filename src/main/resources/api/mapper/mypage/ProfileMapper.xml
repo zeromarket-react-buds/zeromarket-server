@@ -25,4 +25,17 @@
         WHERE member_id   = #{memberId}
     </update>
 
+    <select id="selectProfileEdit"
+            parameterType="long"
+            resultType="com.zeromarket.server.api.dto.mypage.ProfileEditResponse">
+        SELECT
+            m.member_id      AS memberId,
+            m.profile_image  AS profileImage,
+            m.nickname       AS nickname,
+            m.phone          AS phone,
+            m.email          AS email
+        FROM member m
+        WHERE m.member_id = #{memberId}
+    </select>
+
 </mapper>
