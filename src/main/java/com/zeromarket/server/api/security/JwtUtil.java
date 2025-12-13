@@ -95,8 +95,6 @@ public class JwtUtil {
             .parseSignedClaims(token)
             .getPayload();
 
-        System.out.println("JWT PAYLOAD: " + claims); // JWT PAYLOAD: {type=REFRESH, iat=1763893357, exp=1764498157}
-
         return claims;
     }
 
@@ -114,13 +112,14 @@ public class JwtUtil {
 
 //    refresh token 쿠키에 저장
     public void setRefreshCookie(String refreshToken, HttpServletResponse response) {
+        boolean isLogout = (refreshToken == null || refreshToken.isBlank());
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
-            .secure(false)          // HTTPS 환경이면 true
-            .sameSite("Lax")        // 프론트/백 분리 + HTTPS면 None
+            .secure(false)          // HTTPS면 true
+            .sameSite("Lax")        // HTTPS + 프론트/백 분리면 None
             .path("/")
-            .maxAge(REFRESH_EXPIRATION)
+            .maxAge(isLogout ? 0 : REFRESH_EXPIRATION)
             .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

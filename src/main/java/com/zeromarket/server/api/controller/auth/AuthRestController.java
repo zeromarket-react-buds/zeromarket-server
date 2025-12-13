@@ -34,7 +34,6 @@ public class AuthRestController {
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody MemberSignupRequest dto) {
         Long memberId = authService.signup(dto);
-
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Map.of("message", "회원가입 성공", "memberId", memberId));
 
@@ -46,20 +45,7 @@ public class AuthRestController {
         @RequestBody MemberLoginRequest dto,
         HttpServletResponse response
     ) {
-        TokenInfo tokenInfo = authService.login(dto);
-
-        // ✅ HttpOnly Cookie에 refresh token 저장
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenInfo.getRefreshToken())
-            .httpOnly(true)
-            .secure(false)           // https 환경이면 true 로 변경
-            .path("/")              // 모든 요청에 포함
-            .maxAge(Duration.ofDays(7)) // 7일
-            .sameSite("Strict")     // 또는 Lax, 같은 도메인/포트 조합이면 Strict도 무방
-            .build();
-
-        response.setHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
-        // ✅ body에는 access token만 보냄
+        TokenInfo tokenInfo = authService.login(dto, response);
         return ResponseEntity.ok(
             Map.of("accessToken", tokenInfo.getAccessToken())
         );
@@ -68,23 +54,11 @@ public class AuthRestController {
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(
-        @CookieValue(value = "refreshToken", required = false) String refreshToken
+        @CookieValue(value = "refreshToken", required = false) String refreshToken,
+        HttpServletResponse response
     ) {
-        TokenInfo tokens = authService.refresh(refreshToken);
-//        TokenInfo tokenInfo = memberService.refresh(refreshToken);
-
-        // refreshToken 재발급 시 쿠키도 재설정
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true)
-            .secure(false)
-//            .secure(true)
-            .sameSite("Strict")
-            .path("/")
-            .maxAge(Duration.ofDays(7))
-            .build();
-
+        TokenInfo tokens = authService.refresh(refreshToken, response);
         return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
             .body(Map.of("accessToken", tokens.getAccessToken()));
     }
 
@@ -92,25 +66,13 @@ public class AuthRestController {
     @GetMapping("/check-id")
     public ResponseEntity<Map> checkDuplicateId(@RequestParam String loginId) {
         Boolean existsByLoginId = authService.checkDuplicateId(loginId);
-
         return ResponseEntity.ok(Map.of("existsByLoginId", existsByLoginId));
     }
 
     @Operation(summary = "로그아웃", description = "")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-
-        // 같은 이름 + path + maxAge=0 으로 쿠키 삭제
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-            .httpOnly(true)
-            .secure(false) // 개발 시
-//            .secure(true) // 운영 서버 배포 시
-            .path("/")
-            .maxAge(0)
-            .build();
-
-        response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-
+        authService.logout(response);
         return ResponseEntity.ok().build();
     }
 }

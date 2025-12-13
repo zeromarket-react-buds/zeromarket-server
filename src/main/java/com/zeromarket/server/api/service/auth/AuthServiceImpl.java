@@ -15,15 +15,15 @@ import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.Role;
 import com.zeromarket.server.common.exception.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +38,6 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final ReviewService reviewService;
     private final WishSellerMapper wishSellerMapper;
-    private final OAuthLoginService kakaoOAuthService;
-    private final MemberService memberService;
 
     @Override
     @Transactional
@@ -84,23 +82,32 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(readOnly = true)
-    public TokenInfo login(MemberLoginRequest dto) {
+    public TokenInfo login(MemberLoginRequest dto, HttpServletResponse response) {
+        // loginId으로 회원 찾기
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(dto.getLoginId()))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // 비밀번호 일치 확인
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
             throw new ApiException(ErrorCode.LOGIN_FAIL);
         }
 
+        // 쿠키 설정
+        jwtUtil.setRefreshCookie(
+            jwtUtil.generateRefreshToken(dto.getLoginId()),
+            response
+        );
+
+        // 엑세스 토큰 반환
         return new TokenInfo(
-            jwtUtil.generateAccessToken(member.getLoginId(), member.getRole()),
-            jwtUtil.generateRefreshToken(member.getLoginId())
+            jwtUtil.generateAccessToken(member.getLoginId(), member.getRole())
+//            jwtUtil.generateRefreshToken(member.getLoginId())
         );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public TokenInfo refresh(String refreshToken) {
+    public TokenInfo refresh(String refreshToken, HttpServletResponse response) {
 
 //        1. null 확인
         if (refreshToken == null|| refreshToken.isBlank()) {
@@ -121,7 +128,14 @@ public class AuthServiceImpl implements AuthService {
         String newAccessToken = jwtUtil.generateAccessToken(member.getLoginId(), member.getRole());
         String newRefreshToken = jwtUtil.generateRefreshToken(member.getLoginId());
 
-        return new TokenInfo(newAccessToken, newRefreshToken);
+//        4. 쿠키 설정
+        jwtUtil.setRefreshCookie(
+            newRefreshToken,
+            response
+        );
+
+        return new TokenInfo(newAccessToken);
+//        return new TokenInfo(newAccessToken, newRefreshToken);
     }
 
     @Override
@@ -140,9 +154,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public Boolean checkDuplicateId(String loginId) {
-        boolean existsByLoginId = memberMapper.existsByLoginId(loginId);
-
-        return  existsByLoginId;
+        return memberMapper.existsByLoginId(loginId);
     }
 
     // 회원 프로필 정보 조회 (셀러샵 사용)
@@ -167,32 +179,8 @@ public class AuthServiceImpl implements AuthService {
         return dto;
     }
 
-    // OAuth 로그인/회원가입
-    @Transactional
     @Override
-    public String loginWithKakao(String code, HttpServletResponse response) {
-//        1. 카카오 엑세스 토큰 발급
-        String kakaoAccessToken = kakaoOAuthService.getAccessToken(code);
-
-//        2. 사용자 정보 조회 with 카카오 엑세스 토큰
-        KakaoUserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
-
-//        3. DB에서 유저 정보 불러오기 (없으면 생성)
-//        TODO: 왜 loginId가 null이지?
-        Member member = memberService.findOrCreateKakaoUser(userInfo);
-        System.out.println(member.getLoginId()); // null
-        System.out.println(member.getSocialId()); // kakao_4637921436
-
-//        4. JWT 토큰 생성
-        String accessToken = jwtUtil.generateAccessToken(member.getSocialId(), member.getRole());
-        String refreshToken = jwtUtil.generateRefreshToken(member.getLoginId());
-
-//        5. refresh 쿠키 설정
-        jwtUtil.setRefreshCookie(refreshToken, response);
-
-//        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + accessToken);
-
-//        6. 엑세스 토큰 반환
-        return accessToken;
+    public void logout(HttpServletResponse response) {
+        jwtUtil.setRefreshCookie("", response);
     }
 }

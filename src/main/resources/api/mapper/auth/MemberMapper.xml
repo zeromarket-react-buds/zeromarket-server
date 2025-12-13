@@ -90,7 +90,7 @@
         AND withdrawn_at IS NULL
     </select>
 
-    <!--  OAuth 카카오  -->
+    <!-- social_id 회원 존재 여부 -->
     <select id="findBySocialId" resultType="com.zeromarket.server.common.entity.Member">
         SELECT
             member_id,
@@ -102,6 +102,7 @@
         WHERE social_id = #{socialId}
     </select>
 
+    <!-- oauth 회원가입 -->
     <insert id="insertSocialMember" useGeneratedKeys="true" keyProperty="memberId">
         INSERT INTO member (
             nickname,

@@ -6,14 +6,15 @@ import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 
 public interface AuthService {
 
     Long signup(MemberSignupRequest memberSignupRequest);
 
-    TokenInfo login(MemberLoginRequest memberLoginRequest);
+    TokenInfo login(MemberLoginRequest memberLoginRequest, HttpServletResponse response);
 
-    TokenInfo refresh(String refreshToken);
+    TokenInfo refresh(String refreshToken, HttpServletResponse response);
 
     MemberResponse getMyInfo(String loginId);
 
@@ -21,5 +22,5 @@ public interface AuthService {
 
     MemberProfileDto getMemberProfile(Long memberId, Long authMemberId);
 
-    String loginWithKakao(String code, HttpServletResponse response);
+    void logout(HttpServletResponse response);
 }

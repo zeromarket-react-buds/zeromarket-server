@@ -2,7 +2,7 @@ package com.zeromarket.server.api.controller.auth;
 
 import com.zeromarket.server.api.dto.auth.KakaoLoginRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
-import com.zeromarket.server.api.service.auth.AuthService;
+import com.zeromarket.server.api.service.auth.OAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,16 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OAuthRestController {
 
-    private final AuthService authService;
+    private final OAuthService oAuthService;
 
     @PostMapping("/kakao")
     public ResponseEntity<?> kakaoLogin(
         @RequestBody KakaoLoginRequest request,
         HttpServletResponse response
     ) {
-//        System.out.println(">>>>>>>>>>>>>>>>>>>>>> kakaoLogin <<<<<<<<<<<<<<<<<<<<<<");
-
-        String accessToken = authService.loginWithKakao(request.getCode(), response);
+        String accessToken = oAuthService.loginWithKakao(request.getCode(), response);
         return ResponseEntity.ok(new TokenInfo(accessToken));
     }
 }
