@@ -112,7 +112,14 @@
                 phone = #{request.phone},
             </if>
             <if test="request.email != null">
-                email = #{request.email},
+                <choose>
+                    <when test="request.email == ''">
+                        email = NULL,
+                    </when>
+                    <otherwise>
+                        email = #{request.email},
+                    </otherwise>
+                </choose>
             </if>
             updated_at = CURRENT_TIMESTAMP
         </set>
