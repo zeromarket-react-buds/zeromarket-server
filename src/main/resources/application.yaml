@@ -53,3 +53,7 @@ oauth:
       key: ${KAKAO_REST_API_KEY}
       redirect-uri: "http://localhost:5173/oauth/kakao/callback"
       client-secret: ${KAKAO_CLIENT_SECRET}
+azure:
+  vision:
+    endpoint: ${AZURE_VISION_ENDPOINT}
+    key: ${AZURE_VISION_KEY}
