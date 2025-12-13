@@ -120,4 +120,40 @@
             #{password}
         )
     </insert>
+
+    <!-- 회원정보 설정 페이지에서 해당 회원 정보 조회 -->
+    <select id="getMemberEdit"
+            parameterType="long"
+            resultType="com.zeromarket.server.api.dto.mypage.MemberEditResponse">
+        SELECT
+            m.member_id      AS memberId,
+            m.profile_image  AS profileImage,
+            m.nickname       AS nickname,
+            m.phone          AS phone,
+            m.email          AS email
+        FROM member m
+        WHERE m.member_id = #{memberId}
+    </select>
+
+    <!-- 회원정보 설정 페이지에서 해당 회원 정보 수정 -->
+    <update id="updateMemberEdit">
+        UPDATE member
+        <set>
+            <if test="request.phone != null">
+                phone = #{request.phone},
+            </if>
+            <if test="request.email != null">
+                <choose>
+                    <when test="request.email == ''">
+                        email = NULL,
+                    </when>
+                    <otherwise>
+                        email = #{request.email},
+                    </otherwise>
+                </choose>
+            </if>
+            updated_at = CURRENT_TIMESTAMP
+        </set>
+        WHERE member_id = #{memberId}
+    </update>
 </mapper>

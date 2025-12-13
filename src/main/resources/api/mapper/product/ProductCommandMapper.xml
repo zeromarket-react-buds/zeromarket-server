@@ -129,4 +129,35 @@
             product_id = #{productId}
     </update>
 
+  <insert id="insertProductLocation" parameterType="com.zeromarket.server.api.dto.product.ProductCreateRequest">
+    INSERT INTO product_location(
+      product_id,
+      reference_area_id,
+      latitude,
+      longitude,
+      road_address,
+      jibun_address,
+      building_name,
+      zip_code,
+      legal_dong_code,
+      admin_dong_code,
+      admin_dong_name,
+      create_at
+    )VALUES(
+      #{productId},
+      #{referenceAreaId},
+      #{latitude},
+      #{longitude},
+      #{roadAddress},
+      #{jibunAddress},
+      #{buildingName},
+      #{zipCode},
+      #{legalDongCode},
+      #{adminDongCode},
+      #{adminDongName},
+      NOW()
+    );
+  </insert>
+
+
 </mapper>

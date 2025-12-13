@@ -7,8 +7,9 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface ProfileMapper {
-    ProfileSettingResponse selectProfileSetting(@Param("memberId") Long memberId);
+    ProfileSettingResponse getProfileSetting(@Param("memberId") Long memberId);
 
     void updateProfileSetting(@Param("memberId") Long memberId,
                               @Param("request") ProfileSettingRequest request);
+
 }

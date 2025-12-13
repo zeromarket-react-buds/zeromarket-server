@@ -1,9 +1,17 @@
 package com.zeromarket.server.api.service.auth;
 
 import com.zeromarket.server.api.dto.auth.KakaoUserInfo;
+import com.zeromarket.server.api.dto.auth.MemberProfileDto;
+import com.zeromarket.server.api.dto.mypage.MemberEditRequest;
+import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
+import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
+import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
+import com.zeromarket.server.api.service.mypage.ReviewService;
 import com.zeromarket.server.common.entity.Member;
+import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.Role;
+import com.zeromarket.server.common.exception.ApiException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,11 +23,49 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
+    private final ReviewService reviewService;
+    private final WishSellerMapper wishSellerMapper;
 
-//    TODO: 프로필 이미지는 저장 안되는 것 같은데?
+    // 회원 프로필 정보 조회 (셀러샵 사용)
+    @Override
+    public MemberProfileDto getMemberProfile(Long memberId, Long authMemberId) {
+        // 프로필 정보 조회
+        MemberProfileDto dto = memberMapper.selectMemberProfile(memberId);
+        if (dto == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+
+        // 신뢰점수 추가
+        double trustScore = reviewService.getTrustScore(memberId);
+        dto.setTrustScore(Double.toString(trustScore));
+
+        // 좋아요 여부 추가
+        WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId, memberId);
+        boolean liked = false;
+        if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())) {
+            liked = true;
+        };
+        dto.setLiked(liked);
+
+        return dto;
+    }
+
+    // 회원정보 설정 페이지에서 해당 회원 정보 조회
+    @Override
+    public MemberEditResponse getMemberEdit(Long memberId) {
+        return memberMapper.getMemberEdit(memberId);
+    }
+
+    // 회원정보 설정 페이지에서 해당 회원 정보 수정
+    @Override
+    public MemberEditResponse updateMemberEdit(Long memberId, MemberEditRequest request) {
+        memberMapper.updateMemberEdit(memberId, request);
+
+            // 수정 후 최신 값 다시 조회해서 반환
+            return memberMapper.getMemberEdit(memberId);
+    }
 
     @Transactional
     public Member findOrCreateKakaoUser(KakaoUserInfo kakaoUserInfo) {
+        //    TODO: 프로필 이미지는 저장 안되는 것 같은데?
 
         // 1. social_id 생성
         String socialId = "kakao_" + kakaoUserInfo.getId();
@@ -47,7 +93,7 @@ public class MemberServiceImpl implements MemberService {
 //        TODO: '카카오사용자' -> nickname unique 제약 조건 위반
         for(int i = 0; i < maxRetry; i++) {
             String suffix = UUID.randomUUID().toString().substring(0, 4);
-             String nickname = nicknameBase + "_" + suffix;
+            String nickname = nicknameBase + "_" + suffix;
 
             // 4. 신규 회원 생성
             Member newMember = new Member();

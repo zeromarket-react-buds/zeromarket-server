@@ -18,4 +18,6 @@ public interface ProductCommandService {
     void updateProduct(Long productId, ProductUpdateRequest request);
 
     void validateProductOwnership(Long productId, Long memberId);
+
+    void createProductLocation(Long newProductId, ProductCreateRequest request);
 }

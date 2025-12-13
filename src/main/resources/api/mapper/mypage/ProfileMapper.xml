@@ -4,7 +4,7 @@
 
 <mapper namespace="com.zeromarket.server.api.mapper.mypage.ProfileMapper">
 
-    <select id="selectProfileSetting"
+    <select id="getProfileSetting"
             parameterType="long"
             resultType="com.zeromarket.server.api.dto.mypage.ProfileSettingResponse">
         SELECT

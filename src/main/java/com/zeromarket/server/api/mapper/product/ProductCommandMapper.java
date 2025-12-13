@@ -32,4 +32,6 @@ public interface ProductCommandMapper {
     Long getProductSellerId(Long productId);
 
     int updateProductStatus(@Param("productId") Long productId, @Param("salesStatus") SalesStatus salesStatus);
+
+    void insertProductLocation(Long newProductId, ProductCreateRequest request);
 }

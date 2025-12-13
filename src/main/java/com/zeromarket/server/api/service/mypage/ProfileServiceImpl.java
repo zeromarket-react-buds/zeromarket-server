@@ -17,8 +17,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     // 프로필 조회
     @Override
-    public ProfileSettingResponse selectProfileSetting(Long memberId) {
-        return mapper.selectProfileSetting(memberId);
+    public ProfileSettingResponse getProfileSetting(Long memberId) {
+        return mapper.getProfileSetting(memberId);
     }
 
     // 프로필 변경
@@ -28,7 +28,7 @@ public class ProfileServiceImpl implements ProfileService {
         mapper.updateProfileSetting(memberId, request);
 
         // 수정 후 최신 값 다시 조회해서 반환
-        return mapper.selectProfileSetting(memberId);
+        return mapper.getProfileSetting(memberId);
     }
 
     @Override

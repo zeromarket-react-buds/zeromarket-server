@@ -1,6 +1,8 @@
 package com.zeromarket.server.api.mapper.auth;
 
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
+import com.zeromarket.server.api.dto.mypage.MemberEditRequest;
+import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.common.entity.Member;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -22,9 +24,6 @@ public interface MemberMapper {
 //    List<Member> selectMembers(MemberSearchRequest searchRequest);
 //    int countMembers(MemberSearchRequest searchRequest);
 //
-//    // 회원 수정
-//    void updateMember(Member member);
-//
 //    // 비밀번호 변경
 //    void updatePassword(@Param("memberId") Long memberId, @Param("password") String password);
 //
@@ -45,4 +44,12 @@ public interface MemberMapper {
 //    OAuth 카카오
     Member findBySocialId(@Param("socialId") String socialId);
     void insertSocialMember(Member member);
+    
+    MemberEditResponse getMemberEdit(Long memberId);
+
+    // 회원정보 설정 페이지에서 해당 회원 정보 수정
+    void updateMemberEdit(
+        @Param("memberId") Long memberId,
+        @Param("request") MemberEditRequest request
+    );
 }
