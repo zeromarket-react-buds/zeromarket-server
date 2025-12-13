@@ -127,4 +127,40 @@ public class ReviewRestController {
         Integer count = reviewService.getCountReceivedReviewsOnMyPage(memberId);
         return ResponseEntity.ok(count);
     }
+
+    /**
+     * 셀러샵 > 받은 리뷰 요약
+     * @param memberId
+     * @return
+     */
+    @Operation(summary = "특정 회원이 받은 리뷰 요약 목록", description = "rating당 3개씩 조회, 최신순")
+    @GetMapping("/received/summary/{memberId}")
+    public ResponseEntity<ReceivedReviewSummaryResponse> getReceivedReviewSummary(
+        @PathVariable Long memberId
+    ) {
+        ReceivedReviewSummaryResponse summaryResponse = reviewService.getReceivedReviewSummary(memberId);
+        return ResponseEntity.ok(summaryResponse);
+    }
+
+    /**
+     * 셀러샵 > 받은 리뷰 - 점수별
+     * @param cursorReviewId
+     * @param rating
+     * @param size
+     * @return
+     */
+    @GetMapping("/received/{memberId}")
+    public ResponseEntity<ReceivedReviewCursorResponse> getReceivedReviewsByRating(
+        @PathVariable Long memberId,
+        @RequestParam Integer rating,
+        @RequestParam(required = false) Long cursorReviewId,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime cursorCreatedAt,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+            reviewService.getReceivedReviewsByRating(
+                memberId, rating, cursorReviewId, cursorCreatedAt, size)
+        );
+    }
 }
