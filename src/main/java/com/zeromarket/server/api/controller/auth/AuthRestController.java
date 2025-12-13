@@ -3,7 +3,7 @@ package com.zeromarket.server.api.controller.auth;
 import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
-import com.zeromarket.server.api.service.auth.MemberService;
+import com.zeromarket.server.api.service.auth.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,12 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Auth API", description = "인증/인가 API")
 public class AuthRestController {
 
-    private final MemberService memberService;
+    private final AuthService authService;
 
     @Operation(summary = "회원가입", description = "")
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody MemberSignupRequest dto) {
-        Long memberId = memberService.signup(dto);
+        Long memberId = authService.signup(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Map.of("message", "회원가입 성공", "memberId", memberId));
@@ -46,7 +46,7 @@ public class AuthRestController {
         @RequestBody MemberLoginRequest dto,
         HttpServletResponse response
     ) {
-        TokenInfo tokenInfo = memberService.login(dto);
+        TokenInfo tokenInfo = authService.login(dto);
 
         // ✅ HttpOnly Cookie에 refresh token 저장
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenInfo.getRefreshToken())
@@ -70,7 +70,7 @@ public class AuthRestController {
     public ResponseEntity<Map<String, String>> refresh(
         @CookieValue(value = "refreshToken", required = false) String refreshToken
     ) {
-        TokenInfo tokens = memberService.refresh(refreshToken);
+        TokenInfo tokens = authService.refresh(refreshToken);
 //        TokenInfo tokenInfo = memberService.refresh(refreshToken);
 
         // refreshToken 재발급 시 쿠키도 재설정
@@ -86,13 +86,12 @@ public class AuthRestController {
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
             .body(Map.of("accessToken", tokens.getAccessToken()));
-//        return ResponseEntity.ok(tokenInfo);
     }
 
     @Operation(summary = "아이디 중복 체크", description = "")
     @GetMapping("/check-id")
     public ResponseEntity<Map> checkDuplicateId(@RequestParam String loginId) {
-        Boolean existsByLoginId = memberService.checkDuplicateId(loginId);
+        Boolean existsByLoginId = authService.checkDuplicateId(loginId);
 
         return ResponseEntity.ok(Map.of("existsByLoginId", existsByLoginId));
     }

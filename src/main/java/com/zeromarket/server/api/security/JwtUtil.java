@@ -5,9 +5,16 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import java.util.Date;
+import java.util.Map;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -103,5 +110,19 @@ public class JwtUtil {
 
     public String getType(String token) {
         return getClaims(token).get("type", String.class);
+    }
+
+//    refresh token 쿠키에 저장
+    public void setRefreshCookie(String refreshToken, HttpServletResponse response) {
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+            .httpOnly(true)
+            .secure(false)          // HTTPS 환경이면 true
+            .sameSite("Lax")        // 프론트/백 분리 + HTTPS면 None
+            .path("/")
+            .maxAge(REFRESH_EXPIRATION)
+            .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

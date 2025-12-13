@@ -39,6 +39,10 @@ public class JwtFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (path.startsWith("/api/oauth")) {
+            return true;
+        }
+
         // /api/products, /api/products/{productId} → GET 요청만 예외
         if (path.startsWith("/api/products") && "GET".equalsIgnoreCase(method)) {
 
@@ -66,6 +70,10 @@ public class JwtFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
+
+        log.info("path={}, Authorization={}",
+            request.getRequestURI(),
+            request.getHeader("Authorization"));
 
         try {
             String path = request.getRequestURI();

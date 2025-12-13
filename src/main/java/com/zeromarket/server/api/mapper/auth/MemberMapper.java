@@ -41,4 +41,8 @@ public interface MemberMapper {
 
     boolean existsByNicknameExcludingMe(@Param("nickname") String nickname,
                                         @Param("memberId") Long memberId);
+
+//    OAuth 카카오
+    Member findBySocialId(@Param("socialId") String socialId);
+    void insertSocialMember(Member member);
 }

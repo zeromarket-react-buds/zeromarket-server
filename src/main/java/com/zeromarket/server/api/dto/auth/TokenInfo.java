@@ -10,6 +10,7 @@ public class TokenInfo {
     private String accessToken;
     private String refreshToken;
 
-//    private String grantType;
-//    private Long expiresIn;
+    public TokenInfo(String accessToken) {
+        this.accessToken = accessToken;
+    }
 }

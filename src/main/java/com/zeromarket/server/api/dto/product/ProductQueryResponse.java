@@ -1,10 +1,9 @@
 package com.zeromarket.server.api.dto.product;
 
+import com.zeromarket.server.common.enums.SalesStatus;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
-import com.zeromarket.server.common.enums.SalesStatus;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

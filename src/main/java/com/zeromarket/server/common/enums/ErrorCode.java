@@ -14,6 +14,8 @@ public enum ErrorCode {
     PHONE_ALREADY_EXIST(409, "핸드폰 번호가 이미 존재합니다."),
     EMAIL_ALREADY_EXIST(409, "이메일이 이미 존재합니다."),
     LOGIN_FAIL(401, "아이디 또는 비밀번호가 올바르지 않습니다."),
+    JWT_NOT_EXIST(401, "refresh 토큰이 존재하지 않습니다."),
+    JWT_NOT_VALID(401, "JWT 토큰이 유효하지 않습니다."),
 
     // 회원
     MEMBER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),

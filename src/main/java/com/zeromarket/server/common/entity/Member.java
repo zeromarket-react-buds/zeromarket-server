@@ -29,4 +29,5 @@ public class Member {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime withdrawnAt;
+    private String socialId;
 }
