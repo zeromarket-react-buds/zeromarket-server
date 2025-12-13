@@ -8,6 +8,7 @@ import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.AuthService;
+import com.zeromarket.server.api.service.auth.MemberService;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberRestController {
 
     private final AuthService authService;
+    private final MemberService memberService;
 
     //    인증 관련 사용 (인증 정보 조회 API)
     @Operation(summary = "내 정보 조회", description = "")
@@ -45,7 +47,7 @@ public class MemberRestController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long memberId
     ) {
-        MemberProfileDto dto = authService.getMemberProfile(
+        MemberProfileDto dto = memberService.getMemberProfile(
             memberId,                   // 셀러샵 회원
             userDetails.getMemberId()   // 로그인 회원 (좋아요 확인용)
         );
