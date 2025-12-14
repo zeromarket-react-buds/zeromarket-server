@@ -57,3 +57,8 @@ azure:
   vision:
     endpoint: ${AZURE_VISION_ENDPOINT}
     key: ${AZURE_VISION_KEY}
+  openai:
+    endpoint: ${AZURE_OPENAI_ENDPOINT}
+    api-key: ${AZURE_OPENAI_KEY}
+    deployment: ${AZURE_OPENAI_DEPLOYMENT}
+    api-version: ${AZURE_OPENAI_API_VERSION}
