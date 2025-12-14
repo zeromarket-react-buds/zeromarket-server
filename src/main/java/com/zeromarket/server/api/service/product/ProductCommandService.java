@@ -18,7 +18,7 @@ public interface ProductCommandService {
 
     void validateProductOwnership(Long productId, Long memberId);
 
-    void createProductLocation(Long newProductId, ProductCreateRequest request);
+    void createProductLocation(Long newProductId, ProductCreateRequest request, Long memberId);
 
     ProductVisionResponse productVisionAnalyze(byte[] bytes, String contentType);
 
