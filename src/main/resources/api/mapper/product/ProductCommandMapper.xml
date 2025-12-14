@@ -17,6 +17,8 @@
     is_direct,
     is_delivery,
     selling_area,
+    ai_caption,
+    ai_tags,
     created_at
     )
     VALUES
@@ -31,6 +33,8 @@
     #{direct},
     #{delivery},
     #{sellingArea},
+    #{aiCaption},
+    CAST(#{aiTags} AS jsonb),
     NOW()
     )
   </insert>
