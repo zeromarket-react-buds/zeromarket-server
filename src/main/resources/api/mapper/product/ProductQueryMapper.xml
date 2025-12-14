@@ -11,6 +11,9 @@
         <result column="sell_price" property="sellPrice" />
         <result column="selling_area" property="sellingArea" />
 
+        <!--자기상품 찜방지용-->
+        <result column="seller_id" property="sellerId" />
+
         <result column="sales_status"
                 property="salesStatus"
                 javaType="com.zeromarket.server.common.enums.SalesStatus" />
@@ -38,6 +41,9 @@
         p.is_direct,
         p.created_at,
 
+        -- 판매자 ID (본인 상품 판별용) 자기찜 방지용
+        p.seller_id AS seller_id,
+
         -- ⭐ 찜 개수
         COALESCE(wc.wish_count, 0) AS wish_count,
 
@@ -52,7 +58,7 @@
             THEN TRUE
             ELSE FALSE
         END AS is_wished,
-
+        -- 썸네일
         pi.image_url AS thumbnail_url
 
         FROM product p

@@ -25,4 +25,6 @@ public class ProductQueryResponse {
     private int wishCount;
     //찜목록에 넣기
     private boolean isWished;
+
+    private Long sellerId;//자기상품 찜 방지용
 }
