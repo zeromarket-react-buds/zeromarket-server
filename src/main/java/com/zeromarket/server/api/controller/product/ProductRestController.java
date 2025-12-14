@@ -102,14 +102,23 @@ public class ProductRestController {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
-
-
         ProductVisionResponse response =
             productCommandService.productVisionAnalyze(
                 image.getBytes(), // 업로드된 파일에서 실제 이미지 바이트 배열을 꺼냄
                 image.getContentType()); // 이미지 타입을 꺼냄
 
         return ResponseEntity.ok(response);
+    }
+
+    // 상품등록 전 AI 초안
+    @Operation(summary = "상품등록 전 AI 초안", description = "Vision 결과 기반 상품명/설명 초안 생성")
+    @PostMapping("/aidraft")
+    public ResponseEntity<ProductAiDraftResponse> aiDraft(
+        @RequestBody ProductAiDraftRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) throw new ApiException(ErrorCode.UNAUTHORIZED);
+        return ResponseEntity.ok(productCommandService.generateAiDraft(request));
     }
 
     //상품 등록

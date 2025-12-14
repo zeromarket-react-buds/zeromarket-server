@@ -1,9 +1,6 @@
 package com.zeromarket.server.api.service.product;
 
-import com.zeromarket.server.api.dto.product.ProductCreateRequest;
-import com.zeromarket.server.api.dto.product.ProductDetailImageInfo;
-import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
-import com.zeromarket.server.api.dto.product.ProductVisionResponse;
+import com.zeromarket.server.api.dto.product.*;
 
 import java.util.List;
 
@@ -24,4 +21,6 @@ public interface ProductCommandService {
     void createProductLocation(Long newProductId, ProductCreateRequest request);
 
     ProductVisionResponse productVisionAnalyze(byte[] bytes, String contentType);
+
+    ProductAiDraftResponse generateAiDraft(ProductAiDraftRequest request);
 }

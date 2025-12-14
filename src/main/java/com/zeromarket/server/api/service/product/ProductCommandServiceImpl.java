@@ -1,9 +1,6 @@
 package com.zeromarket.server.api.service.product;
 
-import com.zeromarket.server.api.dto.product.ProductCreateRequest;
-import com.zeromarket.server.api.dto.product.ProductDetailResponse;
-import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
-import com.zeromarket.server.api.dto.product.ProductVisionResponse;
+import com.zeromarket.server.api.dto.product.*;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.ProductStatus;
@@ -20,11 +17,18 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     private final ProductCommandMapper mapper;
     private final VisionService visionService;
+    private final AiDraftService aiDraftService;
 
     // 상품 등록 전 vision. VisionService로 흐름 연결
     @Override
     public ProductVisionResponse productVisionAnalyze(byte[] bytes, String contentType) {
         return visionService.analyze(bytes, contentType);
+    }
+
+    // 상품 등록 전 AI 부분 AiDraftService로 흐름 연결
+    @Override
+    public ProductAiDraftResponse generateAiDraft(ProductAiDraftRequest request) {
+        return aiDraftService.generate(request);
     }
 
     @Override
