@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.service.product;
 
 import com.zeromarket.server.api.dto.product.*;
+import com.zeromarket.server.api.mapper.product.AreaQueryMapper;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.ProductStatus;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductCommandServiceImpl implements ProductCommandService {
 
     private final ProductCommandMapper mapper;
+    private final AreaQueryMapper areaQueryMapper;
     private final VisionService visionService;
     private final AiDraftService aiDraftService;
 
@@ -100,6 +102,27 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             }
 
         }
+        //위치정보 있으면 테이블에 insert되게
+        if(request.isDirect()&&request.getLocation()!=null){
+            //  1. 법정동 코드를 8자리로 자르기
+            String fullCode = request.getLocation().getLegalDongCode();
+            String eightDigitCode = fullCode.substring(0, 8);
+
+            // 2. DB에서 reference_area_id 조회
+            Long referenceAreaId = areaQueryMapper.getEupmyeondongIdByLegalCode(eightDigitCode);
+
+            if (referenceAreaId == null) {
+                // ID를 찾지 못하면 예외 발생 (DB에 데이터가 누락되었거나 코드 오류)
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
+            }
+
+            // 3. DTO에 조회한 ID 설정
+            request.getLocation().setReferenceAreaId(referenceAreaId);
+
+
+            mapper.insertProductLocation(newProductId,request,request.getSellerId());
+        }
+
         return newProductId; //여기까지 예외없이끝나면 트랜잭션이 커밋됨..
     }
 
@@ -172,8 +195,9 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     }
 
     @Override
-    public void createProductLocation(Long newProductId, ProductCreateRequest request) {
-        mapper.insertProductLocation(newProductId,request);
+    @Transactional
+    public void createProductLocation(Long newProductId, ProductCreateRequest request,Long memberId) {
+        mapper.insertProductLocation(newProductId,request,memberId);
 
     }
 

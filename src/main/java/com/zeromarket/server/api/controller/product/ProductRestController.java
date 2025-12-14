@@ -139,9 +139,9 @@ public class ProductRestController {
 
         Long newProductId = productCommandService.createProduct(request);
 
-        //직거래 상품등록시 product_location 테이블에 위치 정보 삽입
-        if(request.isDirect()){
-            productCommandService.createProductLocation(newProductId,request);
+        //직거래시 위치정보처리
+        if(request.isDirect() && request.getLocation()!=null){
+            productCommandService.createProductLocation(newProductId,request, userDetails.getMemberId());
         }
 
         ProductCreateResponse response =

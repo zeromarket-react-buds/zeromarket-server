@@ -17,6 +17,8 @@
     is_direct,
     is_delivery,
     selling_area,
+    ai_caption,
+    ai_tags,
     created_at
     )
     VALUES
@@ -31,6 +33,8 @@
     #{direct},
     #{delivery},
     #{sellingArea},
+    #{aiCaption},
+    CAST(#{aiTags} AS jsonb),
     NOW()
     )
   </insert>
@@ -51,7 +55,6 @@
     #{imageUrl},
     #{sortOrder},
     #{isMain},
-<!--    #{isMain, jdbcType=BOOLEAN},-->
     NOW()
     )
   </insert>
@@ -129,9 +132,11 @@
             product_id = #{productId}
     </update>
 
-  <insert id="insertProductLocation" parameterType="com.zeromarket.server.api.dto.product.ProductCreateRequest">
+  <insert id="insertProductLocation" parameterType="map">
     INSERT INTO product_location(
       product_id,
+      location_name,
+      member_id,
       reference_area_id,
       latitude,
       longitude,
@@ -142,19 +147,23 @@
       legal_dong_code,
       admin_dong_code,
       admin_dong_name,
-      create_at
+      created_at
     )VALUES(
       #{productId},
-      #{referenceAreaId},
-      #{latitude},
-      #{longitude},
-      #{roadAddress},
-      #{jibunAddress},
-      #{buildingName},
-      #{zipCode},
-      #{legalDongCode},
-      #{adminDongCode},
-      #{adminDongName},
+      #{request.location.locationName},
+      #{memberId},
+      #{request.location.referenceAreaId},
+      #{request.location.latitude, javaType=java.lang.Double},
+      #{request.location.longitude, javaType=java.lang.Double},
+<!--      #{request.location.latitude},-->
+<!--      #{request.location.longitude},-->
+      #{request.location.roadAddress},
+      #{request.location.jibunAddress},
+      #{request.location.buildingName},
+      #{request.location.zipCode},
+      #{request.location.legalDongCode},
+      #{request.location.adminDongCode},
+      #{request.location.adminDongName},
       NOW()
     );
   </insert>

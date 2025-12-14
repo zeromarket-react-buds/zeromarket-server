@@ -28,10 +28,13 @@ public interface ProductCommandMapper {
 
     void deleteImagesByProductId(Long productId);
 
-    //상품 판매자id조회 메서드
     Long getProductSellerId(Long productId);
 
     int updateProductStatus(@Param("productId") Long productId, @Param("salesStatus") SalesStatus salesStatus);
 
-    void insertProductLocation(Long newProductId, ProductCreateRequest request);
+    void insertProductLocation(
+        @Param("productId") Long newProductId,
+        @Param("request") ProductCreateRequest request,
+        @Param("memberId") Long memberId
+    );
 }
