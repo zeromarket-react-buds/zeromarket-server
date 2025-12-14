@@ -1,36 +1,25 @@
 package com.zeromarket.server.api.controller.product;
 
-import com.zeromarket.server.api.dto.product.HideRequest;
+import com.zeromarket.server.api.dto.product.*;
 import com.zeromarket.server.api.dto.LoadMoreResponse;
-import com.zeromarket.server.api.dto.product.ProductCreateRequest;
-import com.zeromarket.server.api.dto.product.ProductCreateResponse;
-import com.zeromarket.server.api.dto.product.ProductDetailResponse;
-import com.zeromarket.server.api.dto.product.ProductQueryRequest;
-import com.zeromarket.server.api.dto.product.ProductQueryResponse;
-import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.product.ProductCommandService;
 import com.zeromarket.server.api.service.product.ProductQueryService;
+import com.zeromarket.server.api.service.product.VisionService;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.io.IOException;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
@@ -40,6 +29,7 @@ public class ProductRestController {
 
     private ProductQueryService productQueryService;
     private ProductCommandService productCommandService;
+    private final VisionService visionService;
 
 //    @Operation(summary = "상품 목록 조회", description = "검색 포함 상품 목록 조회")
 //    @GetMapping
@@ -97,6 +87,29 @@ public class ProductRestController {
         ProductDetailResponse result = productQueryService.getProductDetail(memberId, productId);
 
         return ResponseEntity.ok(result);
+    }
+
+    // 상품 등록 전 Vision
+    @Operation(summary = "상품등록 전 Vision 분석", description = "이미지 1장 분석 후 caption/tags 반환")
+    // 요청 타입은 multipart/form-data. FormData로 보내는 파일 요청만 허용
+    @PostMapping(value = "/vision", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductVisionResponse> productVision(
+        // FormData 안에서 image라는 이름의 파일을 받음. 프론트의 formData.append("image", file)과 이름이 반드시 같아야
+        @RequestPart("image") MultipartFile image,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) throws IOException {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+
+
+        ProductVisionResponse response =
+            productCommandService.productVisionAnalyze(
+                image.getBytes(), // 업로드된 파일에서 실제 이미지 바이트 배열을 꺼냄
+                image.getContentType()); // 이미지 타입을 꺼냄
+
+        return ResponseEntity.ok(response);
     }
 
     //상품 등록

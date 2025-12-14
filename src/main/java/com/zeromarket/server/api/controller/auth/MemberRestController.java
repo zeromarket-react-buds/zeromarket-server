@@ -7,6 +7,7 @@ import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingRequest;
 import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
+import com.zeromarket.server.api.service.auth.AuthService;
 import com.zeromarket.server.api.service.auth.MemberService;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member API", description = "회원 API")
 public class MemberRestController {
 
+    private final AuthService authService;
     private final MemberService memberService;
 
     //    인증 관련 사용 (인증 정보 조회 API)
@@ -33,7 +35,7 @@ public class MemberRestController {
     ) {
         if(userDetails == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
 
-        MemberResponse response = memberService.getMyInfo(userDetails.getLoginId());
+        MemberResponse response = authService.getMyInfo(userDetails.getLoginId());
 
         return ResponseEntity.ok(response);
     }

@@ -24,9 +24,6 @@ public interface MemberMapper {
 //    List<Member> selectMembers(MemberSearchRequest searchRequest);
 //    int countMembers(MemberSearchRequest searchRequest);
 //
-//    // 회원 수정
-//    void updateMember(Member member);
-//
 //    // 비밀번호 변경
 //    void updatePassword(@Param("memberId") Long memberId, @Param("password") String password);
 //
@@ -43,6 +40,10 @@ public interface MemberMapper {
 
     boolean existsByNicknameExcludingMe(@Param("nickname") String nickname,
                                         @Param("memberId") Long memberId);
+
+//    OAuth 카카오
+    Member findBySocialId(@Param("socialId") String socialId);
+    void insertSocialMember(Member member);
     
     MemberEditResponse getMemberEdit(Long memberId);
 

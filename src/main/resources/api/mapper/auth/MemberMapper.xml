@@ -90,6 +90,37 @@
         AND withdrawn_at IS NULL
     </select>
 
+    <!-- social_id 회원 존재 여부 -->
+    <select id="findBySocialId" resultType="com.zeromarket.server.common.entity.Member">
+        SELECT
+            member_id,
+            email,
+            nickname,
+            social_id,
+            role
+        FROM member
+        WHERE social_id = #{socialId}
+    </select>
+
+    <!-- oauth 회원가입 -->
+    <insert id="insertSocialMember" useGeneratedKeys="true" keyProperty="memberId">
+        INSERT INTO member (
+            nickname,
+            social_id,
+            role,
+            profile_image,
+            login_id,
+            password
+        ) VALUES (
+            #{nickname},
+            #{socialId},
+            #{role},
+            #{profileImage},
+            #{loginId},
+            #{password}
+        )
+    </insert>
+
     <!-- 회원정보 설정 페이지에서 해당 회원 정보 조회 -->
     <select id="getMemberEdit"
             parameterType="long"
@@ -112,11 +143,17 @@
                 phone = #{request.phone},
             </if>
             <if test="request.email != null">
-                email = #{request.email},
+                <choose>
+                    <when test="request.email == ''">
+                        email = NULL,
+                    </when>
+                    <otherwise>
+                        email = #{request.email},
+                    </otherwise>
+                </choose>
             </if>
             updated_at = CURRENT_TIMESTAMP
         </set>
         WHERE member_id = #{memberId}
     </update>
-
 </mapper>

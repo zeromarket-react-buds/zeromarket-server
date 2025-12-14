@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @EnableWebSecurity
@@ -42,7 +43,7 @@ public class SecurityConfig {
                     // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
 //                .requestMatchers("/**").permitAll()
                     // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
-                    .requestMatchers("/api/auth/**", "/api/products/**").permitAll()
+                    .requestMatchers("/api/auth/**", "/api/oauth/**", "/api/products/**").permitAll()
                     .requestMatchers(
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
@@ -95,5 +96,10 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().build();
     }
 }
