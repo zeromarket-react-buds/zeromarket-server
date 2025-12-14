@@ -1,11 +1,14 @@
 package com.zeromarket.server.api.controller.mypage;
 
+import com.zeromarket.server.api.dto.mypage.LikedSellerResponse;
 import com.zeromarket.server.api.dto.mypage.WishToggleResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.mypage.WishSellerService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +36,16 @@ public class WishSellerController {
             sellerId
         );
         return ResponseEntity.ok(response);
+    }
+
+    // 셀러 찜 목록 조회 기능
+    @GetMapping("/api/me/wishlist/sellers")
+    public ResponseEntity<List<LikedSellerResponse>> getLikedSellers(
+        @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        return ResponseEntity.ok(
+            wishSellerService.getLikedSellers(user.getMemberId())
+        );
     }
 
 }

@@ -1,8 +1,10 @@
 package com.zeromarket.server.api.service.mypage;
 
+import com.zeromarket.server.api.dto.mypage.LikedSellerResponse;
 import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.dto.mypage.WishToggleResponse;
 import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,5 +41,12 @@ public class WishSellerServiceImpl implements WishSellerService {
         // 존재하나 비활성화 상태 → 활성화로 변경
         wishMapper.reactiveWishSeller(wish.getWishSellerId());
         return new WishToggleResponse(true); // 좋아요 ON
+    }
+
+    // 셀러 찜 목록 조회 기능
+    @Override
+    @Transactional(readOnly = true)
+    public List<LikedSellerResponse> getLikedSellers(Long memberId) {
+        return wishMapper.selectLikedSellers(memberId);
     }
 }

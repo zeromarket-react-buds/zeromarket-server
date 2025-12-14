@@ -40,4 +40,20 @@
         WHERE wish_seller_id = #{wishSellerId}
     </update>
 
+    <!-- 내가 찜한 셀러 목록 -->
+    <select id="selectLikedSellers"
+        resultType="com.zeromarket.server.api.dto.mypage.LikedSellerResponse">
+        SELECT
+        m.member_id     AS sellerId,
+        m.nickname      AS nickname,
+        m.profile_image AS profileImage,
+        TRUE            AS liked
+        FROM wish_seller ws
+        JOIN member m
+        ON ws.seller_id = m.member_id
+        WHERE ws.member_id = #{memberId}
+        AND ws.is_deleted = FALSE
+        ORDER BY ws.updated_at DESC
+    </select>
+
 </mapper>

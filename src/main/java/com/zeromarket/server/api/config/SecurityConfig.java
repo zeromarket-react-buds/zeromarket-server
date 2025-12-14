@@ -48,6 +48,13 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/swagger-ui.html"
                     ).permitAll()
+
+                    // ⭐ 로그인 필요 (JWT)
+                    .requestMatchers(
+                        "/api/me/**",
+                        "/api/sellershop/**"
+                    ).authenticated()
+
                     // 나머지 모든 요청은 인증(로그인)이 필요함
                 .anyRequest().authenticated()
             )
