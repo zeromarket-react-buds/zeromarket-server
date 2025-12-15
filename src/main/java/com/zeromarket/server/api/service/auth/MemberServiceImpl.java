@@ -14,10 +14,12 @@ import com.zeromarket.server.common.enums.Role;
 import com.zeromarket.server.common.exception.ApiException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -81,8 +83,8 @@ public class MemberServiceImpl implements MemberService {
         KakaoUserInfo.KakaoAccount.Profile profile =
             account != null ? account.getProfile() : null;
 
-        System.out.println(profile.getNickname()); // 황희원
-        System.out.println(profile.getProfileImageUrl()); // null
+//        log.error("KakaoUserInfo.KakaoAccount.profile.getNickname(): {}", profile.getNickname());     // 출력 안됨
+//        log.error("KakaoUserInfo.KakaoAccount.profile.getProfileImageUrl(): {}", profile.getProfileImageUrl());
 
         String nicknameBase = profile != null ? profile.getNickname() : "카카오사용자";
         String profileImageUrl =
@@ -101,12 +103,14 @@ public class MemberServiceImpl implements MemberService {
             newMember.setNickname(nickname);
             newMember.setProfileImage(profileImageUrl);
             newMember.setRole(Role.ROLE_USER.getDescription());
-            // 더미 데이터
-            newMember.setLoginId(socialId);
-            newMember.setPassword("{noop}SOCIAL_LOGIN");
+            newMember.setLoginId(socialId);                 // 더미 데이터 - loginId
+            newMember.setPassword("{noop}SOCIAL_LOGIN");    // 더미 데이터 - password
 
             try {
                 memberMapper.insertSocialMember(newMember);
+
+//                log.info("loginId = null 확인용: {}",  newMember.getLoginId());
+
                 return newMember;
             } catch(DuplicateKeyException e) {
                 // nickname UNIQUE 충돌 → 다시 시도

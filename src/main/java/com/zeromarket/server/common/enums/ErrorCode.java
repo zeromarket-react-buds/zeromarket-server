@@ -16,6 +16,11 @@ public enum ErrorCode {
     LOGIN_FAIL(401, "아이디 또는 비밀번호가 올바르지 않습니다."),
     JWT_NOT_EXIST(401, "refresh 토큰이 존재하지 않습니다."),
     JWT_NOT_VALID(401, "JWT 토큰이 유효하지 않습니다."),
+    // Kakao OAuth 관련 (400번대)
+    INVALID_AUTHORIZATION_CODE(400, "유효하지 않은 인증 코드입니다."),
+    KAKAO_TOKEN_REQUEST_FAILED(400, "카카오 토큰 요청에 실패했습니다."),
+    KAKAO_USER_INFO_REQUEST_FAILED(400, "카카오 사용자 정보 조회에 실패했습니다."),
+    KAKAO_LOGIN_FAILED(400, "카카오 로그인에 실패했습니다."),
 
     // 회원
     MEMBER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),
