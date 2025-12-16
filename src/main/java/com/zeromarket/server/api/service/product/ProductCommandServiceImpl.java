@@ -103,24 +103,39 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         }
         //위치처리
-        if(request.isDirect()&&request.getLocation()!=null){
+//        if (request.isDirect()) {
+//            if (request.getLocation() == null ||
+//                request.getLocation().getLegalDongCode() == null ||
+//                request.getLocation().getLegalDongCode().isBlank()) {
+//                throw new ApiException(ErrorCode.INVALID_REQUEST);
+//            }
+//        }
 
-            String legalDongCode = request.getLocation().getLegalDongCode();
+        if(request.isDirect() && request.getLocation()!=null){
 
-            if(legalDongCode==null || !legalDongCode.matches("\\d{8}")){
+            if(request.getLocation().getLegalDongCode() == null ||
+                request.getLocation().getLegalDongCode().isBlank()) {
                 throw new ApiException(ErrorCode.INVALID_REQUEST);
             }
+            String legalDongCode = request.getLocation().getLegalDongCode();
+
+            if(!legalDongCode.matches("\\d{8}|\\d{10}")){
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
+            }
+//            if(legalDongCode==null || !legalDongCode.matches("\\d{8}")){
+//                throw new ApiException(ErrorCode.INVALID_REQUEST);
+//            }
             //법정동 테이블 기준 조회
             Long legalDongId = areaQueryMapper.getLegalDongIdByLegalCode(legalDongCode);
 
             if(legalDongId==null){
                 throw new ApiException(ErrorCode.INVALID_REQUEST);
             }
-
-            //dto에 fk값 세팅
+//
+//            //dto에 fk값 세팅
             request.getLocation().setReferenceAreaId(legalDongId);
-
-            //insert
+//
+//            //insert
             mapper.insertProductLocation(newProductId,request,request.getSellerId());
         }
 
@@ -195,12 +210,12 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         }
     }
 
-    @Override
-    @Transactional
-    public void createProductLocation(Long newProductId, ProductCreateRequest request,Long memberId) {
-        mapper.insertProductLocation(newProductId,request,memberId);
-
-    }
+//    @Override
+//    @Transactional
+//    public void createProductLocation(Long newProductId, ProductCreateRequest request,Long memberId) {
+//        mapper.insertProductLocation(newProductId,request,memberId);
+//
+//    }
 
 
 }

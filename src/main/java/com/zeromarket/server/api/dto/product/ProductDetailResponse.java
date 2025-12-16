@@ -39,6 +39,8 @@ public class ProductDetailResponse {
     private boolean isDelivery;
     private boolean isDirect;
     private String sellingArea;
+    private Double latitude;
+    private Double longitude;
     private LocalDateTime createdAt;
     private boolean isHidden;
     private boolean isDeleted;
