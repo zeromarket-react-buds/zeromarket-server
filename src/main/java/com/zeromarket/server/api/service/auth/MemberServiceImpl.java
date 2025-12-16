@@ -83,12 +83,11 @@ public class MemberServiceImpl implements MemberService {
         KakaoUserInfo.KakaoAccount.Profile profile =
             account != null ? account.getProfile() : null;
 
-//        log.error("KakaoUserInfo.KakaoAccount.profile.getNickname(): {}", profile.getNickname());     // 출력 안됨
-//        log.error("KakaoUserInfo.KakaoAccount.profile.getProfileImageUrl(): {}", profile.getProfileImageUrl());
-
         String nicknameBase = profile != null ? profile.getNickname() : "카카오사용자";
         String profileImageUrl =
-            profile != null ? profile.getProfileImageUrl() : null;
+            profile != null ? profile.getProfile_image_url() : null;
+
+        log.error("가져온 profileImageUrl={}", profileImageUrl);
 
         int maxRetry = 5;
 

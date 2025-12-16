@@ -27,12 +27,12 @@ public interface MemberMapper {
 //    // 비밀번호 변경
 //    void updatePassword(@Param("memberId") Long memberId, @Param("password") String password);
 //
-//    // 회원 탈퇴
-//    void withdrawMember(@Param("memberId") Long memberId,
-//        @Param("withdrawalReasonId") Long withdrawalReasonId,
-//        @Param("withdrawalReasonDetail") String withdrawalReasonDetail);
-//
-//    // 중복 체크
+    // 회원 탈퇴
+    int withdrawMember(@Param("memberId") Long memberId,
+        @Param("withdrawalReasonId") Integer withdrawalReasonId,
+        @Param("withdrawalReasonDetail") String withdrawalReasonDetail);
+
+    // 중복 체크
     boolean existsByLoginId(String loginId);
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);

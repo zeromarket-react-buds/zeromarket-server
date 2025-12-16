@@ -121,6 +121,19 @@
         )
     </insert>
 
+    <!--  회원 탈퇴  -->
+    <update id="withdrawMember">
+        UPDATE member
+        SET
+            withdrawn_at = NOW(),
+            nickname = nickname || '_withdrawn_' || member_id,
+            withdrawal_reason_id = #{withdrawalReasonId},
+            withdrawal_reason_detail = #{withdrawalReasonDetail},
+            updated_at = NOW()
+        WHERE member_id = #{memberId}
+            AND withdrawn_at IS NULL
+    </update>
+
     <!-- 회원정보 설정 페이지에서 해당 회원 정보 조회 -->
     <select id="getMemberEdit"
             parameterType="long"

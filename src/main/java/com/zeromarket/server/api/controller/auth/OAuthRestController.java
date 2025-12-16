@@ -23,7 +23,7 @@ public class OAuthRestController {
 
     @Operation(summary = "oauth 로그인/회원가입", description = "")
     @PostMapping("/kakao")
-    public ResponseEntity<?> kakaoLogin(
+    public ResponseEntity<?> login(
         @RequestBody KakaoLoginRequest request,
         HttpServletResponse response
     ) {

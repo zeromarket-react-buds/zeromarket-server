@@ -4,6 +4,7 @@ import com.zeromarket.server.api.dto.auth.KakaoTokenResponse;
 import com.zeromarket.server.api.dto.auth.KakaoUserInfo;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,9 @@ public class KakaoOAuthClient {
 
     @Value("${oauth.kakao.redirect-uri}")
     private String redirectUri;
+
+    @Value("${oauth.kakao.admin-key}")
+    String adminKey; // 환경 변수에서 관리
 
 //    카카오 access token 받아오기
     public String requestToken(String code) {
@@ -107,6 +111,26 @@ public class KakaoOAuthClient {
             throw new ApiException(ErrorCode.KAKAO_TOKEN_REQUEST_FAILED);
 //            throw new KakaoUserInfoException("Failed to request Kakao user info", e);
         }
+    }
+
+//      카카오 연결 해제
+    public void unlinkWithAdminKey(String kakaoUserId) {
+
+        webClient.post()
+            .uri("https://kapi.kakao.com/v1/user/unlink")
+            .header("Authorization", "KakaoAK " + adminKey) // Admin Key 사용
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .body(BodyInserters.fromFormData("target_id_type", "user_id")
+                .with("target_id", kakaoUserId))
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response ->
+                // 에러 처리: 연결 끊기 실패 시 ApiException 던지기
+                response.bodyToMono(String.class).flatMap(body -> {
+                    log.error("카카오 연결 끊기 실패. Status: {}, Response Body: {}", response.statusCode().value(), body);
+                    throw new ApiException(ErrorCode.KAKAO_UNLINK_FAILED);
+                }))
+            .bodyToMono(Map.class) // 응답은 해제된 사용자 ID를 포함한 JSON
+            .block();
     }
 }
 
