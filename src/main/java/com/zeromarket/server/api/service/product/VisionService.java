@@ -2,6 +2,8 @@ package com.zeromarket.server.api.service.product;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zeromarket.server.api.dto.product.ProductEnvGradeRequest;
+import com.zeromarket.server.api.dto.product.ProductEnvGradeResponse;
 import com.zeromarket.server.api.dto.product.ProductVisionResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -20,17 +22,21 @@ public class VisionService {
     // JSON 문자열을 Java 객체처럼 다루기 위함. Vision API 응답 파싱에 사용
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final EnvGradeService envGradeService;
+
     // application.yml에 있는 Azure Vision API 키 읽어옴 (보안 처리)
     @Value("${azure.vision.key}")
     private String key;
 
     // WebClient.Builder를 주입. Vision API의 엔드포인트 주입
     public VisionService(WebClient.Builder builder,
-                         @Value("${azure.vision.endpoint}") String endpoint) {
+                         @Value("${azure.vision.endpoint}") String endpoint,
+                         EnvGradeService envGradeService) {
 
         // 주소 끝에 /가 있으면 제거
         String base = endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint;
         this.webClient = builder.baseUrl(base).build(); // Azure Vision API를 기본 주소로 사용하는 WebClient 생성
+        this.envGradeService = envGradeService;
     }
 
     // 이미지 바이트를 Azure Vision에 전송, 응답 JSON을 파싱, caption/tags만 뽑아서 반환
@@ -88,11 +94,22 @@ public class VisionService {
                     }
                 }
             }
+            Long envScore = null;
+            try {
+                ProductEnvGradeRequest envReq = new ProductEnvGradeRequest();
+                envReq.setCaption(caption);
+                envReq.setTags(tags);
 
+                ProductEnvGradeResponse envRes = envGradeService.calculate(envReq);
+                envScore = envRes != null ? envRes.getEnvironmentScore() : null;
+            } catch (Exception e) {
+                System.out.println("envScore 계산 실패: " + e.getMessage());
+            }
             // DTO에 세팅
             ProductVisionResponse res = new ProductVisionResponse();
             res.setCaption(caption);
             res.setTags(tags);
+            res.setEnvironmentScore(envScore);
             return res;
 
         } catch (Exception e) {
