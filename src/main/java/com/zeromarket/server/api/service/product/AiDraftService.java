@@ -43,7 +43,7 @@ public class AiDraftService {
     // 프론트에서 받은 요청을 바탕으로 AI 초안 결과(title, description)를 만들어 반환
     public ProductAiDraftResponse generate(ProductAiDraftRequest req) {
         try {
-            String prompt = buildPrompt(req); // 요청 데이터를 문장 형태로 정리해서 AI에게 보낼 프롬프트 문자열로
+            String prompt = buildPrompt(req); // ProductAiDraftRequest를 기반으로 AI에 전달할 프롬프트 생성
 
             // Azure OpenAI에 보낼 요청 바디(JSON)를 만들기 위한 Map
             Map<String, Object> body = new HashMap<>();
@@ -90,7 +90,7 @@ public class AiDraftService {
                 throw new RuntimeException("AI Draft content가 비어있습니다.");
             }
 
-            JsonNode out = objectMapper.readTree(content); // AI가 content에 JSON 문자열을 넣어줬다고 가정하고 다시 파싱
+            JsonNode out = objectMapper.readTree(content); // content는 JSON 문자열이므로 다시 파싱
 
             // title / description 키의 값을 문자열로. 없으면 빈 문자열
             String title = out.path("title").asText("");
