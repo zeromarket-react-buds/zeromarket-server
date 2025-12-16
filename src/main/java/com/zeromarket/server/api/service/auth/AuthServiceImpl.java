@@ -10,6 +10,7 @@ import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
 import com.zeromarket.server.api.security.JwtUtil;
+import com.zeromarket.server.api.security.KakaoOAuthClient;
 import com.zeromarket.server.api.service.mypage.ReviewService;
 import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -38,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final ReviewService reviewService;
     private final WishSellerMapper wishSellerMapper;
+    private final KakaoOAuthClient kakaoOAuthClient;
 
     @Override
     @Transactional
@@ -123,7 +125,8 @@ public class AuthServiceImpl implements AuthService {
         String loginId = jwtUtil.getLoginId(refreshToken);
 
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
-            .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+//            .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
 
         String newAccessToken = jwtUtil.generateAccessToken(member.getLoginId(), member.getRole());
         String newRefreshToken = jwtUtil.generateRefreshToken(member.getLoginId());
@@ -179,8 +182,4 @@ public class AuthServiceImpl implements AuthService {
         return dto;
     }
 
-    @Override
-    public void logout(HttpServletResponse response) {
-        jwtUtil.setRefreshCookie("", response);
-    }
 }

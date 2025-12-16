@@ -7,11 +7,14 @@ import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
+import com.zeromarket.server.api.security.JwtUtil;
+import com.zeromarket.server.api.security.KakaoOAuthClient;
 import com.zeromarket.server.api.service.mypage.ReviewService;
 import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.Role;
 import com.zeromarket.server.common.exception.ApiException;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,8 @@ public class MemberServiceImpl implements MemberService {
     private final MemberMapper memberMapper;
     private final ReviewService reviewService;
     private final WishSellerMapper wishSellerMapper;
+    private final JwtUtil jwtUtil;
+    private final KakaoOAuthClient kakaoOAuthClient;
 
     // 회원 프로필 정보 조회 (셀러샵 사용)
     @Override
@@ -67,7 +72,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     public Member findOrCreateKakaoUser(KakaoUserInfo kakaoUserInfo) {
-        //    TODO: 프로필 이미지는 저장 안되는 것 같은데?
 
         // 1. social_id 생성
         String socialId = "kakao_" + kakaoUserInfo.getId();
@@ -91,7 +95,7 @@ public class MemberServiceImpl implements MemberService {
 
         int maxRetry = 5;
 
-//        TODO: '카카오사용자' -> nickname unique 제약 조건 위반
+        // nickname unique 제약 조건 위반 시, 5번까지 재생성 시도
         for(int i = 0; i < maxRetry; i++) {
             String suffix = UUID.randomUUID().toString().substring(0, 4);
             String nickname = nicknameBase + "_" + suffix;
@@ -121,5 +125,48 @@ public class MemberServiceImpl implements MemberService {
 
         // 논리적으로 도달하지 않음
         throw new IllegalStateException("닉네임 생성 실패");
+    }
+
+    // 회원탈퇴
+    @Override
+    public void withdraw(Long memberId, HttpServletResponse response) {
+
+        Member member = memberMapper.selectMemberById(memberId);
+        if(member == null) {throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);}
+
+        // 1. 카카오 연결 해제 (socialId != null인 경우)
+        String socialId = member.getSocialId();
+        String prefix = "kakao_";
+
+        if (socialId != null && socialId.startsWith(prefix)) {
+            String extracted = socialId.substring(prefix.length());
+            log.info("추출된 socialId: {}", extracted);
+
+            kakaoOAuthClient.unlinkWithAdminKey(extracted);
+            log.info("카카오 연결 해제 완료");
+        }
+
+        // 2. 쿠키 해제
+        jwtUtil.setRefreshCookie(null, response);
+
+        // 3. DB 회원 정보 삭제 (소프트 딜리트)
+        int updated = memberMapper.withdrawMember(
+            memberId,
+            2,
+            ""
+        );
+
+        if (updated == 0) {
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
+        }
+
+        log.info("탈퇴 성공, 변경된 row: {}", updated);
+    }
+
+    @Override
+    public void logout(HttpServletResponse response) {
+//        1. 쿠키 해제
+        jwtUtil.setRefreshCookie("", response);
+
     }
 }

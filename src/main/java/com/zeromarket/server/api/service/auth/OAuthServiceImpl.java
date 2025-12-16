@@ -35,11 +35,7 @@ public class OAuthServiceImpl implements OAuthService {
         KakaoUserInfo userInfo = kakaoOAuthClient.requestUserInfo(kakaoAccessToken);
 
 //        3. DB에서 유저 정보 불러오기 (로그인 또는 회원가입)
-//        TODO: 왜 loginId가 null이지? -> mybatis 덮어쓰기 문제 (?)
         Member member = memberService.findOrCreateKakaoUser(userInfo);
-        log.info("로그인/회원가입 결과");
-        log.info("member.getLoginId(): {}", member.getLoginId()); // null
-        log.info("member.getSocialId(): {}", member.getSocialId());
 
 //        4. JWT 토큰 생성
         String accessToken = jwtUtil.generateAccessToken(member.getSocialId(), member.getRole());
@@ -54,41 +50,5 @@ public class OAuthServiceImpl implements OAuthService {
         } catch (ApiException e) {
             throw new ApiException(ErrorCode.KAKAO_LOGIN_FAILED);
         }
-    }
-
-    // 회원탈퇴
-    @Override
-    public void withdraw(Long memberId, HttpServletResponse response) {
-
-        Member member = memberMapper.selectMemberById(memberId);
-        if(member == null) {throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);}
-
-        // 1. 카카오 연결 해제 (socialId != null인 경우)
-        String socialId = member.getSocialId();
-        String prefix = "kakao_";
-
-        if (socialId != null && socialId.startsWith(prefix)) {
-            String extracted = socialId.substring(prefix.length());
-            log.info("추출된 socialId: {}", extracted);
-
-            kakaoOAuthClient.unlinkWithAdminKey(extracted);
-            log.info("카카오 연결 해제 완료");
-        }
-
-        // 2. 쿠키 해제
-        jwtUtil.setRefreshCookie(null, response);
-
-        // 3. DB 회원 정보 삭제 (소프트 딜리트)
-        int updated = memberMapper.withdrawMember(
-            memberId,
-            2,
-            ""
-        );
-
-        if (updated == 0) {
-            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
-        }
-
-        log.info("탈퇴 성공, 변경된 row: {}", updated);
     }
 }

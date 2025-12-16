@@ -100,6 +100,7 @@
             role
         FROM member
         WHERE social_id = #{socialId}
+            AND withdrawn_at IS NULL
     </select>
 
     <!-- oauth 회원가입 -->
@@ -121,15 +122,21 @@
         )
     </insert>
 
-    <!--  회원 탈퇴  -->
+    <!--  회원 탈퇴 (soft delete), UNIQUE 제약 조건 회피를 위해 memberId와 현재 시간을 조합  -->
     <update id="withdrawMember">
         UPDATE member
         SET
             withdrawn_at = NOW(),
-            nickname = nickname || '_withdrawn_' || member_id,
             withdrawal_reason_id = #{withdrawalReasonId},
             withdrawal_reason_detail = #{withdrawalReasonDetail},
+
+            login_id = 'withdrawn_' || #{memberId} || '_' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS'),
+            email = 'withdrawn_' || #{memberId} || '_' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS') || '@example.com',
+            nickname = 'withdrawn_' || #{memberId} || '_' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS'),
+            social_id = NULL,
+
             updated_at = NOW()
+
         WHERE member_id = #{memberId}
             AND withdrawn_at IS NULL
     </update>

@@ -28,7 +28,6 @@ public class MemberRestController {
 
     private final AuthService authService;
     private final MemberService memberService;
-    private final OAuthService oAuthService;
 
     //    인증 관련 사용 (인증 정보 조회 API)
     @Operation(summary = "내 정보 조회", description = "")
@@ -46,7 +45,7 @@ public class MemberRestController {
     @Operation(summary = "로그아웃", description = "")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        authService.logout(response);
+        memberService.logout(response);
         return ResponseEntity.ok().build();
     }
 
@@ -58,7 +57,7 @@ public class MemberRestController {
     ) {
         if(userDetails == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
 
-        oAuthService.withdraw(userDetails.getMemberId(), response);
+        memberService.withdraw(userDetails.getMemberId(), response);
         return ResponseEntity.ok().build();
     }
 

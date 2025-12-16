@@ -5,6 +5,7 @@ import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.mypage.MemberEditRequest;
 import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.common.entity.Member;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface MemberService {
     MemberProfileDto getMemberProfile(Long memberId, Long authMemberId);
@@ -14,4 +15,8 @@ public interface MemberService {
     MemberEditResponse updateMemberEdit(Long memberId, MemberEditRequest request);
 
     Member findOrCreateKakaoUser(KakaoUserInfo userInfo);
+
+    void withdraw(Long memberId, HttpServletResponse response);
+
+    void logout(HttpServletResponse response);
 }
