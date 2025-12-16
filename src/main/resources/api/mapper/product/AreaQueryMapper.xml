@@ -3,11 +3,12 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zeromarket.server.api.mapper.product.AreaQueryMapper">
 
-  <select id="getEupmyeondongIdByLegalCode" resultType="Long">
-    SELECT eupmyeondong_id
-    FROM eupmyeondong_areas
-    WHERE eupmyeondong_code = #{code}
-    LIMIT 1
+  <select id="getLegalDongIdByLegalCode" resultType="Long">
+    SELECT legal_dong_id
+    FROM legal_dong_areas
+    WHERE legal_dong_code = #{code}
+    AND deleted_at IS NULL
+<!--    LIMIT 1-->
   </select>
 
 </mapper>

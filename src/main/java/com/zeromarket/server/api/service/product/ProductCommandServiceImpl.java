@@ -85,13 +85,13 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         List<ProductCreateRequest.ProductImageDto> images = request.getImages();
 
         //이미지 없는 상품등록 - 여기서 종료
-        if (images == null || images.isEmpty()) {
-            return newProductId;
-        }
+//        if (images == null || images.isEmpty()) {
+//            return newProductId;
+//        }
 
         //이미지 있는 상품등록 - 디비에 insert
-        if (images != null) {
-//        if (request.getImages() != null) {
+        //이미지가 있는 경우에만 이미지 insert
+        if (images != null && !images.isEmpty()) {
             for (ProductCreateRequest.ProductImageDto img : images) {
                 mapper.insertProductImage(
                     newProductId,
@@ -102,24 +102,25 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             }
 
         }
-        //위치정보 있으면 테이블에 insert되게
+        //위치처리
         if(request.isDirect()&&request.getLocation()!=null){
-            //  1. 법정동 코드를 8자리로 자르기
-            String fullCode = request.getLocation().getLegalDongCode();
-            String eightDigitCode = fullCode.substring(0, 8);
 
-            // 2. DB에서 reference_area_id 조회
-            Long referenceAreaId = areaQueryMapper.getEupmyeondongIdByLegalCode(eightDigitCode);
+            String legalDongCode = request.getLocation().getLegalDongCode();
 
-            if (referenceAreaId == null) {
-                // ID를 찾지 못하면 예외 발생 (DB에 데이터가 누락되었거나 코드 오류)
+            if(legalDongCode==null || !legalDongCode.matches("\\d{8}")){
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
+            }
+            //법정동 테이블 기준 조회
+            Long legalDongId = areaQueryMapper.getLegalDongIdByLegalCode(legalDongCode);
+
+            if(legalDongId==null){
                 throw new ApiException(ErrorCode.INVALID_REQUEST);
             }
 
-            // 3. DTO에 조회한 ID 설정
-            request.getLocation().setReferenceAreaId(referenceAreaId);
+            //dto에 fk값 세팅
+            request.getLocation().setReferenceAreaId(legalDongId);
 
-
+            //insert
             mapper.insertProductLocation(newProductId,request,request.getSellerId());
         }
 

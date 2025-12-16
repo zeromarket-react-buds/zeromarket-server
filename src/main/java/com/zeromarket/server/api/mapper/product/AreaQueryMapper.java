@@ -6,5 +6,5 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface AreaQueryMapper {
 
-    Long getEupmyeondongIdByLegalCode(@Param("code") String eightDigitCode);
+    Long getLegalDongIdByLegalCode(@Param("code") String legalDongCode);
 }
