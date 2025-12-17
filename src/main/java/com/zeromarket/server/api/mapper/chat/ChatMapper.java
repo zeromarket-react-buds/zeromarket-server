@@ -45,5 +45,13 @@ public interface ChatMapper {
 
     Long upsertChatRoomId(ChatRoom chatRoom);
 
+    void updateLastReadMessage(
+        @Param("chatRoomId") Long chatRoomId,
+        @Param("memberId") Long memberId,
+        @Param("lastReadMessageId") Long lastReadMessageId
+    );
+
+    Long getLastReadMessageId(@Param("chatRoomId")Long chatRoomId, @Param("memberId")Long memberId);
+
 //    List<ChatRecentMessageResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
 }

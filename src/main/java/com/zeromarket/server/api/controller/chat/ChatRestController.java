@@ -1,6 +1,7 @@
 package com.zeromarket.server.api.controller.chat;
 
 import com.zeromarket.server.api.dto.chat.ChatDto;
+import com.zeromarket.server.api.dto.chat.ChatDto.ChatReadReq;
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageRequest;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -96,6 +98,17 @@ public class ChatRestController {
         List<ChatMessageResponse> chatMessages = chatService.selectChatMessages(chatRoomId, userDetail.getMemberId());
 
         return ResponseEntity.ok(chatMessages);
+    }
+
+    @PatchMapping("/rooms/{chatRoomId}/read")
+    public ResponseEntity<Void> markAsRead(
+        @PathVariable Long chatRoomId,
+        @RequestBody ChatReadReq req,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = userDetails.getMemberId();
+        chatService.markAsRead(chatRoomId, memberId, req.getLastReadMessageId());
+        return ResponseEntity.ok().build();
     }
 
 

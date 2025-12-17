@@ -6,9 +6,25 @@ public class ChatDto {
 
     @Getter
     @Builder
+    public static class ChatReadEvent {
+
+        private Long chatRoomId;
+        private Long readerId;
+        private Long lastReadMessageId;
+    }
+
+    @Getter
+    @Setter
+    public static class ChatReadReq {
+        private Long lastReadMessageId;
+    }
+
+    @Getter
+    @Builder
     @ToString
     public static class ChatMessagePush {
-        private Long chatMessageId;
+
+        private Long messageId;
         private Long chatRoomId;
         private Long memberId;
         private String content;

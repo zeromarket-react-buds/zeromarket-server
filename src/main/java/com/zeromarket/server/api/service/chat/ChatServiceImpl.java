@@ -2,6 +2,7 @@ package com.zeromarket.server.api.service.chat;
 
 import com.zeromarket.server.api.config.RabbitConfig;
 import com.zeromarket.server.api.dto.chat.ChatDto;
+import com.zeromarket.server.api.dto.chat.ChatDto.ChatReadEvent;
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageRequest;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
@@ -11,6 +12,7 @@ import com.zeromarket.server.api.dto.chat.ChatRoomResponse;
 import com.zeromarket.server.api.dto.product.ProductBasicInfo;
 import com.zeromarket.server.api.mapper.chat.ChatMapper;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
+import com.zeromarket.server.api.publisher.ChatEventPublisher;
 import com.zeromarket.server.api.publisher.ChatPublisher;
 import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.entity.ChatRoom;
@@ -21,6 +23,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMapper chatMapper;
     private final ProductQueryMapper productQueryMapper;
     private final ChatPublisher chatPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public ChatMessage selectChatMessageByMessageId(Long messageId) {
@@ -74,7 +78,7 @@ public class ChatServiceImpl implements ChatService {
         ChatInfoWithMessageResponse chatInfoWithMessageResponse = chatMapper.selectChatInfo(
             chatRoomId);
         chatInfoWithMessageResponse.setChatMessages(selectChatMessages(chatRoomId, memberId));
-
+        chatInfoWithMessageResponse.setYourLastReadMessageId(chatMapper.getLastReadMessageId(chatRoomId, memberId));
         return chatInfoWithMessageResponse;
 
     }
@@ -159,5 +163,25 @@ public class ChatServiceImpl implements ChatService {
         chatMapper.updateLastMessage(chatRoomId, newMessage.getMessageId());
     }
 
+    @Transactional
+    public void markAsRead(Long chatRoomId, Long memberId, Long lastReadMessageId) {
+        if (lastReadMessageId == null) return;
+
+        chatMapper.updateLastReadMessage(
+            chatRoomId,
+            memberId,
+            lastReadMessageId
+        );
+
+        // 상대에게 읽음 이벤트 전파 (같은 방 구독자들에게 브로드캐스트)
+        ChatReadEvent event = ChatReadEvent.builder()
+            .chatRoomId(chatRoomId)
+            .readerId(memberId)
+            .lastReadMessageId(lastReadMessageId)
+            .build();
+        //  커밋 이후 처리되도록 이벤트만 던짐
+        eventPublisher.publishEvent(event);
+
+    }
 
 }

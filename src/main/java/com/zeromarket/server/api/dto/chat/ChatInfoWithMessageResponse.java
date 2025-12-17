@@ -38,4 +38,5 @@ public class ChatInfoWithMessageResponse {
     private LocalDateTime buyerDeletedAt;
     private LocalDateTime sellerDeletedAt;
     private List<ChatMessageResponse> chatMessages; // TODO: API 분리할지?
+    private Long yourLastReadMessageId;
 }

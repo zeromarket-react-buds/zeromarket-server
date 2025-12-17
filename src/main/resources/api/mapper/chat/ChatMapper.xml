@@ -209,16 +209,30 @@
         WHERE chat_room_id = #{chatRoomId}
     </update>
 
-    <update id="updateParticipantLastMessage">
-        UPDATE chat_room_participant crp
-        SET last_read_message_id = cr.last_message_id,
-            last_read_at = now(),
-            updated_at = now()
-        FROM chat_room cr
-        WHERE crp.chat_room_id = cr.chat_room_id
-          AND crp.chat_room_id = #{roomId}
-          AND crp.member_id = #{memberId}
-          AND cr.last_message_id IS NOT NULL
+<!--    <update id="updateParticipantLastMessage">-->
+<!--        UPDATE chat_room_participant crp-->
+<!--        SET last_read_message_id = cr.last_message_id,-->
+<!--            last_read_at = now(),-->
+<!--            updated_at = now()-->
+<!--        FROM chat_room cr-->
+<!--        WHERE crp.chat_room_id = cr.chat_room_id-->
+<!--          AND crp.chat_room_id = #{roomId}-->
+<!--          AND crp.member_id = #{memberId}-->
+<!--          AND cr.last_message_id IS NOT NULL-->
+<!--    </update>-->
+
+    <update id="updateLastReadMessage">
+        UPDATE chat_room_participant
+        SET
+            last_read_message_id = GREATEST(
+              COALESCE(last_read_message_id, 0),
+              #{lastReadMessageId}
+            ),
+            last_read_at = NOW(),
+            updated_at = NOW()
+        WHERE chat_room_id = #{chatRoomId}
+        AND member_id = #{memberId}
+        AND deleted_at IS NULL
     </update>
 
     <select id="selectUnreadMessageCount" resultType="Integer">
@@ -263,9 +277,20 @@
             created_at,
             updated_at,
             member_id = #{memberId} as is_mine
-        FROM chat_message
+        FROM chat_message m
         WHERE chat_room_id = #{chatRoomId}
         ORDER BY created_at ASC
+    </select>
+
+    <select id="getLastReadMessageId" resultType="Long">
+        SELECT last_read_message_id
+        FROM chat_room_participant
+        WHERE chat_room_id = #{chatRoomId}
+           <![CDATA[
+          AND member_id <> #{memberId}
+          ]]>
+          AND deleted_at IS NULL
+        LIMIT 1
     </select>
 
     <select id="existsParticipant" resultType="boolean">

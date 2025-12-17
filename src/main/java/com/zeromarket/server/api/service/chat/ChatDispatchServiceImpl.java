@@ -37,7 +37,7 @@ public class ChatDispatchServiceImpl implements ChatDispatchService {
 
         // 3) push payload 구성
         ChatDto.ChatMessagePush push = ChatDto.ChatMessagePush.builder()
-                .chatMessageId(entity.getMessageId())
+                .messageId(entity.getMessageId())
                 .chatRoomId(msg.getChatRoomId())
                 .memberId(msg.getMemberId())
                 .content(msg.getContent())

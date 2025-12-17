@@ -16,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class ChatRoomResponse {
+
     private Long chatRoomId;
     private Long productId;
     private Long buyerId;
@@ -30,7 +31,7 @@ public class ChatRoomResponse {
     private String lastMessageContent;
     private LocalDateTime lastMessageAt;
     private String lastMessageSenderId;
-
+    private Integer unreadCount;
     private ChatMessage lastChatMessage;
 
     public static ChatRoomResponse fromEntity(ChatRoom room) {
