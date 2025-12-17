@@ -142,6 +142,9 @@
         <result property="isDelivery" column="is_delivery"/>
         <result property="isDirect" column="is_direct"/>
         <result property="sellingArea" column="selling_area"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="environmentScore" column="environment_score"/>
         <result property="viewCount" column="view_count"/>
         <result property="salesStatus" column="sales_status"
                 javaType="com.zeromarket.server.common.enums.SalesStatus"/>
@@ -164,7 +167,6 @@
     </resultMap>
 
     <!--  상품 상세 조회 (찜 여부 포함) -->
-    <!-- parameterType을 Long에서 map으로 변경 -->
     <select id="selectProductDetail"
             parameterType="map"
             resultMap="productDetailMap">
@@ -178,11 +180,15 @@
             p.is_delivery,
             p.is_direct,
             p.selling_area,
+            p.environment_score,
             p.view_count,
             p.sales_status,
             p.product_status,
             p.is_hidden,
             p.is_deleted,
+
+            pl.latitude,
+            pl.longitude,
 
             <!-- 찜 개수 -->
             (SELECT COUNT(*)
@@ -241,12 +247,13 @@
             pi.is_main,
             pi.sort_order
 
-        FROM product p
-                 LEFT JOIN member m ON m.member_id = p.seller_id
-                 LEFT JOIN product_image pi ON pi.product_id = p.product_id
-                 LEFT JOIN category_level3 c3 ON c3.level3_id = p.level3_id
-                 LEFT JOIN category_level2 c2 ON c2.level2_id = c3.parent_id
-                 LEFT JOIN category_level1 c1 ON c1.level1_id = c2.parent_id
+          FROM product p
+            LEFT JOIN member m ON m.member_id = p.seller_id
+            LEFT JOIN product_image pi ON pi.product_id = p.product_id
+            LEFT JOIN category_level3 c3 ON c3.level3_id = p.level3_id
+            LEFT JOIN category_level2 c2 ON c2.level2_id = c3.parent_id
+            LEFT JOIN category_level1 c1 ON c1.level1_id = c2.parent_id
+            LEFT JOIN product_location pl ON pl.product_id = p.product_id
 
         WHERE p.product_id = #{productId}
           AND p.is_deleted = false

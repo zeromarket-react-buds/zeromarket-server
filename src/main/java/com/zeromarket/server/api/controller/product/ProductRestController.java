@@ -140,9 +140,9 @@ public class ProductRestController {
         Long newProductId = productCommandService.createProduct(request);
 
         //직거래시 위치정보처리
-        if(request.isDirect() && request.getLocation()!=null){
-            productCommandService.createProductLocation(newProductId,request, userDetails.getMemberId());
-        }
+//        if(request.isDirect() && request.getLocation()!=null){
+//            productCommandService.createProductLocation(newProductId,request, userDetails.getMemberId());
+//        }
 
         ProductCreateResponse response =
             new ProductCreateResponse(newProductId, "상품이 정상적으로 등록되었습니다.");

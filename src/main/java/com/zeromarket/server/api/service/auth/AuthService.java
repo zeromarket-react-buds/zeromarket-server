@@ -21,6 +21,4 @@ public interface AuthService {
     Boolean checkDuplicateId(String loginId);
 
     MemberProfileDto getMemberProfile(Long memberId, Long authMemberId);
-
-    void logout(HttpServletResponse response);
 }

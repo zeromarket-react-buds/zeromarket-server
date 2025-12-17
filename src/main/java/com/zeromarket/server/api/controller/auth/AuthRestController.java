@@ -69,10 +69,10 @@ public class AuthRestController {
         return ResponseEntity.ok(Map.of("existsByLoginId", existsByLoginId));
     }
 
-    @Operation(summary = "로그아웃", description = "")
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        authService.logout(response);
-        return ResponseEntity.ok().build();
-    }
+//    @Operation(summary = "로그아웃", description = "")
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(HttpServletResponse response) {
+//        authService.logout(response);
+//        return ResponseEntity.ok().build();
+//    }
 }

@@ -9,10 +9,12 @@ import com.zeromarket.server.api.dto.mypage.ProfileSettingResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.AuthService;
 import com.zeromarket.server.api.service.auth.MemberService;
+import com.zeromarket.server.api.service.auth.OAuthService;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,6 +40,25 @@ public class MemberRestController {
         MemberResponse response = authService.getMyInfo(userDetails.getLoginId());
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "로그아웃", description = "")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        memberService.logout(response);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "회원 탈퇴", description = "")
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdraw(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        HttpServletResponse response
+    ) {
+        if(userDetails == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+
+        memberService.withdraw(userDetails.getMemberId(), response);
+        return ResponseEntity.ok().build();
     }
 
 //    프로필 정보 조회 (셀러샵 사용)

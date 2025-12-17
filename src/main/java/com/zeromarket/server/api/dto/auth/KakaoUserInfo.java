@@ -18,8 +18,8 @@ public class KakaoUserInfo {
         @Getter @Setter
         public static class Profile {
             private String nickname;
-            private String profileImageUrl;
-            private String thumbnailImageUrl;
+            private String profile_image_url;
+            private String thumbnail_image_url;
         }
     }
 }
