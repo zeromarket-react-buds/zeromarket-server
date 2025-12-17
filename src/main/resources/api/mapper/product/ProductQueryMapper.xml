@@ -10,6 +10,9 @@
         <result column="product_title" property="productTitle" />
         <result column="sell_price" property="sellPrice" />
         <result column="selling_area" property="sellingArea" />
+      <result column="latitude" property="latitude"/>
+      <result column="longitude" property="longitude"/>
+      <result column="category_name" property="category"/>
 
         <!--자기상품 찜방지용-->
         <result column="seller_id" property="sellerId" />
@@ -44,6 +47,10 @@
         -- 판매자 ID (본인 상품 판별용) 자기찜 방지용
         p.seller_id AS seller_id,
 
+        pl.latitude,
+        pl.longitude,
+        c1.level1_name AS category_name,
+
         --  찜 개수
         COALESCE(wc.wish_count, 0) AS wish_count,
 
@@ -62,6 +69,10 @@
         pi.image_url AS thumbnail_url
 
         FROM product p
+        LEFT JOIN product_location pl ON pl.product_id = p.product_id
+        LEFT JOIN category_level3 c3 ON c3.level3_id = p.level3_id
+        LEFT JOIN category_level2 c2 ON c2.level2_id = c3.parent_id
+        LEFT JOIN category_level1 c1 ON c1.level1_id = c2.parent_id
 
         --  찜 개수 집계 서브쿼리
         LEFT JOIN (
@@ -97,6 +108,11 @@
 
         <if test="maxPrice != null">
             AND p.sell_price &lt;= #{maxPrice}
+        </if>
+
+        <if test="swLat != null and neLat != null and swLng != null and neLng != null">
+          AND pl.latitude BETWEEN #{swLat} AND #{neLat}
+          AND pl.longitude BETWEEN #{swLng} AND #{neLng}
         </if>
 
         ORDER BY

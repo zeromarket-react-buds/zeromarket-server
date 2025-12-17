@@ -39,6 +39,13 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         queryReq.setArea(req.getArea());
         queryReq.setMemberId(req.getMemberId());//찜 여부 계산위한(새로고침해도 빨강 고정)
 
+        queryReq.setSwLat(req.getSwLat());
+        queryReq.setSwLng(req.getSwLng());
+        queryReq.setNeLat(req.getNeLat());
+        queryReq.setNeLng(req.getNeLng());
+        queryReq.setLatitude(req.getLatitude());
+        queryReq.setLongitude(req.getLongitude());
+
         List<ProductQueryResponse> fetched = mapper.selectProductsOffset(queryReq);
 
         boolean hasNext = fetched.size() > size;

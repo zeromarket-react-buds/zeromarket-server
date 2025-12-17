@@ -27,4 +27,8 @@ public class ProductQueryResponse {
     private boolean isWished;
 
     private Long sellerId;//자기상품 찜 방지용
+
+    private Double latitude;
+    private Double longitude;
+    private String category;
 }
