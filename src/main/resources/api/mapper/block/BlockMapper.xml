@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.block.BlockMapper">
+
+    <resultMap id="BlockUserListMap" type="com.zeromarket.server.api.dto.block.BlockListUser">
+        <id column="block_id" property="blockId"/>
+        <result column="blocked_user_id" property="blockedUserId"/>
+        <result column="profile_image" property="profileImage"/>
+        <result column="blocked_user_nickname" property="blockedUserNickname"/>
+        <result column="is_active" property="isActive"/>
+    </resultMap>
+
+    <!-- 차단 요청자(로그인한 사람) 닉네임 용 -->
+    <select id="selectBlockerNickname" parameterType="long" resultType="string">
+        SELECT nickname
+        FROM member
+        WHERE member_id = #{memberId}
+    </select>
+
+    <!-- 차단한 수 -->
+    <select id="countBlockedUsers" parameterType="long" resultType="int">
+        SELECT COUNT(block_id)
+        FROM block
+        WHERE blocker_user_id = #{memberId}
+            AND is_active = true
+    </select>
+
+    <!-- 차단한 유저 목록 -->
+    <select id="selectBlockedUsers" parameterType="long" resultMap="BlockUserListMap">
+        SELECT
+            b.block_id,
+            b.blocked_user_id,
+            m.profile_image,
+            m.nickname AS blocked_user_nickname,
+            b.is_active
+        FROM block b
+        JOIN member m ON m.member_id = b.blocked_user_id
+        WHERE b.blocker_user_id = #{memberId}
+            AND b.is_active = true
+        <!-- created_at이랑 updated_at 둘이 다를 경우, updated_at을 기준으로 최신 기준 -->
+        ORDER BY b.updated_at DESC NULLS LAST, b.created_at DESC
+    </select>
+
+</mapper>
