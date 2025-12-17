@@ -43,11 +43,11 @@ public class ProductRestController {
         @ModelAttribute ProductQueryRequest productQueryRequest,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // ⭐ 로그인한 사용자라면 memberId 전달
+        //  로그인한 사용자라면 memberId 전달
         if (userDetails != null) {
             productQueryRequest.setMemberId(userDetails.getMemberId());
         } else {
-            // ⭐ 비로그인 → memberId = 0 (항상 찜 false)
+            //  비로그인 → memberId = 0 (항상 찜 false)
             productQueryRequest.setMemberId(0L);
         }
 
@@ -69,12 +69,12 @@ public class ProductRestController {
         @RequestParam(required = false) Long memberId,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        // 1️⃣ 로그인 사용자 정보가 있으면 memberId 재설정
+        // 1️. 로그인 사용자 정보가 있으면 memberId 재설정
         if (userDetails != null) {
             memberId = userDetails.getMemberId();
         }
 
-        // 2️⃣ 로그인 상태가 아니면 TEMP_MEMBER_ID 사용 (비로그인 조회 가능)
+        // 2️. 로그인 상태가 아니면 TEMP_MEMBER_ID 사용 (비로그인 조회 가능)
         if (memberId == null) {
             memberId = 0L; // 비로그인 → 항상 찜해제 상태로 보여줌
         }
