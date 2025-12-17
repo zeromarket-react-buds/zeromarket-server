@@ -48,7 +48,7 @@ public class ProductRestController {
             productQueryRequest.setMemberId(userDetails.getMemberId());
         } else {
             //  비로그인 → memberId = 0 (항상 찜 false)
-            productQueryRequest.setMemberId(0L);
+            productQueryRequest.setMemberId(null);//0L수정-> 비로그인은 null
         }
 
         //userDetails가 null이라면 항상 0L이 들어감 → 찜 = false
@@ -76,7 +76,7 @@ public class ProductRestController {
 
         // 2️. 로그인 상태가 아니면 TEMP_MEMBER_ID 사용 (비로그인 조회 가능)
         if (memberId == null) {
-            memberId = 0L; // 비로그인 → 항상 찜해제 상태로 보여줌
+            memberId = null; // 비로그인 → 항상 찜해제 상태로 보여줌
         }
 
         // 임시 로그인/미구현 상태라면 TEMP_MEMBER_ID 사용
