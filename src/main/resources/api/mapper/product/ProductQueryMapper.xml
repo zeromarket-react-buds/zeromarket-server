@@ -28,7 +28,7 @@
         <result column="wish_count" property="wishCount" />
         <result column="thumbnail_url" property="thumbnailUrl" />
 
-        <result column="is_wished" property="isWished" />
+        <result column="liked" property="liked" />
     </resultMap>
     <!--상품목록-->
     <select id="selectProductsOffset"
@@ -64,7 +64,7 @@
             )
             THEN TRUE
             ELSE FALSE
-        END AS is_wished,
+        END AS liked,
         -- 썸네일
         pi.image_url AS thumbnail_url
 
@@ -167,7 +167,7 @@
         <result property="productStatus" column="product_status"
                 javaType="com.zeromarket.server.common.enums.ProductStatus"/>
         <result property="wishCount" column="wish_count"/>
-        <result property="isWished" column="is_wished"/>
+        <result property="liked" column="liked"/>
         <result property="isHidden" column="is_hidden"/>
         <result property="isDeleted" column="is_deleted"/>
 
@@ -221,7 +221,7 @@
                 )
                 THEN TRUE
                 ELSE FALSE
-            END AS is_wished,
+            END AS liked,
 
             -- 판매자 ID
             m.member_id AS seller_id,

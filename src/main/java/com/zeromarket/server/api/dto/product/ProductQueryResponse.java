@@ -24,7 +24,7 @@ public class ProductQueryResponse {
     private LocalDateTime createdAt;
     private int wishCount;
     //찜목록에 넣기
-    private boolean isWished;
+    private boolean liked;//liked로 통일
 
     private Long sellerId;//자기상품 찜 방지용
 
