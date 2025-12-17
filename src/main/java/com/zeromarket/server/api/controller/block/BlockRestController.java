@@ -10,9 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -32,5 +30,15 @@ public class BlockRestController {
         Long memberId = userPrincipal.getMemberId();
         BlockListResponse res = blockService.getBlockList(memberId);
         return ResponseEntity.ok(res);
+    }
+
+    @Operation(summary = "차단 해제", description = "차단 유저 목록 페이지에서 해당 유저 차단해제")
+    @PatchMapping("/{blockId}")
+    public ResponseEntity<Void> unblock(
+        @PathVariable Long blockId,
+        @AuthenticationPrincipal CustomUserDetails userPrincipal
+    ) {
+        blockService.updateUnblock(blockId, userPrincipal.getMemberId());
+        return ResponseEntity.ok().build();
     }
 }

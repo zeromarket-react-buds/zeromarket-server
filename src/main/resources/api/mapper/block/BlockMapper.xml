@@ -43,4 +43,13 @@
         ORDER BY b.updated_at DESC NULLS LAST, b.created_at DESC
     </select>
 
+    <update id="updateUnblock">
+        UPDATE block
+            SET is_active = false,
+                updated_at = CURRENT_TIMESTAMP
+        WHERE block_id = #{blockId}
+            AND blocker_user_id = #{memberId}
+            AND is_active = true
+    </update>
+
 </mapper>

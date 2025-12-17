@@ -23,4 +23,13 @@ public class BlockServiceImpl implements BlockService {
         
         return res;
     }
+
+    @Override
+    public void updateUnblock(Long blockId, Long memberId) {
+        int updated = mapper.updateUnblock(blockId, memberId);
+
+        if (updated == 0) { // blockId가 존재하지 않거나 blocker_user_id ≠ memberId, 이미 is_active가 false인 경우
+            throw new IllegalArgumentException("차단 정보가 없거나 권한이 없습니다.");
+        }
+    }
 }

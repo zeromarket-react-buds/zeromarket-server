@@ -11,4 +11,6 @@ public interface BlockMapper {
     String selectBlockerNickname(Long memberId);
     int countBlockedUsers(Long memberId);
     List<BlockListUser> selectBlockedUsers(Long memberId);
+
+    int updateUnblock(Long blockId, Long memberId);
 }
