@@ -21,7 +21,7 @@ public class ChatMessage {
     private Long memberId;
     private String content;
     private MessageType messageType; /* enum */
-    private boolean isRead;
+    private Boolean isRead;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

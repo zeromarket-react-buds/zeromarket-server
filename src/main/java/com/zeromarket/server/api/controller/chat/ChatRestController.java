@@ -1,8 +1,11 @@
 package com.zeromarket.server.api.controller.chat;
 
+import com.zeromarket.server.api.dto.chat.ChatDto;
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatMessageRequest;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatRoomResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.chat.ChatService;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -12,9 +15,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,19 +33,38 @@ public class ChatRestController {
 
     private final ChatService chatService;
 
+
+    /**
+     * Destination Queue: /pub/chat.message를 통해 호출 후 처리 되는 로직
+     */
+//    @MessageMapping("chat.message")
+//    public ResponseEntity<Void> sendMessage(ChatMessageRequest message) {
+//        chatService.sendMessage(message);
+//        return ResponseEntity.ok().build();
+//    }
+
+
+    @PostMapping("/messages")
+    public ResponseEntity<Void> send(@RequestBody ChatDto.ChatMessageReq req) {
+
+         chatService.publish(req);
+        //        chatService.sendMessage(req);
+        return ResponseEntity.accepted().build(); // 202
+    }
+
     @Operation(summary = "채팅방 목록 조회", description = "유저의 채팅방 목록 조회")
     @GetMapping
-    public ResponseEntity<List<ChatRecentMessageResponse>> getChatRooms(
+    public ResponseEntity<List<ChatRoomResponse>> getChatRooms(
         @AuthenticationPrincipal CustomUserDetails userDetail) {
         if (userDetail == null || userDetail.getMemberId() == null || userDetail.getMemberId() <= 0L) {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
-        List<ChatRecentMessageResponse> list = chatService.selectRecentChatMessages(userDetail.getMemberId());
+        List<ChatRoomResponse> list = chatService.selectRecentChatMessages(userDetail.getMemberId());
 
         return ResponseEntity.ok(list);
     }
 
-    @Operation(summary = "채팅방 번호 조회", description = "상품 ID로 채팅방 번호 조회")
+    @Operation(summary = "채팅방 번호 조회, 없으면 채팅방 생성", description = "상품 ID로 채팅방 번호 조회, 없으면 채팅방 생성")
     @GetMapping("/room")
     public ResponseEntity<Long> getChatRoomId(@RequestParam Long productId,
         @AuthenticationPrincipal CustomUserDetails userDetail) {

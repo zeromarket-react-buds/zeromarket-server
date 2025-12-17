@@ -1,4 +1,30 @@
 spring:
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false # rabbitMQ 서버 연결하고 싶으면 true로 바꿔야함!!!
+    host: ${RABBIT_MQ_HOST}
+    port: ${RABBIT_MQ_PORT}
+    virtual-host: "/"
+    username: ${RABBIT_MQ_USERNAME}
+    password: ${RABBIT_MQ_PASSWORD}
+    connection-timeout: 300
+    template:
+      retry:
+        enabled: false
+#    relay:
+#      port: 61613
+#      system-login: ${RABBIT_MQ_USERNAME}
+#      system-passcode: ${RABBIT_MQ_PASSWORD}
+#      client-login: ${RABBIT_MQ_USERNAME}
+#      client-passcode: ${RABBIT_MQ_PASSWORD}
+#    chat:
+#      queue:
+#        name: "chat.queue"
+#      exchange:
+#        name: "chat.exchange"
+#      routing:
+#        key: "room.*"
   devtools:
     restart:
       enabled: false
@@ -10,16 +36,19 @@ spring:
   application:
     name: zeromarket-server
   datasource:
-    url: ${DB_URL}?prepareThreshold=0
+    url: ${DB_URL}?prepareThreshold=0&application_name=zeromarket&options=-c%20statement_timeout%3D8000
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 4      # 최대 4개 정도로 줄이기
       minimum-idle: 1           # 유휴 커넥션 1~2개 정도만 유지
       connection-timeout: 5000  # 연결 못 잡으면 5초 뒤 예외
-      idle-timeout: 300000      # 5분 유휴 시 커넥션 정리
-      max-lifetime: 600000      # 10분마다 커넥션 재생성
-      leak-detection-threshold: 60000
+#      idle-timeout: 300000      # 5분 유휴 시 커넥션 정리
+#      max-lifetime: 600000      # 10분마다 커넥션 재생성
+      leak-detection-threshold: 120000
+      idle-timeout: 60000         # 1분
+      max-lifetime: 240000        # 4분
+      keepalive-time: 30000       # 30초 (가능하면)
 #      maximum-pool-size: 10        # 최대 연결 수 제한
 #      minimum-idle: 5               # 최소 유휴 연결
 #      connection-timeout: 20000     # 연결 타임아웃 (20초)
@@ -43,6 +72,9 @@ logging:
 #    com.zaxxer.hikari: DEBUG
 #    com.zaxxer.hikari.HikariConfig: DEBUG
     org.springframework.web.reactive.function.client.ExchangeFunctions: TRACE
+    org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer: WARN
+    org.springframework.amqp.rabbit.connection.CachingConnectionFactory: WARN
+    com.rabbitmq.client: WARN
 
 
 jwt:

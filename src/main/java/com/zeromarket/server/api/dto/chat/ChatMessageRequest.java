@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto.chat;
 
+import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.enums.MessageType;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -24,4 +25,17 @@ public class ChatMessageRequest {
     private boolean isRead;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public ChatMessage toEntity() {
+        return ChatMessage.builder()
+            .messageId(messageId)
+            .chatRoomId(chatRoomId)
+            .memberId(memberId)
+            .content(content)
+            .messageType(messageType)
+            .isRead(isRead)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
+            .build();
+    }
 }

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>STOMP Test</title>
+  </head>
+  <body>
+    <h3>STOMP Test</h3>
+    <div>
+      roomId: <input id="roomId" value="1" /> memberId:
+      <input id="memberId" value="18" />
+    </div>
+    <div>
+      <input id="msg" placeholder="message..." />
+      <button id="connect">Connect</button>
+      <button id="sub">Subscribe</button>
+      <button id="send">Send</button>
+    </div>
+    <pre id="log"></pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+
+    <script>
+      const log = (s) =>
+        (document.getElementById("log").textContent += s + "\n");
+      let client;
+
+      document.getElementById("connect").onclick = () => {
+        // ✅ 서버에서 registry.addEndpoint("/ws").withSockJS() 를 썼다면 SockJS 사용
+        const socket = new SockJS("http://localhost:8080/ws");
+        client = new StompJs.Client({
+          webSocketFactory: () => socket,
+          debug: (str) => log("[debug] " + str),
+          reconnectDelay: 3000,
+        });
+
+        client.onConnect = () => log("✅ CONNECTED");
+        client.onStompError = (frame) => log("❌ STOMP ERROR: " + frame.body);
+        client.onWebSocketClose = () => log("⚠️ WS CLOSED");
+
+        client.activate();
+      };
+
+      document.getElementById("sub").onclick = () => {
+        const roomId = document.getElementById("roomId").value;
+        client.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+          log("📩 RECV: " + message.body);
+        });
+        log(`✅ SUBSCRIBED /sub/chat/room/${roomId}`);
+      };
+
+      document.getElementById("send").onclick = () => {
+        const roomId = Number(document.getElementById("roomId").value);
+        const memberId = Number(document.getElementById("memberId").value);
+        const content = document.getElementById("msg").value;
+
+        client.publish({
+          destination: "/pub/chat.send",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ chatRoomId: roomId, memberId, content }),
+        });
+        log("➡️ SENT");
+      };
+    </script>
+  </body>
+</html>

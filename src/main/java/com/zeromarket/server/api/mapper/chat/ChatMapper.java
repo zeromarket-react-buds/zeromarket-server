@@ -4,6 +4,7 @@ import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRoomRequest;
+import com.zeromarket.server.api.dto.chat.ChatRoomResponse;
 import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.entity.ChatRoom;
 import java.util.List;
@@ -12,6 +13,11 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface ChatMapper {
+
+//    List<ChatRoomResponse> selectChatRooms();
+    List<ChatRoomResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
+
+    ChatRoom selectChatRoomByChatRoomId(Long chatRoomId);
 
     ChatMessage selectChatMessageByMessageId(Long messageId);
 
@@ -23,6 +29,12 @@ public interface ChatMapper {
 
     void createChatMessage(ChatMessage chatMessage);
 
+    int updateLastMessage(@Param("chatRoomId") Long chatRoomId,
+                          @Param("messageId") Long messageId);
+
+    Integer selectUnreadMessageCount(@Param("chatRoomId") Long chatRoomId,
+                          @Param("memberId") Long memberId);
+
     int countChatParticipants(@Param("chatRoomId") Long chatRoomId);
 
     List<ChatMessageResponse> selectChatMessages(@Param("chatRoomId") Long chatRoomId, @Param("memberId") Long memberId);
@@ -31,5 +43,7 @@ public interface ChatMapper {
 
     ChatInfoWithMessageResponse selectChatInfo(Long chatRoomId);
 
-    List<ChatRecentMessageResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
+    Long upsertChatRoomId(ChatRoom chatRoom);
+
+//    List<ChatRecentMessageResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
 }

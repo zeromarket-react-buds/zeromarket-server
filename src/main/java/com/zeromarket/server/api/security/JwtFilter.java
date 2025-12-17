@@ -43,6 +43,10 @@ public class JwtFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (path.startsWith("/ws")) {
+            return true;
+        }
+
         // /api/products, /api/products/{productId} → GET 요청만 예외
         if (path.startsWith("/api/products") && "GET".equalsIgnoreCase(method)) {
 
@@ -132,6 +136,7 @@ public class JwtFilter extends OncePerRequestFilter {
             sendError(response, 401, "TOKEN_MALFORMED", "토큰 형식이 잘못되었습니다");
 
         } catch (Exception e) {
+            log.error("Exception: {}", e.getMessage());
 //            7. 기타 오류 -> TOKEN_ERROR
             sendError(response, 401, "TOKEN_ERROR", "토큰 검증 실패");
         }

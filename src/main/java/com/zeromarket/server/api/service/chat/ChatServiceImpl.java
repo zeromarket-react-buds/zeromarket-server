@@ -1,12 +1,17 @@
 package com.zeromarket.server.api.service.chat;
 
+import com.zeromarket.server.api.config.RabbitConfig;
+import com.zeromarket.server.api.dto.chat.ChatDto;
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatMessageRequest;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRoomRequest;
+import com.zeromarket.server.api.dto.chat.ChatRoomResponse;
 import com.zeromarket.server.api.dto.product.ProductBasicInfo;
 import com.zeromarket.server.api.mapper.chat.ChatMapper;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
+import com.zeromarket.server.api.publisher.ChatPublisher;
 import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.entity.ChatRoom;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -15,6 +20,8 @@ import com.zeromarket.server.common.exception.ApiException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ChatServiceImpl implements ChatService{
+public class ChatServiceImpl implements ChatService {
 
     private final ChatMapper chatMapper;
     private final ProductQueryMapper productQueryMapper;
+    private final ChatPublisher chatPublisher;
 
     @Override
     public ChatMessage selectChatMessageByMessageId(Long messageId) {
@@ -33,6 +41,7 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
+    @Transactional
     public Long selectChatRoomByProductIdBuyerId(Long productId, Long buyerId) {
         ProductBasicInfo productBasicInfo
             = productQueryMapper.selectBasicInfo(productId);
@@ -53,7 +62,7 @@ public class ChatServiceImpl implements ChatService{
         if (chatRoomId == null || chatRoomId <= 0) {
             chatRoomId = this.createNewChatRoom(chatRoomRequest);
             // TODO: 임시 처리
-            this.createChatTextMessage(chatRoomId, buyerId, "구매 의사 있어요.");
+//            this.createChatTextMessage(chatRoomId, buyerId, "구매 의사 있어요.");
         }
 
         return chatRoomId;
@@ -62,7 +71,8 @@ public class ChatServiceImpl implements ChatService{
     @Override
     public ChatInfoWithMessageResponse selectChatInfoWithMessages(Long chatRoomId, Long memberId) {
 
-        ChatInfoWithMessageResponse chatInfoWithMessageResponse = chatMapper.selectChatInfo(chatRoomId);
+        ChatInfoWithMessageResponse chatInfoWithMessageResponse = chatMapper.selectChatInfo(
+            chatRoomId);
         chatInfoWithMessageResponse.setChatMessages(selectChatMessages(chatRoomId, memberId));
 
         return chatInfoWithMessageResponse;
@@ -81,15 +91,54 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public List<ChatRecentMessageResponse> selectRecentChatMessages(Long memberId) {
+    public List<ChatRoomResponse> selectRecentChatMessages(Long memberId) {
         return chatMapper.selectRecentChatMessages(memberId);
     }
+
+
+    @Override
+    public void publish(ChatDto.ChatMessageReq req) {
+        ChatDto.ChatMessageRes res = ChatDto.ChatMessageRes.from(req);
+        chatPublisher.publish(res);
+    }
+//    @Override
+//    public void sendMessage(ChatDto.ChatMessageReq req) {
+//        // ✅ 1차는 검증 로직 생략 (room/member 존재검사는 나중에 붙이자)
+//        ChatDto.ChatMessageRes res = ChatDto.ChatMessageRes.from(req);
+//
+//        String routingKey = RabbitConfig.ROUTING_KEY_PREFIX + req.getChatRoomId(); // room.1
+//        rabbitTemplate.convertAndSend(RabbitConfig.CHAT_EXCHANGE, routingKey, res);
+//
+//        log.info("Sent to RabbitMQ exchange={}, routingKey={}, payload={}",
+//                RabbitConfig.CHAT_EXCHANGE, routingKey, res);
+//    }
+
+//    @Override
+//    public void sendMessage(ChatMessageRequest messageRequest) {
+//        ChatRoomResponse roomResponse
+//            = ChatRoomResponse.fromEntity(chatMapper
+//                .selectChatRoomByChatRoomId(messageRequest.getChatRoomId()));
+//
+//        if (roomResponse == null) {
+//            throw new ApiException(ErrorCode.CHAT_NOT_FOUND);
+//        }
+//
+//        ChatMessage message = messageRequest.toEntity();
+//        roomResponse.setLastChatMessage(message);
+//
+//        ChatMessageResponse messageResponse = ChatMessageResponse.fromEntity(message);
+//
+//        rabbitTemplate.convertAndSend("room." + messageRequest.getChatRoomId(), messageResponse);
+//        log.info("Message sent to RabbitMQ: {}", message);
+//    }
 
     private Long createNewChatRoom(ChatRoomRequest chatRoomRequest) {
 
         ChatRoom chatRoom = ChatRoom.of(chatRoomRequest);
-        chatMapper.createChatRoom(chatRoom);
-        Long chatRoomId = chatRoom.getChatRoomId();
+//        chatMapper.createChatRoom(chatRoom);
+//        Long chatRoomId = chatRoom.getChatRoomId();
+
+        Long chatRoomId = chatMapper.upsertChatRoomId(chatRoom);
 
         log.info("생성된 chatRoomId: {}", chatRoomId);
 
@@ -100,12 +149,14 @@ public class ChatServiceImpl implements ChatService{
     }
 
     private void createChatTextMessage(Long chatRoomId, Long memberId, String content) {
-
-        chatMapper.createChatMessage(ChatMessage.builder().chatRoomId(chatRoomId)
+        ChatMessage newMessage = ChatMessage.builder().chatRoomId(chatRoomId)
             .memberId(memberId)
             .content(content)
             .messageType(MessageType.TEXT)
-            .build());
+            .build();
+        chatMapper.createChatMessage(newMessage);
+
+        chatMapper.updateLastMessage(chatRoomId, newMessage.getMessageId());
     }
 
 
