@@ -12,20 +12,20 @@ public class WishProductResponse {
     private String productTitle;
     private Long sellPrice;
 
-    //⭐ 상품 판매 상태: FOR_SALE, RESERVED, SOLD_OUT
+    // 상품 판매 상태: FOR_SALE, RESERVED, SOLD_OUT
     private String salesStatus;
     private String salesStatusKr; // 판매중, 예약중, 거래완료
 
     private String productStatus;
 
     private String thumbnailUrl;
-    //⭐ UI 박스 밖에서 날짜 그룹핑할 때 사용 (찜한 날짜)
+    // UI 박스 밖에서 날짜 그룹핑할 때 사용 (찜한 날짜)
     private LocalDateTime wishCreatedAt;
 
-    //⭐ UI 박스 내 "몇 분 전 / 몇 초 전" 표시할 때 사용 (상품 등록 날짜)
+    // UI 박스 내 "몇 분 전 / 몇 초 전" 표시할 때 사용 (상품 등록 날짜)
     private LocalDateTime productCreatedAt;
 
-    //⭐ 거래 방식 표시용
+    // 거래 방식 표시용
     private Boolean direct;   // 직거래 거래
     private Boolean delivery; // 택배 거래
 

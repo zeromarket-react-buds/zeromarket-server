@@ -12,6 +12,6 @@ public interface WishQueryService {
     // 찜상품목록: 단일 상품 요약 조회
     WishProductResponse selectProductSummary(Long memberId, Long productId);
 
-    // ⭐ 추가됨: 찜 개수 조회
+    //  찜 개수 조회
     int getWishCount(Long memberId);
 }

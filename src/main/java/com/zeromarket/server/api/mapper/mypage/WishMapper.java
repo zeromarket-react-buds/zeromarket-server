@@ -25,12 +25,12 @@ public interface WishMapper {
         @Param("offset") Integer offset,
         @Param("size") Integer size);
 
-    // ⭐ 찜 상품 요약 조회 (memberId 조건 추가됨)
+    //  찜 상품 요약 조회 (memberId 조건 추가됨)
     WishProductResponse selectProductSummary(
         @Param("memberId") Long memberId,
         @Param("productId") Long productId
     );
 
-    // ⭐ 추가됨: 찜 개수 조회
+    // 추가됨: 찜 개수 조회
     int countWish(@Param("memberId") Long memberId);
 }

@@ -44,10 +44,10 @@
         -- 판매자 ID (본인 상품 판별용) 자기찜 방지용
         p.seller_id AS seller_id,
 
-        -- ⭐ 찜 개수
+        --  찜 개수
         COALESCE(wc.wish_count, 0) AS wish_count,
 
-        <!-- ⭐ 로그인한 회원이 찜했는지 여부 -->
+        <!-- 로그인한 회원이 찜했는지 여부 -->
         CASE
             WHEN EXISTS (
             SELECT 1 FROM wish w
@@ -63,7 +63,7 @@
 
         FROM product p
 
-        -- ⭐ 찜 개수 집계 서브쿼리
+        --  찜 개수 집계 서브쿼리
         LEFT JOIN (
         SELECT product_id, COUNT(*) AS wish_count
         FROM wish

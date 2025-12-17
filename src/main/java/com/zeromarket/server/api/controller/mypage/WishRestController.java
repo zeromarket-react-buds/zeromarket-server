@@ -23,9 +23,9 @@ public class WishRestController {
 
     // 로그인 기능 미구현 → 임시 사용자 ID 고정
     // private static final Long TEMP_MEMBER_ID = 1L;
-    // 👉 현재는 @AuthenticationPrincipal 기반 로그인 사용자 ID 사용
+    // ㄴ> 현재는 @AuthenticationPrincipal 기반 로그인 사용자 ID 사용
 
-    // ⭐ 찜 토글 API (POST)
+    //  찜 토글 API (POST)
     // URL: POST /api/products/{productId}/wish
     // 기능: 찜 상태가 없으면 INSERT, 있으면 DELETE → boolean 반환
     @PostMapping("/{productId}/wish")
@@ -47,8 +47,8 @@ public class WishRestController {
         return ResponseEntity.ok(result);
     }
 
-    // ⭐ 찜 삭제 전용 API (DELETE)
-    // ⭐ DELETE → toggleWish 금지 → deleteWish 전용 메서드 사용
+    //  찜 삭제 전용 API (DELETE)
+    // DELETE → toggleWish 금지 → deleteWish 전용 메서드 사용
     // URL: DELETE /api/products/{productId}/wish
     // 기능: 찜을 강제로 삭제하는 전용 메서드
     // toggle 방식이 아님 → deleteWish 서비스 사용
@@ -71,7 +71,7 @@ public class WishRestController {
         return ResponseEntity.ok(result);
     }
 
-    // ⭐ 특정 상품이 찜 되어 있는지 여부 조회 (GET)
+    //  특정 상품이 찜 되어 있는지 여부 조회 (GET)
     // URL: GET /api/products/{productId}/wish
     // 기능: true(찜 O) / false(찜 X)
     @GetMapping("/{productId}/wish")
@@ -93,7 +93,7 @@ public class WishRestController {
         return ResponseEntity.ok(result);
     }
 
-    // ⭐ 나의 찜한 상품 목록 조회 API (페이징 지원)
+    //  나의 찜한 상품 목록 조회 API (페이징 지원)
     // URL: GET /api/products/wishlist?page=1&size=20
     //
     // 1) wish 테이블에서 현재 유저가 찜한 productId 목록 가져옴
@@ -103,7 +103,7 @@ public class WishRestController {
     public ResponseEntity<List<WishProductResponse>> getMyWishlist(
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "20") int size,
-        @AuthenticationPrincipal CustomUserDetails userDetails // 임시 1번 회원 ❌ → 로그인 사용자 ID
+        @AuthenticationPrincipal CustomUserDetails userDetails // 임시 1번 회원 X → 로그인 사용자 ID
     ) {
         // 로그인 안 된 경우 → 401 반환
         if (userDetails == null) {
@@ -127,7 +127,7 @@ public class WishRestController {
         return ResponseEntity.ok(result);
     }
 
-    // ⭐ 유저의 전체 찜 개수 조회 API
+    //  유저의 전체 찜 개수 조회 API
     // URL: GET /api/products/wishlist/count
     // 기능: 유저가 찜한 상품 총 개수 반환
     // → MyPage 상단에서 "찜 n개" 표시용

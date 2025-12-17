@@ -12,31 +12,31 @@ public class WishCommandServiceImpl implements WishCommandService {
 
     private final WishMapper wishMapper;
 
-    // ⭐ POST /wish → 찜 등록 전용
+    //  POST /wish → 찜 등록 전용
     @Override
     //public boolean toggleWish(Long memberId, Long productId)
     public boolean addWish(Long memberId, Long productId) {
 
         Wish existing = wishMapper.findWish(memberId, productId);
 
-        // 1️⃣ 존재하지 않으면 Insert → 찜 생성
+        // 1️. 존재하지 않으면 Insert → 찜 생성
         if (existing == null) {
             Wish w = Wish.builder()
                 .memberId(memberId)
                 .productId(productId)
-                .isDeleted(false)   // ⭐ 찜 상태로 새로 생성
+                .isDeleted(false)   // 찜 상태로 새로 생성
                 .build();
             wishMapper.insertWish(w);
             return true; // 찜됨
         }
 
-//        // 2️⃣ soft delete 상태면 → 복원
-//        if (Boolean.TRUE.equals(existing.getIsDeleted())) {   // ⭐ null-safe
+//        // 2️. soft delete 상태면 → 복원
+//        if (Boolean.TRUE.equals(existing.getIsDeleted())) {   // null-safe
 //            wishMapper.restoreWish(existing.getWishId());
 //            return true;
 //        }
 //
-//        // 3️⃣ 현재 찜 상태면 → soft delete
+//        // 3️. 현재 찜 상태면 → soft delete
 //        wishMapper.softDeleteWish(existing.getWishId());
 //        return false;
 
@@ -62,7 +62,7 @@ public class WishCommandServiceImpl implements WishCommandService {
         return false;//  찜 해제 → 항상 false 반환
     }
 
-    // ⭐ 선택적으로 유지: 찜 목록 페이지에서는 toggle이 유용할 수 있음
+    // 선택적으로 유지: 찜 목록 페이지에서는 toggle이 유용할 수 있음
     @Override
     public boolean toggleWish(Long memberId, Long productId) {
 
