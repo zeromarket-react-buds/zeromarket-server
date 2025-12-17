@@ -19,6 +19,7 @@
     selling_area,
     ai_caption,
     ai_tags,
+    environment_score,
     created_at
     )
     VALUES
@@ -35,6 +36,7 @@
     #{sellingArea},
     #{aiCaption},
     CAST(#{aiTags} AS jsonb),
+    #{environmentScore},
     NOW()
     )
   </insert>

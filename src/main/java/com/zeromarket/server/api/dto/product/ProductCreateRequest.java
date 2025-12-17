@@ -30,6 +30,9 @@ public class ProductCreateRequest {
     private String aiCaption;
     private String aiTags;
 
+    // 환경점수 저장용
+    private int environmentScore;
+
     //위치정보
     private Long referenceAreaId;
     private Double latitude;
