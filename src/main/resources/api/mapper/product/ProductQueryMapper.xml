@@ -144,6 +144,7 @@
         <result property="sellingArea" column="selling_area"/>
         <result property="latitude" column="latitude"/>
         <result property="longitude" column="longitude"/>
+        <result property="environmentScore" column="environment_score"/>
         <result property="viewCount" column="view_count"/>
         <result property="salesStatus" column="sales_status"
                 javaType="com.zeromarket.server.common.enums.SalesStatus"/>
@@ -179,6 +180,7 @@
             p.is_delivery,
             p.is_direct,
             p.selling_area,
+            p.environment_score,
             p.view_count,
             p.sales_status,
             p.product_status,

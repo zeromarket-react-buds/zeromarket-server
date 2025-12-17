@@ -35,6 +35,9 @@ public class ProductDetailResponse {
     private boolean isWished;//Boolean: Wrapper 타입으로 변경<-다시 기본형 boolean로 변경: json에서 isWished가 아닌wished로 응답
     private int wishCount;
 
+    // 환경 점수
+    private int environmentScore;
+
     private int viewCount;
     private boolean isDelivery;
     private boolean isDirect;
