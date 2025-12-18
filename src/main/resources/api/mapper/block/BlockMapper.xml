@@ -43,6 +43,61 @@
         ORDER BY b.updated_at DESC NULLS LAST, b.created_at DESC
     </select>
 
+    <!-- 셀러샵에서 해당 유저가 차단한 사람인지 boolean 체크 -->
+    <select id="selectIsBlocked" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM block
+            WHERE blocker_user_id = #{memberId}
+                AND blocked_user_id = #{targetId}
+                AND is_active = true
+        )
+    </select>
+
+    <!-- 차단 등록하는 과정. isActive 된 부분 확인 -->
+    <select id="selectBlockIsActive" resultType="boolean">
+        SELECT is_active
+        FROM block
+        WHERE blocker_user_id = #{memberId}
+            AND blocked_user_id = #{blockedUserId}
+    </select>
+
+    <!-- 차단 할때 해당 blockId 있는지 확인 -->
+    <select id="selectBlockId" resultType="long">
+        SELECT block_id
+        FROM block
+        WHERE blocker_user_id = #{memberId}
+            AND blocked_user_id = #{blockedUserId}
+    </select>
+
+    <!-- 처음 차단. 행이 없으면 INSERT -->
+    <insert id="insertBlock">
+        INSERT INTO block (
+            blocker_user_id,
+            blocked_user_id,
+            is_active,
+            created_at,
+            updated_at
+        )
+        VALUES (
+            #{memberId},
+            #{blockedUserId},
+            TRUE,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 재차단 할 때 -->
+    <update id="reactivateBlock">
+        UPDATE block
+        SET is_active = true,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE blocker_user_id = #{memberId}
+            AND blocked_user_id = #{blockedUserId}
+    </update>
+
+    <!-- 차단 해제 할 때 -->
     <update id="updateUnblock">
         UPDATE block
             SET is_active = false,

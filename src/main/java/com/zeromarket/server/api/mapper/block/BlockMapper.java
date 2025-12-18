@@ -12,5 +12,15 @@ public interface BlockMapper {
     int countBlockedUsers(Long memberId);
     List<BlockListUser> selectBlockedUsers(Long memberId);
 
+    Boolean selectIsBlocked(Long memberId, Long targetId);
+
+    Boolean selectBlockIsActive(Long memberId, Long blockedUserId);
+
+    Long selectBlockId(Long memberId, Long blockedUserId);
+
+    int insertBlock(Long memberId, Long blockedUserId);
+
+    int reactivateBlock(Long memberId, Long blockedUserId);
+
     int updateUnblock(Long blockId, Long memberId);
 }
