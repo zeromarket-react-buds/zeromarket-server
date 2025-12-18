@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.order.OrderMapper">
+
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO "order" (
+            trade_id,
+            buyer_id,
+            order_status,
+
+            amount_paid,
+            payment_method,
+
+            receiver_name,
+            receiver_phone,
+            delivery_zipcode,
+            delivery_addr_base,
+            delivery_addr_detail
+        )
+        VALUES (
+            #{tradeId},
+            #{buyerId},
+            'PAID',
+
+            #{amountPaid},
+            #{paymentMethod},
+
+            #{receiverName},
+            #{receiverPhone},
+            #{deliveryZipcode},
+            #{deliveryAddrBase},
+            #{deliveryAddrDetail}
+        )
+    </insert>
+
+    <update id="updateOrderStatus">
+        UPDATE "order"
+        SET order_status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = #{orderId}
+    </update>
+
+</mapper>

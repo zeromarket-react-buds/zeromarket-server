@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.order.MemberAddressMapper">
+
+    <select id="countActiveByMember" resultType="int">
+        SELECT COUNT(*)
+        FROM member_address
+        WHERE member_id = #{memberId}
+            AND deleted_at IS NULL
+    </select>
+
+    <update id="clearDefault">
+        UPDATE member_address
+        SET is_default = false
+        WHERE member_id = #{memberId}
+        AND deleted_at IS NULL
+    </update>
+
+    <insert id="insert">
+        INSERT INTO member_address (
+            member_id,
+            receiver_name,
+            receiver_phone,
+            zipcode,
+            addr_base,
+            addr_detail,
+            is_default,
+            name
+        ) VALUES (
+            #{memberId},
+            #{req.receiverName},
+            #{req.receiverPhone},
+            #{req.zipcode},
+            #{req.addrBase},
+            #{req.addrDetail},
+            #{isDefault},
+            #{name}
+        )
+    </insert>
+
+    <select id="findAll" resultType="com.zeromarket.server.api.dto.order.MemberAddressDto">
+        SELECT
+            address_id      AS addressId,
+            receiver_name   AS receiverName,
+            receiver_phone  AS receiverPhone,
+            zipcode,
+            addr_base       AS addrBase,
+            addr_detail     AS addrDetail,
+            is_default      AS isDefault
+        FROM member_address
+        WHERE member_id = #{memberId}
+            AND deleted_at IS NULL
+        ORDER BY is_default DESC, created_at DESC
+    </select>
+
+    <update id="update">
+        UPDATE member_address
+        SET receiver_name = #{req.receiverName},
+            receiver_phone = #{req.receiverPhone},
+            zipcode = #{req.zipcode},
+            addr_base = #{req.addrBase},
+            addr_detail = #{req.addrDetail},
+            is_default = #{req.isDefault},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE address_id = #{addressId}
+            AND member_id = #{memberId}
+            AND deleted_at IS NULL
+    </update>
+
+    <update id="softDelete">
+        UPDATE member_address
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE address_id = #{addressId}
+        AND member_id = #{memberId}
+    </update>
+
+    <select id="findById" resultType="com.zeromarket.server.api.dto.order.MemberAddressDto">
+        SELECT
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            zipcode,
+            addr_base AS addrBase,
+            addr_detail AS addrDetail,
+            is_default AS isDefault
+        FROM member_address
+        WHERE address_id = #{addressId}
+            AND member_id = #{memberId}
+            AND deleted_at IS NULL
+    </select>
+
+</mapper>
