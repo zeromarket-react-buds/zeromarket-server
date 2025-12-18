@@ -15,9 +15,9 @@ public class RabbitMqChatPublisher implements ChatPublisher {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public void publish(ChatDto.ChatMessageRes msg) {
-        String routingKey = RabbitConfig.ROUTING_KEY_PREFIX + msg.getChatRoomId();
-        rabbitTemplate.convertAndSend(RabbitConfig.CHAT_EXCHANGE, routingKey, msg);
-        log.debug("[PUBLISH:RABBIT] routingKey={}", routingKey);
+    public void publish(ChatDto.ChatMessagePush push) {
+        String routingKey = RabbitConfig.ROUTING_KEY_PREFIX + push.getChatRoomId();
+        rabbitTemplate.convertAndSend(RabbitConfig.CHAT_EXCHANGE, routingKey, push);
+        log.debug("[PUSH:RABBIT] routingKey={}, push={}", routingKey, push);
     }
 }

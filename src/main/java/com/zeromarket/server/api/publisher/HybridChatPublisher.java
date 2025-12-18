@@ -26,12 +26,12 @@ public class HybridChatPublisher implements ChatPublisher {
     private static final long COOLDOWN_MAX_MS  = 120_000; // 최대 120초
 
     @Override
-    public void publish(ChatDto.ChatMessageRes msg) {
+    public void publish(ChatDto.ChatMessagePush push) {
 
         // 1) 최근에 계속 실패했으면 Rabbit 시도 자체를 잠깐 스킵 → 바로 local
         long now = System.currentTimeMillis();
         if (now < nextRabbitTryAtMs) {
-            local.publish(msg);
+            local.publish(push);
             return;
         }
 
@@ -44,7 +44,7 @@ public class HybridChatPublisher implements ChatPublisher {
                 return null;
             });
 
-            rabbit.publish(msg);
+            rabbit.publish(push);
 
             // 성공하면 실패 카운터 리셋
             consecutiveFailures = 0;
@@ -58,7 +58,7 @@ public class HybridChatPublisher implements ChatPublisher {
             log.warn("[PUBLISH:FALLBACK] Rabbit unavailable -> local. failCount={}, cooldownMs={}",
                     consecutiveFailures, cooldown, e);
 
-            local.publish(msg);
+            local.publish(push);
         }
     }
 }

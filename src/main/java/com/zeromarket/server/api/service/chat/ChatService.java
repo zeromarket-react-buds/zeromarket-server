@@ -27,5 +27,7 @@ public interface ChatService {
 //    void sendMessage(ChatDto.ChatMessageReq req);
 
     void markAsRead(Long chatRoomId, Long memberId, Long lastReadMessageId);
+
+    ChatDto.ChatMessagePush persist(ChatDto.ChatMessageReq req);
 }
 

@@ -19,6 +19,7 @@ import com.zeromarket.server.common.entity.ChatRoom;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.MessageType;
 import com.zeromarket.server.common.exception.ApiException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,45 +103,23 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void publish(ChatDto.ChatMessageReq req) {
-        ChatDto.ChatMessageRes res = ChatDto.ChatMessageRes.from(req);
-        chatPublisher.publish(res);
-    }
-//    @Override
-//    public void sendMessage(ChatDto.ChatMessageReq req) {
-//        // ✅ 1차는 검증 로직 생략 (room/member 존재검사는 나중에 붙이자)
-//        ChatDto.ChatMessageRes res = ChatDto.ChatMessageRes.from(req);
-//
-//        String routingKey = RabbitConfig.ROUTING_KEY_PREFIX + req.getChatRoomId(); // room.1
-//        rabbitTemplate.convertAndSend(RabbitConfig.CHAT_EXCHANGE, routingKey, res);
-//
-//        log.info("Sent to RabbitMQ exchange={}, routingKey={}, payload={}",
-//                RabbitConfig.CHAT_EXCHANGE, routingKey, res);
-//    }
+        // 1) 무조건 DB 저장 먼저 (트랜잭션)
+        ChatDto.ChatMessagePush push = this.persist(req);
 
-//    @Override
-//    public void sendMessage(ChatMessageRequest messageRequest) {
-//        ChatRoomResponse roomResponse
-//            = ChatRoomResponse.fromEntity(chatMapper
-//                .selectChatRoomByChatRoomId(messageRequest.getChatRoomId()));
-//
-//        if (roomResponse == null) {
-//            throw new ApiException(ErrorCode.CHAT_NOT_FOUND);
-//        }
-//
-//        ChatMessage message = messageRequest.toEntity();
-//        roomResponse.setLastChatMessage(message);
-//
-//        ChatMessageResponse messageResponse = ChatMessageResponse.fromEntity(message);
-//
-//        rabbitTemplate.convertAndSend("room." + messageRequest.getChatRoomId(), messageResponse);
-//        log.info("Message sent to RabbitMQ: {}", message);
-//    }
+        // 2) 커밋이 성공한 뒤에만 push 되도록 (권장)
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    chatPublisher.publish(push);
+                }
+            }
+        );
+    }
 
     private Long createNewChatRoom(ChatRoomRequest chatRoomRequest) {
 
         ChatRoom chatRoom = ChatRoom.of(chatRoomRequest);
-//        chatMapper.createChatRoom(chatRoom);
-//        Long chatRoomId = chatRoom.getChatRoomId();
 
         Long chatRoomId = chatMapper.upsertChatRoomId(chatRoom);
 
@@ -182,6 +161,35 @@ public class ChatServiceImpl implements ChatService {
         //  커밋 이후 처리되도록 이벤트만 던짐
         eventPublisher.publishEvent(event);
 
+    }
+
+    @Transactional
+    @Override
+    public ChatDto.ChatMessagePush persist(ChatDto.ChatMessageReq req) {
+
+        // 1) DB INSERT
+        ChatMessage entity = new ChatMessage();
+        entity.setChatRoomId(req.getChatRoomId());
+        entity.setMemberId(req.getMemberId());
+        entity.setMessageType(MessageType.TEXT);
+        entity.setContent(req.getContent());
+
+        chatMapper.createChatMessage(entity);
+
+        // 2) chat_room 마지막 메시지 갱신
+        chatMapper.updateLastMessage(req.getChatRoomId(), entity.getMessageId());
+
+        // 3) push payload 구성(확정된 messageId 기반)
+        ChatDto.ChatMessagePush push = ChatDto.ChatMessagePush.builder()
+                .messageId(entity.getMessageId())
+                .chatRoomId(req.getChatRoomId())
+                .memberId(req.getMemberId())
+                .content(req.getContent())
+                .createdAt(OffsetDateTime.now().toString())
+                .build();
+
+        log.info("[DB:SAVED] room={}, messageId={}", push.getChatRoomId(), push.getMessageId());
+        return push;
     }
 
 }
