@@ -1,6 +1,5 @@
-package com.zeromarket.server.api.dto.order;
+package com.zeromarket.server.api.dto.trade;
 
-import com.zeromarket.server.common.enums.SalesStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.enums.TradeType;
 import jakarta.validation.constraints.Pattern;

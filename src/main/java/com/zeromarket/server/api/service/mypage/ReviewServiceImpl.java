@@ -1,6 +1,5 @@
 package com.zeromarket.server.api.service.mypage;
 
-import com.zeromarket.server.api.dto.PageResponse;
 import com.zeromarket.server.api.dto.mypage.RatingReviewGroup;
 import com.zeromarket.server.api.dto.mypage.ReceivedReviewCursorResponse;
 import com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryDto;
@@ -10,7 +9,7 @@ import com.zeromarket.server.api.dto.mypage.ReviewListResponse;
 import com.zeromarket.server.api.dto.mypage.ReviewResponse;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.api.mapper.mypage.ReviewMapper;
-import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
+import com.zeromarket.server.api.mapper.trade.TradeHistoryMapper;
 import com.zeromarket.server.common.entity.Member;
 import com.zeromarket.server.common.entity.Review;
 import com.zeromarket.server.common.enums.ErrorCode;

@@ -1,15 +1,15 @@
-package com.zeromarket.server.api.controller.order;
+package com.zeromarket.server.api.controller.trade;
 
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 import com.zeromarket.server.api.dto.order.*;
+import com.zeromarket.server.api.dto.trade.*;
 import com.zeromarket.server.api.security.CustomUserDetails;
-import com.zeromarket.server.api.service.order.TradeHistoryService;
+import com.zeromarket.server.api.service.trade.TradeHistoryService;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

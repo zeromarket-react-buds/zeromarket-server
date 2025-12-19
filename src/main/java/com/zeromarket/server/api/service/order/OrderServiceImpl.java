@@ -4,7 +4,7 @@ import com.zeromarket.server.api.dto.order.CreateOrderRequest;
 import com.zeromarket.server.api.dto.order.OrderCompleteDto;
 import com.zeromarket.server.api.dto.order.TradeRequest;
 import com.zeromarket.server.api.mapper.order.OrderMapper;
-import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
+import com.zeromarket.server.api.mapper.trade.TradeHistoryMapper;
 import com.zeromarket.server.common.entity.Order;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.OrderStatus;
