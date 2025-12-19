@@ -4,6 +4,7 @@ import com.zeromarket.server.api.dto.block.BlockCreateRequest;
 import com.zeromarket.server.api.dto.block.BlockCreateResponse;
 import com.zeromarket.server.api.dto.block.BlockListResponse;
 import com.zeromarket.server.api.dto.block.BlockStatusResponse;
+import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.block.BlockService;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -29,11 +30,13 @@ public class BlockRestController {
     public ResponseEntity<BlockListResponse> getBlockList(
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
-        if (userPrincipal == null) throw new ApiException(ErrorCode.FORBIDDEN);
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
 
         Long memberId = userPrincipal.getMemberId();
-        BlockListResponse res = blockService.getBlockList(memberId);
-        return ResponseEntity.ok(res);
+        BlockListResponse dto = blockService.getBlockList(memberId);
+        return ResponseEntity.ok(dto);
     }
 
     @Operation(summary = "차단 상태 조회", description = "로그인한 사용자가 특정 셀러를 차단했는지 여부")
@@ -42,7 +45,9 @@ public class BlockRestController {
         @AuthenticationPrincipal CustomUserDetails userPrincipal,
         @RequestParam Long targetId
     ) {
-        if (userPrincipal == null) throw new ApiException(ErrorCode.FORBIDDEN);
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
 
         boolean isBlocked = blockService.isBlocked(
             userPrincipal.getMemberId(),
@@ -58,14 +63,17 @@ public class BlockRestController {
         @AuthenticationPrincipal CustomUserDetails userPrincipal,
         @RequestBody BlockCreateRequest req
     ) {
-        if (userPrincipal == null) throw new ApiException(ErrorCode.FORBIDDEN);
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
 
         Long memberId = userPrincipal.getMemberId();
         Long blockedUserId = req.getBlockedUserId();
         Long blockId = blockService.createBlock(memberId, blockedUserId);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new BlockCreateResponse(blockId,"해당 유저가 차단되었습니다."));
+        BlockCreateResponse body = new BlockCreateResponse(blockId, "해당 유저가 차단되었습니다.");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
 
     }
 
@@ -75,6 +83,10 @@ public class BlockRestController {
         @PathVariable Long blockId,
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
         blockService.updateUnblock(blockId, userPrincipal.getMemberId());
         return ResponseEntity.ok().build();
     }

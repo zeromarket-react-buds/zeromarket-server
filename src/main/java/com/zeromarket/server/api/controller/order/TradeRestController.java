@@ -31,7 +31,7 @@ public class TradeRestController {
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
         if (userPrincipal == null) {
-            throw new ApiException(ErrorCode.FORBIDDEN);
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
         Long tradeId =
@@ -46,7 +46,7 @@ public class TradeRestController {
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
         if (userPrincipal == null) {
-            throw new ApiException(ErrorCode.FORBIDDEN);
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
         Long tradeId =
@@ -60,9 +60,11 @@ public class TradeRestController {
         @ModelAttribute TradeHistoryRequest tradeHistoryRequest,
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
-        if (userPrincipal != null) {
-            tradeHistoryRequest.setMemberId(userPrincipal.getMemberId());
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
+
+        tradeHistoryRequest.setMemberId(userPrincipal.getMemberId());
 
         List<TradeHistoryResponse> result =
             tradeHistoryService.selectTradeList(tradeHistoryRequest);
@@ -76,11 +78,12 @@ public class TradeRestController {
         @ModelAttribute TradeProductRequest tradeProductRequest,
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
-        tradeProductRequest.setTradeId(tradeId);
-
-        if (userPrincipal != null) {
-            tradeProductRequest.setMemberId(userPrincipal.getMemberId());
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
+
+        tradeProductRequest.setTradeId(tradeId);
+        tradeProductRequest.setMemberId(userPrincipal.getMemberId());
 
         TradeProductResponse result =
             tradeHistoryService.selectTradeProduct(tradeProductRequest);
@@ -95,7 +98,7 @@ public class TradeRestController {
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
         if (userPrincipal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
         Long memberId = userPrincipal.getMemberId();
@@ -114,7 +117,7 @@ public class TradeRestController {
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
         if (userPrincipal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
         Long memberId = userPrincipal.getMemberId();
 

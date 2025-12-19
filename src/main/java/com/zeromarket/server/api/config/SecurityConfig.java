@@ -53,7 +53,8 @@ public class SecurityConfig {
                     // ⭐ 로그인 필요 (JWT)
                     .requestMatchers(
                         "/api/me/**",
-                        "/api/sellershop/**"
+                        "/api/sellershop/**",
+                        "/api/trades/**"
                     ).authenticated()
 
                     // 나머지 모든 요청은 인증(로그인)이 필요함

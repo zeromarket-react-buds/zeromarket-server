@@ -78,21 +78,33 @@ public class MemberRestController {
     // 회원정보 설정 페이지 정보 조회
     @Operation(summary = "회원정보 설정 페이지 조회", description = "회원정보 설정 페이지 멤버 조회")
     @GetMapping("me/edit")
-    public MemberEditResponse getMemberEdit(
+    public ResponseEntity<MemberEditResponse> getMemberEdit(
         @AuthenticationPrincipal CustomUserDetails userPrincipal
     ) {
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
         Long memberId = userPrincipal.getMemberId();
-        return memberService.getMemberEdit(memberId);
+        MemberEditResponse dto = memberService.getMemberEdit(memberId);
+
+        return ResponseEntity.ok(dto);
     }
 
     // 회원정보 설정 페이지 정보 수정
     @Operation(summary = "회원정보 설정 페이지 수정", description = "핸드폰 번호, 이메일 수정")
     @PatchMapping("me/edit")
-    public MemberEditResponse updateMemberEdit(
+    public ResponseEntity<MemberEditResponse> updateMemberEdit(
         @AuthenticationPrincipal CustomUserDetails userPrincipal,
         @RequestBody MemberEditRequest request
     ) {
+        if (userPrincipal == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
         Long memberId = userPrincipal.getMemberId();
-        return memberService.updateMemberEdit(memberId, request);
+        MemberEditResponse dto = memberService.updateMemberEdit(memberId, request);
+
+        return ResponseEntity.ok(dto);
     }
 }
