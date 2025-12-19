@@ -1,4 +1,4 @@
-package com.zeromarket.server.api.dto.order;
+package com.zeromarket.server.api.dto.trade;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;

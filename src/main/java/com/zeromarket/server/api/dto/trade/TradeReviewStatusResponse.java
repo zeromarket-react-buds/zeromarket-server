@@ -1,4 +1,4 @@
-package com.zeromarket.server.api.dto.order;
+package com.zeromarket.server.api.dto.trade;
 
 import lombok.Getter;
 import lombok.Setter;

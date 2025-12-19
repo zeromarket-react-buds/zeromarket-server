@@ -1,8 +1,9 @@
-package com.zeromarket.server.api.service.order;
+package com.zeromarket.server.api.service.trade;
 
 import com.zeromarket.server.api.dto.order.*;
 
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
+import com.zeromarket.server.api.dto.trade.*;
 
 import java.util.List;
 

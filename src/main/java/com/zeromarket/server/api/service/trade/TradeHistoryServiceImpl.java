@@ -1,10 +1,11 @@
-package com.zeromarket.server.api.service.order;
+package com.zeromarket.server.api.service.trade;
 
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.dto.product.ProductBasicInfo;
+import com.zeromarket.server.api.dto.trade.*;
 import com.zeromarket.server.api.mapper.mypage.ReviewMapper;
-import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
+import com.zeromarket.server.api.mapper.trade.TradeHistoryMapper;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
 import com.zeromarket.server.common.entity.Review;
@@ -26,7 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 @AllArgsConstructor
-public class TradeHistoryServiceImpl implements TradeHistoryService{
+public class TradeHistoryServiceImpl implements TradeHistoryService {
 
     private final TradeHistoryMapper mapper;
     private final ReviewMapper reviewMapper;

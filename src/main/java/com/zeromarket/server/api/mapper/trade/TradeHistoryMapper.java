@@ -1,8 +1,9 @@
-package com.zeromarket.server.api.mapper.order;
+package com.zeromarket.server.api.mapper.trade;
 
 import com.zeromarket.server.api.dto.order.*;
 import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
 
+import com.zeromarket.server.api.dto.trade.*;
 import com.zeromarket.server.common.entity.Trade;
 import java.time.LocalDateTime;
 import java.util.Map;
