@@ -90,6 +90,14 @@
         AND p.is_deleted = FALSE
         AND p.sales_status != 'SOLD_OUT'
 
+        AND NOT EXISTS (
+            SELECT 1
+            FROM block b
+            WHERE b.blocker_user_id = #{memberId}
+                AND b.blocked_user_id = p.seller_id
+                AND b.is_active = true
+        )
+
         <if test="keyword != null and keyword != ''">
             AND p.product_title ILIKE CONCAT('%', #{keyword}, '%')
         </if>
