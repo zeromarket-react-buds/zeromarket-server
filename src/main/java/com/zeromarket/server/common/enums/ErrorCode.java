@@ -54,12 +54,14 @@ public enum ErrorCode {
     TRADE_COMPLETED_ALREADY_EXIST(409, "이미 완료된 거래입니다."),
     TRADE_PROCESSING_ALREADY_EXIST(409, "이미 예약중이거나 거래가 완료된 상품입니다."),
 
+    // 배송지
+    ADDRESS_LIMIT_REACHED(409, "배송지는 최대 5개까지 등록 가능합니다."),
+    ADDRESS_UNSET_NOT_ALLOWED(409, "대표 배송지는 해제할 수 없습니다. 다른 주소를 대표로 지정하세요."),
+
     // 후기
     REVIEW_EXIST(409, "이미 리뷰를 작성한 거래입니다."),
     REVIEW_CREATE_FORBIDDEN(403, "거래에 참여한 사용자만 리뷰를 작성할 수 있습니다."),
     REVIEW_NOT_FOUND(404, "후기 정보를 찾을 수 없습니다.");
-
-
 
     private final int status;
     private final String message;

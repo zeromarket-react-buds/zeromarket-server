@@ -36,7 +36,7 @@
             #{req.addrBase},
             #{req.addrDetail},
             #{isDefault},
-            #{name}
+            #{req.name}
         )
     </insert>
 
@@ -48,16 +48,27 @@
             zipcode,
             addr_base       AS addrBase,
             addr_detail     AS addrDetail,
-            is_default      AS isDefault
+            is_default      AS isDefault,
+            name
         FROM member_address
         WHERE member_id = #{memberId}
             AND deleted_at IS NULL
         ORDER BY is_default DESC, created_at DESC
     </select>
 
+    <select id="isDefaultAddress" resultType="boolean">
+        SELECT is_default
+        FROM member_address
+        WHERE address_id = #{addressId}
+            AND member_id = #{memberId}
+            AND deleted_at IS NULL
+    </select>
+
     <update id="update">
         UPDATE member_address
-        SET receiver_name = #{req.receiverName},
+        SET
+            name = #{req.name},
+            receiver_name = #{req.receiverName},
             receiver_phone = #{req.receiverPhone},
             zipcode = #{req.zipcode},
             addr_base = #{req.addrBase},
@@ -73,7 +84,26 @@
         UPDATE member_address
         SET deleted_at = CURRENT_TIMESTAMP
         WHERE address_id = #{addressId}
-        AND member_id = #{memberId}
+            AND member_id = #{memberId}
+    </update>
+
+    <!-- 남은 주소 중 하나를 대표로 고르기: 최신 1개 -->
+    <select id="pickNextDefaultAddressId" resultType="long">
+        SELECT address_id
+        FROM member_address
+        WHERE member_id = #{memberId}
+        AND deleted_at IS NULL
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <update id="setDefaultById">
+        UPDATE member_address
+        SET is_default = true,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE address_id = #{addressId}
+            AND member_id = #{memberId}
+            AND deleted_at IS NULL
     </update>
 
     <select id="findById" resultType="com.zeromarket.server.api.dto.order.MemberAddressDto">
@@ -81,6 +111,7 @@
             address_id AS addressId,
             receiver_name AS receiverName,
             receiver_phone AS receiverPhone,
+            name,
             zipcode,
             addr_base AS addrBase,
             addr_detail AS addrDetail,
@@ -88,6 +119,22 @@
         FROM member_address
         WHERE address_id = #{addressId}
             AND member_id = #{memberId}
+            AND deleted_at IS NULL
+    </select>
+
+    <select id="findDefaultByMember" resultType="com.zeromarket.server.api.dto.order.MemberAddressDto">
+        SELECT
+            address_id AS addressId,
+            name,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            zipcode,
+            addr_base AS addrBase,
+            addr_detail AS addrDetail,
+            is_default AS isDefault
+        FROM member_address
+        WHERE member_id = #{memberId}
+            AND is_default = true
             AND deleted_at IS NULL
     </select>
 

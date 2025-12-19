@@ -16,4 +16,10 @@ public interface MemberAddressMapper {
         @Param("addressId") Long addressId,
         @Param("memberId") Long memberId
     );
+    int update(Long addressId, Long memberId, MemberAddressRequest req);
+    void softDelete(Long addressId, Long memberId);
+    boolean isDefaultAddress(Long addressId, Long memberId);
+    Long pickNextDefaultAddressId(Long memberId);
+    void setDefaultById(Long addressId, Long memberId);
+    MemberAddressDto findDefaultByMember(Long memberId);
 }
