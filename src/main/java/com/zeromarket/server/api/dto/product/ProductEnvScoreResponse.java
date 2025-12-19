@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProductEnvGradeResponse {
+public class ProductEnvScoreResponse {
     private Long environmentScore;
 }

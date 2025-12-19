@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ProductEnvGradeRequest {
+public class ProductEnvScoreRequest {
     private String caption;
     private List<String> tags;
 }

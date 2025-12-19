@@ -2,8 +2,8 @@ package com.zeromarket.server.api.service.product;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zeromarket.server.api.dto.product.ProductEnvGradeRequest;
-import com.zeromarket.server.api.dto.product.ProductEnvGradeResponse;
+import com.zeromarket.server.api.dto.product.ProductEnvScoreRequest;
+import com.zeromarket.server.api.dto.product.ProductEnvScoreResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class EnvGradeService {
+public class EnvScoreService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -31,7 +31,7 @@ public class EnvGradeService {
     private String apiVersion;
 
     // WebClient를 생성하고 endpoint를 설정하는 생성자
-    public EnvGradeService(
+    public EnvScoreService(
         WebClient.Builder builder,
         @Value("${azure.openai.endpoint}") String endpoint
     ) {
@@ -42,7 +42,7 @@ public class EnvGradeService {
     }
 
     // Vision 결과(caption, tags)를 기반으로 환경점수 계산
-    public ProductEnvGradeResponse calculate(ProductEnvGradeRequest req) {
+    public ProductEnvScoreResponse calculate(ProductEnvScoreRequest req) {
         try {
             String caption = req.getCaption() == null ? "" : req.getCaption().trim();
             List<String> tags = req.getTags() == null ? List.of() : req.getTags();
@@ -102,7 +102,7 @@ public class EnvGradeService {
                 throw new RuntimeException("environmentScore 범위 오류: " + score);
             }
 
-            ProductEnvGradeResponse res = new ProductEnvGradeResponse();
+            ProductEnvScoreResponse res = new ProductEnvScoreResponse();
             res.setEnvironmentScore(score);
             return res;
 
