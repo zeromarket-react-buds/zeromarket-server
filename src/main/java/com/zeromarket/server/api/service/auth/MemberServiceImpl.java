@@ -127,6 +127,7 @@ public class MemberServiceImpl implements MemberService {
         throw new IllegalStateException("닉네임 생성 실패");
     }
 
+    // TODO: oauth 계정 탈퇴만 고려 (일반 계정 고려 필요)
     // 회원탈퇴
     @Override
     public void withdraw(Long memberId, HttpServletResponse response) {

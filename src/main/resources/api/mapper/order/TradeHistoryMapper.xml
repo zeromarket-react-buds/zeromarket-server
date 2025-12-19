@@ -372,4 +372,26 @@
           AND t.canceled_at is null
 
     </select>
+
+<!--    <insert id="insertTrade" useGeneratedKeys="true" keyProperty="tradeId">-->
+<!--        INSERT INTO trade (-->
+<!--            product_id,-->
+<!--            buyer_id,-->
+<!--            trade_type,-->
+<!--            trade_status-->
+<!--        )-->
+<!--        VALUES (-->
+<!--            #{productId},-->
+<!--            #{buyerId},-->
+<!--            #{tradeType},-->
+<!--            'PENDING'-->
+<!--        )-->
+<!--    </insert>-->
+
+<!--    <update id="updateTradeStatus">-->
+<!--        UPDATE trade-->
+<!--        SET trade_status = #{status},-->
+<!--        updated_at = CURRENT_TIMESTAMP-->
+<!--        WHERE trade_id = #{tradeId}-->
+<!--    </update>-->
 </mapper>

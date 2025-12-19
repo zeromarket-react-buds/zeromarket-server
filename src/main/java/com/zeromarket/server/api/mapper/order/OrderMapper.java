@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.mapper.order;
 
+import com.zeromarket.server.api.dto.order.OrderCompleteDto;
 import com.zeromarket.server.common.entity.Order;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,5 +13,10 @@ public interface OrderMapper {
     void updateOrderStatus(
         @Param("orderId") Long orderId,
         @Param("status") String status
+    );
+
+    OrderCompleteDto selectOrderComplete(
+        @Param("orderId") Long orderId,
+        @Param("memberId") Long memberId
     );
 }

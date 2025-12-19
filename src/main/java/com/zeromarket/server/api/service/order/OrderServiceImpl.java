@@ -1,11 +1,11 @@
 package com.zeromarket.server.api.service.order;
 
 import com.zeromarket.server.api.dto.order.CreateOrderRequest;
+import com.zeromarket.server.api.dto.order.OrderCompleteDto;
 import com.zeromarket.server.api.dto.order.TradeRequest;
 import com.zeromarket.server.api.mapper.order.OrderMapper;
 import com.zeromarket.server.api.mapper.order.TradeHistoryMapper;
 import com.zeromarket.server.common.entity.Order;
-import com.zeromarket.server.common.entity.Trade;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.OrderStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
@@ -28,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
  * -> order.CANCELED
  * -> trade.CANCELED
  */
+
+//todo: 거래 중복 발생 가능
+//todo: 상태 전이 유효성 검사
 
 @RequiredArgsConstructor
 @Service
@@ -74,45 +77,63 @@ public class OrderServiceImpl {
         return order.getOrderId();
     }
 
-//    /**
-//     * 배송 시작
-//     * @param orderId
-//     */
-//    @Transactional
-//    public void markDeliveryReady(Long orderId) {
-//        orderMapper.updateOrderStatus(orderId, OrderStatus.DELIVERY_READY);
-//    }
-//
-//    /**
-//     * 배송 중
-//     * @param orderId
-//     */
-//    @Transactional
-//    public void ship(Long orderId) {
-//        orderMapper.updateOrderStatus(orderId, OrderStatus.SHIPPED);
-//    }
-//
-//    /**
-//     * 배송 완료 -> 거래 완료
-//     * @param orderId
-//     * @param tradeId
-//     */
-//    @Transactional
-//    public void completeOrder(Long orderId, Long tradeId) {
-//
-//        orderMapper.updateOrderStatus(orderId, OrderStatus.DELIVERED);
-//        tradeMapper.updateTradeStatus(tradeId, TradeStatus.COMPLETED);
-//    }
-//
-//    /**
-//     * 주문 취소
-//     * @param orderId
-//     * @param tradeId
-//     */
-//    @Transactional
-//    public void cancelOrder(Long orderId, Long tradeId) {
-//
-//        orderMapper.updateOrderStatus(orderId, OrderStatus.CANCELED);
+    /**
+     * 결제 완료 후 거래 내역 조회
+     * @param orderId
+     * @param memberId
+     * @return
+     */
+    public OrderCompleteDto selectOrderComplete(Long orderId, Long memberId) {
+        if(memberId == null){throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);}
+
+        OrderCompleteDto dto = orderMapper.selectOrderComplete(orderId, memberId);
+
+        if (dto == null) {
+            throw new ApiException(ErrorCode.TRADE_NOT_FOUND); // "주문 정보를 찾을 수 없습니다."
+        }
+
+        return dto;
+    };
+
+    /**
+     * 배송 시작 (order.DELIVERY_READY)
+     * @param orderId
+     */
+    @Transactional
+    public void markDeliveryReady(Long orderId) {
+        orderMapper.updateOrderStatus(orderId, OrderStatus.DELIVERY_READY.name());
+    }
+
+    /**
+     * 배송 중 (order.SHIPPED)
+     * @param orderId
+     */
+    @Transactional
+    public void ship(Long orderId) {
+        orderMapper.updateOrderStatus(orderId, OrderStatus.SHIPPED.name());
+    }
+
+    /**
+     * 배송 완료 -> 거래 완료 (order.DELIVERED, trade.COMPLETED)
+     * @param orderId
+     * @param tradeId
+     */
+    @Transactional
+    public void completeOrder(Long orderId, Long tradeId) {
+
+        orderMapper.updateOrderStatus(orderId, OrderStatus.DELIVERED.name());
+//        tradeMapper.updateTradeStatus(tradeId, TradeStatus.COMPLETED.name());
+    }
+
+    /**
+     * 주문 취소 (order.CANCELED, trade.CANCELED)
+     * @param orderId
+     * @param tradeId
+     */
+    @Transactional
+    public void cancelOrder(Long orderId, Long tradeId) {
+
+        orderMapper.updateOrderStatus(orderId, OrderStatus.CANCELED.name());
 //        tradeMapper.updateTradeStatus(tradeId, TradeStatus.CANCELED);
-//    }
+    }
 }
