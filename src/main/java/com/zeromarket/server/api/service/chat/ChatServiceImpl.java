@@ -6,14 +6,18 @@ import com.zeromarket.server.api.dto.chat.ChatDto.ChatReadEvent;
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageRequest;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatPersistResult;
 import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRoomRequest;
 import com.zeromarket.server.api.dto.chat.ChatRoomResponse;
+import com.zeromarket.server.api.dto.noti.NotificationPush;
 import com.zeromarket.server.api.dto.product.ProductBasicInfo;
 import com.zeromarket.server.api.mapper.chat.ChatMapper;
+import com.zeromarket.server.api.mapper.noti.NotificationMapper;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
 import com.zeromarket.server.api.publisher.ChatEventPublisher;
 import com.zeromarket.server.api.publisher.ChatPublisher;
+import com.zeromarket.server.api.publisher.NotificationPublisher;
 import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.entity.ChatRoom;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -28,6 +32,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -39,6 +45,8 @@ public class ChatServiceImpl implements ChatService {
     private final ProductQueryMapper productQueryMapper;
     private final ChatPublisher chatPublisher;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationMapper notificationMapper;
+    private final NotificationPublisher notificationPublisher;
 
     @Override
     public ChatMessage selectChatMessageByMessageId(Long messageId) {
@@ -66,8 +74,6 @@ public class ChatServiceImpl implements ChatService {
 
         if (chatRoomId == null || chatRoomId <= 0) {
             chatRoomId = this.createNewChatRoom(chatRoomRequest);
-            // TODO: 임시 처리
-//            this.createChatTextMessage(chatRoomId, buyerId, "구매 의사 있어요.");
         }
 
         return chatRoomId;
@@ -79,7 +85,8 @@ public class ChatServiceImpl implements ChatService {
         ChatInfoWithMessageResponse chatInfoWithMessageResponse = chatMapper.selectChatInfo(
             chatRoomId);
         chatInfoWithMessageResponse.setChatMessages(selectChatMessages(chatRoomId, memberId));
-        chatInfoWithMessageResponse.setYourLastReadMessageId(chatMapper.getLastReadMessageId(chatRoomId, memberId));
+        chatInfoWithMessageResponse.setYourLastReadMessageId(
+            chatMapper.getLastReadMessageId(chatRoomId, memberId));
         return chatInfoWithMessageResponse;
 
     }
@@ -100,23 +107,6 @@ public class ChatServiceImpl implements ChatService {
         return chatMapper.selectRecentChatMessages(memberId);
     }
 
-
-    @Override
-    public void publish(ChatDto.ChatMessageReq req) {
-        // 1) 무조건 DB 저장 먼저 (트랜잭션)
-        ChatDto.ChatMessagePush push = this.persist(req);
-
-        // 2) 커밋이 성공한 뒤에만 push 되도록 (권장)
-        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
-            new org.springframework.transaction.support.TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    chatPublisher.publish(push);
-                }
-            }
-        );
-    }
-
     private Long createNewChatRoom(ChatRoomRequest chatRoomRequest) {
 
         ChatRoom chatRoom = ChatRoom.of(chatRoomRequest);
@@ -131,20 +121,12 @@ public class ChatServiceImpl implements ChatService {
         return chatRoomId;
     }
 
-    private void createChatTextMessage(Long chatRoomId, Long memberId, String content) {
-        ChatMessage newMessage = ChatMessage.builder().chatRoomId(chatRoomId)
-            .memberId(memberId)
-            .content(content)
-            .messageType(MessageType.TEXT)
-            .build();
-        chatMapper.createChatMessage(newMessage);
-
-        chatMapper.updateLastMessage(chatRoomId, newMessage.getMessageId());
-    }
 
     @Transactional
     public void markAsRead(Long chatRoomId, Long memberId, Long lastReadMessageId) {
-        if (lastReadMessageId == null) return;
+        if (lastReadMessageId == null) {
+            return;
+        }
 
         chatMapper.updateLastReadMessage(
             chatRoomId,
@@ -163,33 +145,80 @@ public class ChatServiceImpl implements ChatService {
 
     }
 
+    @Override
+    public void publish(ChatDto.ChatMessageReq req) {
+        ChatPersistResult result = this.persist(req);
+
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    chatPublisher.publish(result.getChatPush());
+                    notificationPublisher.publish(result.getNotificationPush());
+                }
+            }
+        );
+    }
+
     @Transactional
     @Override
-    public ChatDto.ChatMessagePush persist(ChatDto.ChatMessageReq req) {
+    public ChatPersistResult persist(ChatDto.ChatMessageReq req) {
 
-        // 1) DB INSERT
+        // 1) 메시지 저장
         ChatMessage entity = new ChatMessage();
         entity.setChatRoomId(req.getChatRoomId());
         entity.setMemberId(req.getMemberId());
         entity.setMessageType(MessageType.TEXT);
         entity.setContent(req.getContent());
-
         chatMapper.createChatMessage(entity);
 
-        // 2) chat_room 마지막 메시지 갱신
+        // 2) last_message 갱신
         chatMapper.updateLastMessage(req.getChatRoomId(), entity.getMessageId());
 
-        // 3) push payload 구성(확정된 messageId 기반)
-        ChatDto.ChatMessagePush push = ChatDto.ChatMessagePush.builder()
-                .messageId(entity.getMessageId())
-                .chatRoomId(req.getChatRoomId())
-                .memberId(req.getMemberId())
-                .content(req.getContent())
-                .createdAt(OffsetDateTime.now().toString())
-                .build();
+        // 3) 채팅 push DTO
+        ChatDto.ChatMessagePush chatPush = ChatDto.ChatMessagePush.builder()
+            .messageId(entity.getMessageId())
+            .chatRoomId(req.getChatRoomId())
+            .memberId(req.getMemberId())
+            .content(req.getContent())
+            .createdAt(OffsetDateTime.now().toString())
+            .build();
 
-        log.info("[DB:SAVED] room={}, messageId={}", push.getChatRoomId(), push.getMessageId());
-        return push;
+        // 4) 수신자 조회
+        List<Long> receiverIds = chatMapper.findChatRoomParticipantIdsExceptSender(
+            req.getChatRoomId(), req.getMemberId()
+        );
+
+        // 5) 알림 upsert (DB)
+        String preview = makePreview(req.getContent());
+        String linkUrl = "/chat/rooms/" + req.getChatRoomId();
+
+        for (Long receiverId : receiverIds) {
+            notificationMapper.upsertChatNotification(
+                receiverId, req.getChatRoomId(), preview, linkUrl
+            );
+        }
+
+        // 6) 알림 push DTO (개인 채널)
+        NotificationPush notiPush = NotificationPush.builder()
+            .notificationType("CHAT_MESSAGE")
+            .refType("CHAT_ROOM")
+            .refId(req.getChatRoomId())
+            .body(preview)
+            .linkUrl(linkUrl)
+            .createdAt(OffsetDateTime.now().toString())
+            .receiverIds(receiverIds)
+            .build();
+
+        return new ChatPersistResult(chatPush, notiPush);
+    }
+
+    private String makePreview(String content) {
+        if (content == null) {
+            return null;
+        }
+        String s = content.replace("\n", " ");
+        return s.length() > 60 ? s.substring(0, 60) + "..." : s;
     }
 
 }

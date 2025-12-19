@@ -4,6 +4,7 @@ import com.zeromarket.server.api.dto.chat.ChatDto;
 import com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatMessageRequest;
 import com.zeromarket.server.api.dto.chat.ChatMessageResponse;
+import com.zeromarket.server.api.dto.chat.ChatPersistResult;
 import com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse;
 import com.zeromarket.server.api.dto.chat.ChatRoomResponse;
 import com.zeromarket.server.common.entity.ChatMessage;
@@ -28,6 +29,6 @@ public interface ChatService {
 
     void markAsRead(Long chatRoomId, Long memberId, Long lastReadMessageId);
 
-    ChatDto.ChatMessagePush persist(ChatDto.ChatMessageReq req);
+    ChatPersistResult persist(ChatDto.ChatMessageReq req);
 }
 

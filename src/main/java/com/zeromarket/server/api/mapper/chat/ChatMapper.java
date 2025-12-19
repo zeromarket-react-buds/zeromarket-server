@@ -14,8 +14,8 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ChatMapper {
 
-//    List<ChatRoomResponse> selectChatRooms();
-    List<ChatRoomResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
+    //    List<ChatRoomResponse> selectChatRooms();
+    List<ChatRoomResponse> selectRecentChatMessages(@Param("memberId") Long memberId);
 
     ChatRoom selectChatRoomByChatRoomId(Long chatRoomId);
 
@@ -25,21 +25,24 @@ public interface ChatMapper {
 
     void createChatRoom(ChatRoom chatRoom);
 
-    void createChatParticipant(@Param("chatRoomId") Long chatRoomId, @Param("memberId") Long sellerId);
+    void createChatParticipant(@Param("chatRoomId") Long chatRoomId,
+        @Param("memberId") Long sellerId);
 
     void createChatMessage(ChatMessage chatMessage);
 
     int updateLastMessage(@Param("chatRoomId") Long chatRoomId,
-                          @Param("messageId") Long messageId);
+        @Param("messageId") Long messageId);
 
     Integer selectUnreadMessageCount(@Param("chatRoomId") Long chatRoomId,
-                          @Param("memberId") Long memberId);
+        @Param("memberId") Long memberId);
 
     int countChatParticipants(@Param("chatRoomId") Long chatRoomId);
 
-    List<ChatMessageResponse> selectChatMessages(@Param("chatRoomId") Long chatRoomId, @Param("memberId") Long memberId);
+    List<ChatMessageResponse> selectChatMessages(@Param("chatRoomId") Long chatRoomId,
+        @Param("memberId") Long memberId);
 
-    boolean existsParticipant(@Param("chatRoomId") Long chatRoomId, @Param("memberId")  Long memberId);
+    boolean existsParticipant(@Param("chatRoomId") Long chatRoomId,
+        @Param("memberId") Long memberId);
 
     ChatInfoWithMessageResponse selectChatInfo(Long chatRoomId);
 
@@ -51,7 +54,13 @@ public interface ChatMapper {
         @Param("lastReadMessageId") Long lastReadMessageId
     );
 
-    Long getLastReadMessageId(@Param("chatRoomId")Long chatRoomId, @Param("memberId")Long memberId);
+    Long getLastReadMessageId(@Param("chatRoomId") Long chatRoomId,
+        @Param("memberId") Long memberId);
 
+    // 채팅방 참여자 ID 조회 (보낸 사람 제외)
+    List<Long> findChatRoomParticipantIdsExceptSender(
+        @Param("chatRoomId") Long chatRoomId,
+        @Param("memberId") Long memberId
+    );
 //    List<ChatRecentMessageResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
 }

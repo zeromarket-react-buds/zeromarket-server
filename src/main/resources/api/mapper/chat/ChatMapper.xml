@@ -3,135 +3,134 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zeromarket.server.api.mapper.chat.ChatMapper">
 
-    <select id="selectRecentChatMessages" resultType="com.zeromarket.server.api.dto.chat.ChatRoomResponse">
-<!--    <select id="selectChatRooms" resultType="com.zeromarket.server.api.dto.chat.ChatRoomResponse">-->
+    <select id="selectRecentChatMessages"
+        resultType="com.zeromarket.server.api.dto.chat.ChatRoomResponse">
+        <!--    <select id="selectChatRooms" resultType="com.zeromarket.server.api.dto.chat.ChatRoomResponse">-->
         SELECT
-          cr.chat_room_id,
-          cr.product_id,
-          cr.buyer_id,
-          cr.seller_id,
-          (
-            SELECT
-              nickname
-           FROM member
-           WHERE member_id =
-               CASE WHEN cr.buyer_id = #{memberId} THEN cr.seller_id ELSE cr.buyer_id END
-           ) AS your_nickname,
-          cr.product_image,
-          cr.last_message_id,
+        cr.chat_room_id,
+        cr.product_id,
+        cr.buyer_id,
+        cr.seller_id,
+        (
+        SELECT
+        nickname
+        FROM member
+        WHERE member_id =
+        CASE WHEN cr.buyer_id = #{memberId} THEN cr.seller_id ELSE cr.buyer_id END
+        ) AS your_nickname,
+        cr.product_image,
+        cr.last_message_id,
 
-          lm.content        AS last_message_content,
-          lm.created_at     AS last_message_at,
-          lm.member_id      AS last_message_sender_id,
+        lm.content AS last_message_content,
+        lm.created_at AS last_message_at,
+        lm.member_id AS last_message_sender_id,
 
-          (
-            SELECT COUNT(*)
-            FROM chat_message cm
-            WHERE cm.chat_room_id = cr.chat_room_id
-              <![CDATA[
+        (
+        SELECT COUNT(*)
+        FROM chat_message cm
+        WHERE cm.chat_room_id = cr.chat_room_id
+        <![CDATA[
               AND cm.member_id <> #{memberId}
               AND cm.message_id > COALESCE(crp.last_read_message_id, 0)
             ]]>
-          ) AS unread_count
+        ) AS unread_count
 
         FROM chat_room_participant crp
         JOIN chat_room cr
-          ON cr.chat_room_id = crp.chat_room_id
+        ON cr.chat_room_id = crp.chat_room_id
 
         LEFT JOIN chat_message lm
-          ON lm.message_id = cr.last_message_id
+        ON lm.message_id = cr.last_message_id
 
         WHERE crp.member_id = #{memberId}
-          AND cr.is_deleted = FALSE
-          AND crp.deleted_at IS NULL
+        AND cr.is_deleted = FALSE
+        AND crp.deleted_at IS NULL
 
         ORDER BY COALESCE(lm.created_at, cr.created_at) DESC
     </select>
-<!--    <select id="selectRecentChatMessages" resultType="com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse">-->
-<!--        SELECT-->
-<!--            t.chat_room_id,-->
-<!--            t.product_id,-->
-<!--            t.product_image,-->
-<!--            t.buyer_id,-->
-<!--            t.seller_id,-->
-<!--            t.your_nickname,-->
-<!--            t.message_id,-->
-<!--            t.content,-->
-<!--            t.created_at-->
-<!--        FROM-->
-<!--            (SELECT-->
-<!--                 cr.chat_room_id,-->
-<!--                 cr.product_id,-->
-<!--                 cr.product_image,-->
-<!--                 cr.buyer_id,-->
-<!--                 cr.seller_id,-->
-<!--                 (SELECT-->
-<!--                    nickname-->
-<!--                 FROM member-->
-<!--                 WHERE member_id =-->
-<!--                     CASE WHEN cr.buyer_id = #{memberId} THEN cr.seller_id ELSE cr.buyer_id END-->
-<!--                 ) AS your_nickname,-->
-<!--                 cm.message_id,-->
-<!--                 cm.content,-->
-<!--                 cm.created_at,-->
-<!--                 ROW_NUMBER() OVER (-->
-<!--                    PARTITION BY cr.chat_room_id-->
-<!--                    ORDER BY cm.created_at DESC, cm.message_id DESC-->
-<!--                 ) AS rn-->
-<!--              FROM chat_room cr-->
-<!--                       LEFT JOIN chat_message cm-->
-<!--                                 ON cm.chat_room_id = cr.chat_room_id-->
-<!--              WHERE-->
-<!--                  (cr.buyer_id = #{memberId} or cr.seller_id = #{memberId})-->
-<!--                AND cr.deleted_at IS NULL) t-->
-<!--        WHERE rn = 1-->
-<!--        ORDER BY chat_room_id desc-->
+    <!--    <select id="selectRecentChatMessages" resultType="com.zeromarket.server.api.dto.chat.ChatRecentMessageResponse">-->
+    <!--        SELECT-->
+    <!--            t.chat_room_id,-->
+    <!--            t.product_id,-->
+    <!--            t.product_image,-->
+    <!--            t.buyer_id,-->
+    <!--            t.seller_id,-->
+    <!--            t.your_nickname,-->
+    <!--            t.message_id,-->
+    <!--            t.content,-->
+    <!--            t.created_at-->
+    <!--        FROM-->
+    <!--            (SELECT-->
+    <!--                 cr.chat_room_id,-->
+    <!--                 cr.product_id,-->
+    <!--                 cr.product_image,-->
+    <!--                 cr.buyer_id,-->
+    <!--                 cr.seller_id,-->
+    <!--                 (SELECT-->
+    <!--                    nickname-->
+    <!--                 FROM member-->
+    <!--                 WHERE member_id =-->
+    <!--                     CASE WHEN cr.buyer_id = #{memberId} THEN cr.seller_id ELSE cr.buyer_id END-->
+    <!--                 ) AS your_nickname,-->
+    <!--                 cm.message_id,-->
+    <!--                 cm.content,-->
+    <!--                 cm.created_at,-->
+    <!--                 ROW_NUMBER() OVER (-->
+    <!--                    PARTITION BY cr.chat_room_id-->
+    <!--                    ORDER BY cm.created_at DESC, cm.message_id DESC-->
+    <!--                 ) AS rn-->
+    <!--              FROM chat_room cr-->
+    <!--                       LEFT JOIN chat_message cm-->
+    <!--                                 ON cm.chat_room_id = cr.chat_room_id-->
+    <!--              WHERE-->
+    <!--                  (cr.buyer_id = #{memberId} or cr.seller_id = #{memberId})-->
+    <!--                AND cr.deleted_at IS NULL) t-->
+    <!--        WHERE rn = 1-->
+    <!--        ORDER BY chat_room_id desc-->
 
-<!--    &lt;!&ndash; 레터럴 조인 사용하는 경우-->
-<!--       SELECT-->
-<!--            cr.chat_room_id,-->
-<!--            cr.product_id,-->
-<!--            cr.product_image,-->
-<!--            cr.buyer_id,-->
-<!--            cr.seller_id,-->
-<!--            cm.message_id,-->
-<!--            cm.content,-->
-<!--            cm.created_at-->
-<!--        FROM chat_room cr-->
-<!--        LEFT JOIN LATERAL (-->
-<!--            SELECT cm.*-->
-<!--            FROM chat_message cm-->
-<!--            WHERE cm.chat_room_id = cr.chat_room_id-->
-<!--            ORDER BY cm.created_at DESC-->
-<!--            LIMIT 1-->
-<!--        ) cm ON TRUE-->
-<!--        WHERE (cr.buyer_id = #{memberId} or cr.seller_id = #{memberId})-->
-<!--          AND cr.deleted_at IS NULL-->
+    <!--    &lt;!&ndash; 레터럴 조인 사용하는 경우-->
+    <!--       SELECT-->
+    <!--            cr.chat_room_id,-->
+    <!--            cr.product_id,-->
+    <!--            cr.product_image,-->
+    <!--            cr.buyer_id,-->
+    <!--            cr.seller_id,-->
+    <!--            cm.message_id,-->
+    <!--            cm.content,-->
+    <!--            cm.created_at-->
+    <!--        FROM chat_room cr-->
+    <!--        LEFT JOIN LATERAL (-->
+    <!--            SELECT cm.*-->
+    <!--            FROM chat_message cm-->
+    <!--            WHERE cm.chat_room_id = cr.chat_room_id-->
+    <!--            ORDER BY cm.created_at DESC-->
+    <!--            LIMIT 1-->
+    <!--        ) cm ON TRUE-->
+    <!--        WHERE (cr.buyer_id = #{memberId} or cr.seller_id = #{memberId})-->
+    <!--          AND cr.deleted_at IS NULL-->
 
-<!--    &ndash;&gt;-->
-<!--    </select>-->
+    <!--    &ndash;&gt;-->
+    <!--    </select>-->
 
     <select id="selectChatRoom" resultType="java.lang.Long">
-        SELECT
-            chat_room_id
+        SELECT chat_room_id
         FROM chat_room cr
         WHERE cr.product_id = #{productId}
           AND cr.buyer_id = #{buyerId}
-        AND cr.seller_id = #{sellerId}
+          AND cr.seller_id = #{sellerId}
     </select>
 
     <select id="selectChatRoomByChatRoomId" parameterType="java.lang.Long"
-    resultType="com.zeromarket.server.common.entity.ChatRoom">
-        SELECT
-            chat_room_id,
-            product_id,
-            buyer_id,
-            seller_id,
-            product_image,
-            is_deleted,
-            created_at,
-            updated_at,
-            deleted_at
+        resultType="com.zeromarket.server.common.entity.ChatRoom">
+        SELECT chat_room_id,
+               product_id,
+               buyer_id,
+               seller_id,
+               product_image,
+               is_deleted,
+               created_at,
+               updated_at,
+               deleted_at
         FROM chat_room cr
         WHERE cr.chat_room_id = #{chatRoomId}
     </select>
@@ -140,66 +139,50 @@
         useGeneratedKeys="true"
         keyProperty="chatRoomId"
         keyColumn="chat_room_id">
-        INSERT INTO
-            chat_room
-        (
-               product_id,
-               buyer_id,
-               seller_id,
-               product_image
-        ) VALUES (
-                #{productId},
+        INSERT INTO chat_room
+        (product_id,
+         buyer_id,
+         seller_id,
+         product_image)
+        VALUES (#{productId},
                 #{buyerId},
                 #{sellerId},
-                #{productImage}
-        )
+                #{productImage})
     </insert>
 
     <select id="upsertChatRoomId" resultType="long">
         INSERT INTO chat_room (product_id, buyer_id, seller_id, product_image)
-        VALUES (#{productId}, #{buyerId}, #{sellerId}, #{productImage})
-        ON CONFLICT (product_id, buyer_id, seller_id)
-        DO UPDATE SET
-        product_image = EXCLUDED.product_image,
-        updated_at = now()
-        RETURNING chat_room_id
+        VALUES (#{productId}, #{buyerId}, #{sellerId}, #{productImage}) ON CONFLICT (product_id, buyer_id, seller_id)
+        DO
+        UPDATE SET
+            product_image = EXCLUDED.product_image,
+            updated_at = now()
+            RETURNING chat_room_id
     </select>
 
-    <insert id="createChatParticipant" >
-        INSERT INTO
-            chat_room_participant
-        (
-             chat_room_id,
-             member_id,
-             deleted_at
-        )
-        VALUES
-        (
-             #{chatRoomId},
-             #{memberId},
-             null
-        )
+    <insert id="createChatParticipant">
+        INSERT INTO chat_room_participant
+        (chat_room_id,
+         member_id,
+         deleted_at)
+        VALUES (#{chatRoomId},
+                #{memberId},
+                null)
     </insert>
 
     <insert id="createChatMessage" parameterType="com.zeromarket.server.common.entity.ChatMessage"
         useGeneratedKeys="true"
         keyProperty="messageId"
         keyColumn="message_id">
-        INSERT INTO
-            chat_message
-        (
-            chat_room_id,
-            member_id,
-            content,
-            message_type
-        )
-        VALUES
-        (
-             #{chatRoomId},
-             #{memberId},
-             #{content},
-             #{messageType}
-        )
+        INSERT INTO chat_message
+        (chat_room_id,
+         member_id,
+         content,
+         message_type)
+        VALUES (#{chatRoomId},
+                #{memberId},
+                #{content},
+                #{messageType})
     </insert>
 
 
@@ -209,44 +192,44 @@
         WHERE chat_room_id = #{chatRoomId}
     </update>
 
-<!--    <update id="updateParticipantLastMessage">-->
-<!--        UPDATE chat_room_participant crp-->
-<!--        SET last_read_message_id = cr.last_message_id,-->
-<!--            last_read_at = now(),-->
-<!--            updated_at = now()-->
-<!--        FROM chat_room cr-->
-<!--        WHERE crp.chat_room_id = cr.chat_room_id-->
-<!--          AND crp.chat_room_id = #{roomId}-->
-<!--          AND crp.member_id = #{memberId}-->
-<!--          AND cr.last_message_id IS NOT NULL-->
-<!--    </update>-->
+    <!--    <update id="updateParticipantLastMessage">-->
+    <!--        UPDATE chat_room_participant crp-->
+    <!--        SET last_read_message_id = cr.last_message_id,-->
+    <!--            last_read_at = now(),-->
+    <!--            updated_at = now()-->
+    <!--        FROM chat_room cr-->
+    <!--        WHERE crp.chat_room_id = cr.chat_room_id-->
+    <!--          AND crp.chat_room_id = #{roomId}-->
+    <!--          AND crp.member_id = #{memberId}-->
+    <!--          AND cr.last_message_id IS NOT NULL-->
+    <!--    </update>-->
 
     <update id="updateLastReadMessage">
         UPDATE chat_room_participant
-        SET
-            last_read_message_id = GREATEST(
-              COALESCE(last_read_message_id, 0),
-              #{lastReadMessageId}
-            ),
-            last_read_at = NOW(),
-            updated_at = NOW()
+        SET last_read_message_id = GREATEST(
+            COALESCE(last_read_message_id, 0),
+            #{lastReadMessageId}
+                                   ),
+            last_read_at         = NOW(),
+            updated_at           = NOW()
         WHERE chat_room_id = #{chatRoomId}
-        AND member_id = #{memberId}
-        AND deleted_at IS NULL
+          AND member_id = #{memberId}
+          AND deleted_at IS NULL
     </update>
 
     <select id="selectUnreadMessageCount" resultType="Integer">
         SELECT COUNT(*)
         FROM chat_message cm
-        INNER JOIN chat_room_participant crp ON crp.chat_room_id = cm.chat_room_id
+                 INNER JOIN chat_room_participant crp ON crp.chat_room_id = cm.chat_room_id
         WHERE cm.chat_room_id = #{chatRoomId}
           <![CDATA[
-            AND cm.member_id <> #{memberId}
-            AND cm.message_id > COALESCE(crp.last_read_message_id, 0)
+          AND cm.member_id <> #{memberId}
+          AND cm.message_id > COALESCE(crp.last_read_message_id, 0)
         ]]>
     </select>
 
-    <select id="selectChatMessageByMessageId" resultType="com.zeromarket.server.common.entity.ChatMessage"
+    <select id="selectChatMessageByMessageId"
+        resultType="com.zeromarket.server.common.entity.ChatMessage"
         parameterType="Long">
         SELECT message_id,
                chat_room_id,
@@ -259,7 +242,7 @@
         WHERE message_id = #{messageId}
     </select>
 
-<!--테스트용-->
+    <!--테스트용-->
     <select id="countChatParticipants" resultType="int">
         SELECT COUNT(*)
         FROM chat_room_participant
@@ -267,16 +250,16 @@
           AND deleted_at is null
     </select>
 
-    <select id="selectChatMessages" resultType="com.zeromarket.server.api.dto.chat.ChatMessageResponse">
-        SELECT
-            message_id,
-            chat_room_id,
-            member_id,
-            content,
-            message_type,
-            created_at,
-            updated_at,
-            member_id = #{memberId} as is_mine
+    <select id="selectChatMessages"
+        resultType="com.zeromarket.server.api.dto.chat.ChatMessageResponse">
+        SELECT message_id,
+               chat_room_id,
+               member_id,
+               content,
+               message_type,
+               created_at,
+               updated_at,
+               member_id = #{memberId} as is_mine
         FROM chat_message m
         WHERE chat_room_id = #{chatRoomId}
         ORDER BY created_at ASC
@@ -289,59 +272,55 @@
            <![CDATA[
           AND member_id <> #{memberId}
           ]]>
-          AND deleted_at IS NULL
-        LIMIT 1
+          AND deleted_at IS NULL LIMIT 1
     </select>
 
     <select id="existsParticipant" resultType="boolean">
-        SELECT EXISTS(
-            SELECT 1
-            FROM chat_room_participant cp
-                     INNER JOIN chat_room cr
-                                ON cp.chat_room_id = cr.chat_room_id
-            WHERE cp.chat_room_id = #{chatRoomId}
-              AND cp.member_id = #{memberId}
-              AND cp.deleted_at IS NULL
-              AND cr.is_deleted = false
-        )
+        SELECT EXISTS(SELECT 1
+                      FROM chat_room_participant cp
+                               INNER JOIN chat_room cr
+                                          ON cp.chat_room_id = cr.chat_room_id
+                      WHERE cp.chat_room_id = #{chatRoomId}
+                        AND cp.member_id = #{memberId}
+                        AND cp.deleted_at IS NULL
+                        AND cr.is_deleted = false)
     </select>
 
     <select id="selectChatInfo"
         parameterType="long"
         resultType="com.zeromarket.server.api.dto.chat.ChatInfoWithMessageResponse">
-        SELECT
-            cr.chat_room_id,
-            cr.product_id,
-            p.product_title,
-            p.sell_price,
-            p.sales_status,
-            t.trade_status ,
-            cr.buyer_id ,
-            buyer.profile_image as buyer_profile_image,
-            buyer.nickname as buyer_nickname,
-            cr.seller_id ,
-            seller.profile_image as seller_profile_image,
-            seller.nickname as seller_nickname,
-            cr.product_image ,
-            cr.is_deleted ,
-            cr.created_at ,
-            cr.updated_at ,
-            buyer_part.deleted_at AS buyer_deleted_at,
-            seller_part.deleted_at AS seller_deleted_at
+        SELECT cr.chat_room_id,
+               cr.product_id,
+               p.product_title,
+               p.sell_price,
+               p.sales_status,
+               t.trade_status,
+               cr.buyer_id,
+               buyer.profile_image    as buyer_profile_image,
+               buyer.nickname         as buyer_nickname,
+               cr.seller_id,
+               seller.profile_image   as seller_profile_image,
+               seller.nickname        as seller_nickname,
+               cr.product_image,
+               cr.is_deleted,
+               cr.created_at,
+               cr.updated_at,
+               buyer_part.deleted_at  AS buyer_deleted_at,
+               seller_part.deleted_at AS seller_deleted_at
         FROM chat_room cr
-        INNER JOIN product p ON cr.product_id = p.product_id
-        INNER JOIN member buyer ON cr.buyer_id = buyer.member_id
-        INNER JOIN member seller ON cr.seller_id = seller.member_id
-        LEFT JOIN chat_room_participant buyer_part
-                  ON cr.chat_room_id = buyer_part.chat_room_id
-                      AND buyer_part.member_id = cr.buyer_id
-        LEFT JOIN chat_room_participant seller_part
-                  ON cr.chat_room_id = seller_part.chat_room_id
-                      AND seller_part.member_id = cr.seller_id
-        LEFT JOIN trade t
-                  ON cr.product_id = t.product_id
-                      AND cr.buyer_id = t.buyer_id
-                      AND t.trade_status != 'CANCELED'
+                 INNER JOIN product p ON cr.product_id = p.product_id
+                 INNER JOIN member buyer ON cr.buyer_id = buyer.member_id
+                 INNER JOIN member seller ON cr.seller_id = seller.member_id
+                 LEFT JOIN chat_room_participant buyer_part
+                           ON cr.chat_room_id = buyer_part.chat_room_id
+                               AND buyer_part.member_id = cr.buyer_id
+                 LEFT JOIN chat_room_participant seller_part
+                           ON cr.chat_room_id = seller_part.chat_room_id
+                               AND seller_part.member_id = cr.seller_id
+                 LEFT JOIN trade t
+                           ON cr.product_id = t.product_id
+                               AND cr.buyer_id = t.buyer_id
+                               AND t.trade_status != 'CANCELED'
                        AND t.trade_id = (
                            SELECT trade_id
                            FROM trade
@@ -354,51 +333,17 @@
         WHERE cr.chat_room_id = #{chatRoomId}
     </select>
 
-<!--    <select id="selectOrCreateChatRoomByProductIdBuyerId" resultType="long">-->
-<!--        WITH product_info AS (-->
-<!--            SELECT-->
-<!--                p.product_id,-->
-<!--                p.seller_id,-->
-<!--                (-->
-<!--                    SELECT pi.image_url-->
-<!--                    FROM product_image pi-->
-<!--                    WHERE pi.product_id = p.product_id-->
-<!--                    ORDER BY pi.is_main DESC, pi.sort_order ASC-->
-<!--                    LIMIT 1-->
-<!--        ) AS product_image-->
-<!--        FROM product p-->
-<!--        WHERE p.product_id = #{productId}-->
-<!--            ),-->
-<!--            upsert AS (-->
-<!--        INSERT INTO chat_room (-->
-<!--            product_id,-->
-<!--            buyer_id,-->
-<!--            seller_id,-->
-<!--            product_image-->
-<!--        )-->
-<!--        SELECT-->
-<!--            product_id,-->
-<!--            #{buyerId}        AS buyer_id,-->
-<!--            seller_id,-->
-<!--            product_image-->
-<!--        FROM product_info-->
-<!--        ON CONFLICT (product_id, buyer_id, seller_id) DO NOTHING-->
-<!--            RETURNING chat_room_id-->
-<!--            )-->
-<!--        SELECT chat_room_id-->
-<!--        FROM upsert-->
+    <select id="findChatRoomParticipantIdsExceptSender"
+        resultType="long">
+        SELECT
+            DISTINCT member_id
+        FROM chat_room_participant
+        WHERE chat_room_id = #{chatRoomId}
+          AND member_id IS NOT NULL
+          <![CDATA[
+          AND member_id <> #{memberId}
+          ]]>
+          AND deleted_at is null
 
-<!--        UNION ALL-->
-
-<!--        SELECT cr.chat_room_id-->
-<!--        FROM chat_room cr-->
-<!--                 JOIN product_info pi-->
-<!--                      ON cr.product_id = pi.product_id-->
-<!--                          AND cr.seller_id = pi.seller_id-->
-<!--        WHERE cr.buyer_id = #{buyerId}-->
-
-<!--            LIMIT 1-->
-<!--    </select>-->
-
-
+    </select>
 </mapper>
