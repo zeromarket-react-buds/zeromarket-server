@@ -15,6 +15,7 @@ public class MemberProfileDto {
     private String profileImage;
     private String description;
     private String trustScore; // 서비스에서 주입
+    private Long environmentScoreTotal;
     private boolean liked; // 서비스에서 주입
 }
 

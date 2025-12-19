@@ -26,6 +26,7 @@ public class Member {
     private String withdrawalReasonDetail;
     private String role; // USER, ADMIN
     private String profileImage;
+    private Long environmentScoreTotal;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime withdrawnAt;

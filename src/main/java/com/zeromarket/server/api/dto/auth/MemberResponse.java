@@ -23,6 +23,8 @@ public class MemberResponse {
     private String role;
     private String profileImage;
 
+    private Long environmentScoreTotal;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 

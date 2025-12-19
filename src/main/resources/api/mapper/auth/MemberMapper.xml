@@ -55,7 +55,8 @@
             m.member_id AS memberId,
             m.nickname AS nickname,
             m.profile_image AS profileImage,
-            m.introduction AS description
+            m.introduction AS description,
+            m.environment_score_total AS environmentScoreTotal
         FROM member m
         WHERE m.member_id = #{memberId}
             AND m.withdrawn_at IS NULL
