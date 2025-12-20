@@ -55,7 +55,6 @@ public class AddressRestController {
 
     @GetMapping("/default")
     public ResponseEntity<MemberAddressDto> defaultAddress (
-        @PathVariable Long addressId,
         @AuthenticationPrincipal CustomUserDetails user
     ) {
         if(user == null) {throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);}

@@ -356,4 +356,18 @@
         WHERE p.product_id = #{productId}
     </select>
 
+    <select id="selectProductForOrder"
+        parameterType="long"
+        resultType="com.zeromarket.server.api.dto.product.ProductDetailResponse">
+        SELECT
+            product_id,
+            seller_id,
+            sell_price,
+            sales_status
+        FROM product
+        WHERE product_id = #{productId}
+            AND sales_status = 'FOR_SALE'
+            AND is_deleted IS NOT TRUE
+        FOR UPDATE
+    </select>
 </mapper>

@@ -23,4 +23,6 @@ public interface ProductQueryMapper {
     List<ProductQueryResponse> selectSimilarProducts(Long productId);
 
     ProductBasicInfo selectBasicInfo(Long productId);
+
+    ProductDetailResponse selectProductForOrder(Long productId);
 }

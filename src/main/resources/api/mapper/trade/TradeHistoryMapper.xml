@@ -397,7 +397,24 @@
 
     </select>
 
-<!--    <insert id="insertTrade" useGeneratedKeys="true" keyProperty="tradeId">-->
+    <select id="existsActiveOrderByProductId"
+        parameterType="long"
+        resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM "order" o
+            JOIN trade t ON o.trade_id = t.trade_id
+            WHERE t.product_id = #{productId}
+                AND o.order_status IN (
+                'PAID',
+                'DELIVERY_READY',
+                'SHIPPED'
+                )
+        )
+    </select>
+
+
+    <!--    <insert id="insertTrade" useGeneratedKeys="true" keyProperty="tradeId">-->
 <!--        INSERT INTO trade (-->
 <!--            product_id,-->
 <!--            buyer_id,-->

@@ -34,6 +34,7 @@ public class OrderRestController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long orderId = orderService.createOrder(req, userDetails.getMemberId());
+
         return ResponseEntity.ok(Map.of("orderId", orderId));
     }
 
