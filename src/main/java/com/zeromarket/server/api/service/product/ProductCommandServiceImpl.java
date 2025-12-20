@@ -88,7 +88,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 //        if (images == null || images.isEmpty()) {
 //            return newProductId;
 //        }
-
         //이미지 있는 상품등록 - 디비에 insert
         //이미지가 있는 경우에만 이미지 insert
         if (images != null && !images.isEmpty()) {
@@ -102,14 +101,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             }
 
         }
-        //위치처리
-//        if (request.isDirect()) {
-//            if (request.getLocation() == null ||
-//                request.getLocation().getLegalDongCode() == null ||
-//                request.getLocation().getLegalDongCode().isBlank()) {
-//                throw new ApiException(ErrorCode.INVALID_REQUEST);
-//            }
-//        }
 
         if(request.isDirect() && request.getLocation()!=null){
 
@@ -131,11 +122,11 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             if(legalDongId==null){
                 throw new ApiException(ErrorCode.INVALID_REQUEST);
             }
-//
-//            //dto에 fk값 세팅
+
+            //dto에 fk값 세팅
             request.getLocation().setReferenceAreaId(legalDongId);
-//
-//            //insert
+
+            //insert
             mapper.insertProductLocation(newProductId,request,request.getSellerId());
         }
 
@@ -179,14 +170,30 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         //텍스트,기본정보수정
         mapper.updateProduct(productId,request);
 
+        //위치 수정
+        if(request.isDirect()&&request.getLocation()!=null){
+            String legalDongCode = request.getLocation().getLegalDongCode();
+
+            if(legalDongCode!=null && !legalDongCode.isBlank()){
+                Long legalDongId = areaQueryMapper.getLegalDongIdByLegalCode(legalDongCode);
+                if(legalDongId!=null){
+                    mapper.deleteProductLocation(productId);
+                    request.getLocation().setReferenceAreaId(legalDongId);
+                    mapper.insertProductLocationFromUpdate(productId,request,request.getLocation());
+
+                }
+            }
+
+        }else if(!request.isDirect()){
+            mapper.deleteProductLocation(productId);
+        }
+
         //이미지 수정-이미지 리스트null이면 변경X
         if(request.getImages()==null){
             return;
         }
-
         //기존이미지 전부 삭제
         mapper.deleteImagesByProductId(productId);
-
         //새 이미지 순서대로 다시 삽입
         for(ProductUpdateRequest.ImageDto img : request.getImages()){
             mapper.insertProductImage(
@@ -209,13 +216,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             throw new ApiException(ErrorCode.FORBIDDEN);
         }
     }
-
-//    @Override
-//    @Transactional
-//    public void createProductLocation(Long newProductId, ProductCreateRequest request,Long memberId) {
-//        mapper.insertProductLocation(newProductId,request,memberId);
-//
-//    }
 
 
 }

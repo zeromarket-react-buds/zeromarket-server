@@ -147,8 +147,6 @@
       building_name,
       zip_code,
       legal_dong_code,
-      admin_dong_code,
-      admin_dong_name,
       created_at
     )VALUES(
       #{productId},
@@ -164,11 +162,45 @@
       #{request.location.buildingName},
       #{request.location.zipCode},
       #{request.location.legalDongCode},
-      #{request.location.adminDongCode},
-      #{request.location.adminDongName},
       NOW()
     );
   </insert>
+  <insert id="insertProductLocationFromUpdate" parameterType="map">
+    INSERT INTO product_location(
+    product_id,
+    location_name,
+    member_id,
+    reference_area_id,
+    latitude,
+    longitude,
+    road_address,
+    jibun_address,
+    building_name,
+    zip_code,
+    legal_dong_code,
+    created_at
+    )VALUES(
+    #{productId},
+    #{location.locationName},
+    (SELECT seller_id FROM product WHERE product_id = #{productId}),
+    #{location.referenceAreaId},
+    #{location.latitude, javaType=java.lang.Double},
+    #{location.longitude, javaType=java.lang.Double},
+    <!--      #{request.location.latitude},-->
+    <!--      #{request.location.longitude},-->
+    #{location.roadAddress},
+    #{location.jibunAddress},
+    #{location.buildingName},
+    #{location.zipCode},
+    #{location.legalDongCode},
+    NOW()
+    )
+  </insert>
+
+  <delete id="deleteProductLocation">
+    DELETE FROM product_location
+    WHERE product_id = #{productId}
+  </delete>
 
 
 </mapper>

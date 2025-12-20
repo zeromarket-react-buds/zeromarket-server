@@ -127,10 +127,6 @@ public class ProductRestController {
     public ResponseEntity<ProductCreateResponse> createProduct
     (   @RequestBody ProductCreateRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails)
-        //@RequestPart : 아래처럼 작성하여, JSON + 파일을 각각 분리하여 받을수있게함
-//        @RequestPart("data") ProductCreateRequest request,
-//        // required = false : 스프링이 특정 요청 파트를 반드시 필요로 하지 않게 만드는 옵션,이미지가 없어도 에러를 내지 말고 images = null 로 (상품등록을)처리하라는 의미.
-//        @RequestPart(value = "images",required = false) List<MultipartFile> images
     {
         if (userDetails == null) {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
@@ -139,17 +135,9 @@ public class ProductRestController {
 
         Long newProductId = productCommandService.createProduct(request);
 
-        //직거래시 위치정보처리
-//        if(request.isDirect() && request.getLocation()!=null){
-//            productCommandService.createProductLocation(newProductId,request, userDetails.getMemberId());
-//        }
-
         ProductCreateResponse response =
             new ProductCreateResponse(newProductId, "상품이 정상적으로 등록되었습니다.");
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        //HttpStatus.CREATED = 201
-        //메서드 체이닝 - HTTP 201 Created 상태로 newProductId 를 body 에 담아 JSON 응답
-//        return ResponseEntity.status(HttpStatus.CREATED).body(newProductId);
     }
 
     //비슷한 상품 조회
@@ -160,7 +148,7 @@ public class ProductRestController {
         return ResponseEntity.ok(productQueryService.findSimilarProducts(productId));
     }
     
-    //상품 숨기기 //숨기기도 상품상태 update의 일종이므로 command로
+    //상품 숨기기
     @Operation(summary = "상품 숨기기", description = "현재 노출중 상품 숨기기")
     @PatchMapping("/{productId}/hide")
     public ResponseEntity<Void> updateHidden(

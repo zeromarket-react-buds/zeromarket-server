@@ -3,6 +3,7 @@ package com.zeromarket.server.api.mapper.product;
 import com.zeromarket.server.api.dto.product.ProductCreateRequest;
 import com.zeromarket.server.api.dto.product.ProductDetailResponse;
 import com.zeromarket.server.api.dto.product.ProductUpdateRequest;
+import com.zeromarket.server.api.dto.product.ProductUpdateRequest.LocationDto;
 import com.zeromarket.server.common.enums.SalesStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -37,4 +38,11 @@ public interface ProductCommandMapper {
         @Param("request") ProductCreateRequest request,
         @Param("memberId") Long memberId
     );
+
+    void deleteProductLocation(@Param("productId") Long productId);
+
+    void insertProductLocationFromUpdate(
+        @Param("productId") Long productId,
+        @Param("request") ProductUpdateRequest request,
+        @Param("location") LocationDto location);
 }

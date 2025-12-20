@@ -21,8 +21,26 @@ public class ProductUpdateRequest {
     private boolean delivery;
     private String sellingArea;
 
+    //위치
+    private LocationDto location;
     //이미지 수정
     private List<ImageDto> images;
+
+    @Getter
+    @Setter
+    public static class LocationDto {
+        private Long referenceAreaId;
+        private String locationName;
+        private String legalDongCode;
+        private Double latitude;
+        private Double longitude;
+        private String roadAddress;
+        private String jibunAddress;
+        private String buildingName;
+        private String zipCode;
+
+
+    }
 
     @Getter
     @Setter

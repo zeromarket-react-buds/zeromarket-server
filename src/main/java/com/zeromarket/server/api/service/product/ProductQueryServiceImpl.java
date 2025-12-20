@@ -64,18 +64,6 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     @Override
     @Transactional
     public ProductDetailResponse getProductDetail(Long memberId,Long productId) {
-
-//        ProductBasicInfo basic = mapper.selectBasicInfo(productId);
-//
-//        if(basic==null){
-//            throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND); // 디비에없는상품판별
-//        }
-//        if(basic.isDeleted()){
-//            throw new ApiException(ErrorCode.DELETED_PRODUCT);
-//        }
-//        if(basic.isHidden()){
-//            throw new ApiException(ErrorCode.HIDDEN_PRODUCT);
-//        }
         //조회수 증가
         mapper.updateViewCount(productId);
         // 🔥 변경된 부분: Map으로 두 개의 파라미터 전달
@@ -97,17 +85,6 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         if(detail.isHidden() && !detail.getSellerId().equals(memberId)){
             throw new ApiException(ErrorCode.HIDDEN_PRODUCT);
         }
-
-//        //메인 이미지 인덱스 계산 - 이미지 등록시 재확인예정
-//        Integer mainIndex = null;
-//        for (int i = 0; i < detail.getImages().size(); i++) {
-//            if (detail.getImages().get(i).isMain()) {
-//                mainIndex = i;
-//                break;
-//            }
-//        }
-//        detail.setMainImageIndex(mainIndex);
-
         return detail;
     }
 

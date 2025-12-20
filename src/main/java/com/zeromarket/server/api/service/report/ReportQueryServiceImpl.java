@@ -13,11 +13,6 @@ public class ReportQueryServiceImpl implements ReportQueryService{
 
     private final ReportMapper reportMapper;
 
-//    @Override
-//    public List<ReportReasonCodeResponse> getActiveReasons() {
-//        return reportMapper.getActiveReasons();
-//    }
-
     @Override
     public List<ReportReasonCodeResponse> getActiveReasons(String targetType) {
         return reportMapper.selectActiveReasons(targetType);
