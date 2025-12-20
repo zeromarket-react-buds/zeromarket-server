@@ -10,10 +10,7 @@ import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
 import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
 import com.zeromarket.server.common.entity.Review;
 import com.zeromarket.server.common.entity.Trade;
-import com.zeromarket.server.common.enums.ErrorCode;
-import com.zeromarket.server.common.enums.SalesStatus;
-import com.zeromarket.server.common.enums.TradeStatus;
-import com.zeromarket.server.common.enums.TradeType;
+import com.zeromarket.server.common.enums.*;
 import com.zeromarket.server.common.exception.ApiException;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
@@ -161,62 +158,70 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
                                                        TradeStatusUpdateRequest request,
                                                        Long memberId) {
 
-        // 거래 조회
         TradeStatusUpdateRow trade = mapper.selectById(tradeId);
-        if (trade == null) {
-            // 존재하지 않으면 예외
-            throw new IllegalArgumentException("존재하지 않는 거래입니다.");
-        }
+        if (trade == null) throw new IllegalArgumentException("존재하지 않는 거래입니다.");
 
-        // 권한 검증
-        if (!trade.getSellerId().equals(memberId) &&
-            !trade.getBuyerId().equals(memberId)) {
+        if (!trade.getSellerId().equals(memberId) && !trade.getBuyerId().equals(memberId)) {
             throw new IllegalStateException("해당 거래의 당사자가 아닙니다.");
         }
 
-        // 상태 전이 검증
-        TradeStatus current = trade.getTradeStatus();
-        TradeStatus target = request.getStatus();
-
-        validateStatusTransition(current, target, memberId, trade);
-
-        // 상태 및 시간 컬럼 세팅
         LocalDateTime updatedAt = LocalDateTime.now();
-        LocalDateTime completedAt = trade.getCompletedAt();
-        LocalDateTime canceledAt = trade.getCanceledAt();
-        String canceledBy  = trade.getCanceledBy();
 
-        if (target == TradeStatus.COMPLETED) {
-            completedAt = updatedAt;
-            Long productId = trade.getProductId();
-            if (productId != null) {
-                mapper.updateProductSalesStatus(productId, SalesStatus.SOLD_OUT);
-            }
-        } else if (target == TradeStatus.CANCELED) {
-            canceledAt = updatedAt;
-
-            if (memberId.equals(trade.getSellerId())) {
-                canceledBy = "SELLER";
-            } else if (memberId.equals(trade.getBuyerId())) {
-                canceledBy = "BUYER";
+        // 1) 주문 상태 변경이 들어온 경우 (바로구매 진행)
+        if (request.getOrderStatus() != null) {
+            if (trade.getOrderId() == null || trade.getOrderStatus() == null) {
+                throw new IllegalStateException("주문이 없는 거래입니다.");
             }
 
-            // 거래취소시 상품상태를 다시 FOR_SALE로 돌려서 뱃지가 예약중으로 안보이게
-            Long productId = trade.getProductId();
-            if (productId != null) {
-                mapper.updateProductSalesStatus(productId, SalesStatus.FOR_SALE);
-            }
+            OrderStatus currentOrder = trade.getOrderStatus();
+            OrderStatus nextOrder = request.getOrderStatus();
+
+            validateOrderStatusTransition(currentOrder, nextOrder);
+
+            mapper.updateOrderStatus(tradeId, nextOrder, updatedAt);
+
+            // 선택: 주문이 CANCELED로 바뀌면 trade도 같이 CANCELED로 맞춰야 한다면
+            // -> 아래 trade 취소 로직을 재사용해서 trade_status도 CANCELED 처리하는 방식 권장
+            // (이 부분은 정책이라서 확실하지 않음: 원하시는 동작이 “주문취소=거래취소”가 맞는지)
         }
 
-        mapper.updateTradeStatus(tradeId, target, completedAt, canceledAt, canceledBy,updatedAt);
+        // 2) 거래 상태 변경이 들어온 경우 (채팅거래 종료 or 거래 완료/취소)
+        if (request.getStatus() != null) {
+            TradeStatus current = trade.getTradeStatus();
+            TradeStatus target = request.getStatus();
 
-        // 응답 DTO 구성
+            validateStatusTransition(current, target);
+
+            LocalDateTime completedAt = trade.getCompletedAt();
+            LocalDateTime canceledAt = trade.getCanceledAt();
+            String canceledBy  = trade.getCanceledBy();
+
+            if (target == TradeStatus.COMPLETED) {
+                completedAt = updatedAt;
+                Long productId = trade.getProductId();
+                if (productId != null) {
+                    mapper.updateProductSalesStatus(productId, SalesStatus.SOLD_OUT);
+                }
+            } else if (target == TradeStatus.CANCELED) {
+                canceledAt = updatedAt;
+
+                if (memberId.equals(trade.getSellerId())) canceledBy = "SELLER";
+                else if (memberId.equals(trade.getBuyerId())) canceledBy = "BUYER";
+
+                Long productId = trade.getProductId();
+                if (productId != null) {
+                    mapper.updateProductSalesStatus(productId, SalesStatus.FOR_SALE);
+                }
+            }
+
+            mapper.updateTradeStatus(tradeId, target, completedAt, canceledAt, canceledBy, updatedAt);
+        }
+
+        // 응답은 최소로 유지하되, 프론트가 필요하면 orderStatus도 같이 내려주기 권장
         TradeStatusUpdateResponse response = new TradeStatusUpdateResponse();
         response.setTradeId(tradeId);
-        response.setTradeStatus(target);
-        response.setCanceledAt(canceledAt);
-        response.setCompletedAt(completedAt);
-        response.setCanceledBy(canceledBy);
+        response.setTradeStatus(request.getStatus() != null ? request.getStatus() : trade.getTradeStatus());
+        response.setUpdatedAt(updatedAt);
 
         return response;
     }
@@ -404,21 +409,38 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
         return productBasicInfo;
     }
 
-    private void validateStatusTransition(TradeStatus current,
-                                          TradeStatus target,
-                                          Long memberId,
-                                          TradeStatusUpdateRow trade) {
-
+    private void validateStatusTransition(
+        TradeStatus current,
+        TradeStatus target
+    ) {
         // 예: PENDING > COMPLETED, PENDING > CANCELED 둘 다 허용
-        if (current == TradeStatus.PENDING) {
-            if (target == TradeStatus.COMPLETED ||
-                target == TradeStatus.CANCELED) {
-                return;
-            }
+        if (current == TradeStatus.PENDING &&
+            (target == TradeStatus.COMPLETED || target == TradeStatus.CANCELED)) {
+            return;
         }
-
         // 그 외에는 불허
         throw new IllegalStateException("허용되지 않는 상태 변경입니다.");
+    }
+
+    /**
+     * 주문(order) 상태 전이 검증
+     * - 주문 도메인은 별도 담당
+     * - 거래 내역 화면/흐름 검증용으로 쓰임
+     */
+    private void validateOrderStatusTransition(
+        OrderStatus current,
+        OrderStatus next
+    ) {
+        boolean allowed = switch (current) {
+            case PAID -> (next == OrderStatus.DELIVERY_READY || next == OrderStatus.CANCELED);
+            case DELIVERY_READY -> (next == OrderStatus.SHIPPED);
+            case SHIPPED -> (next == OrderStatus.DELIVERED);
+            case DELIVERED, CANCELED -> false;
+        };
+
+        if (!allowed) {
+            throw new IllegalStateException("허용되지 않는 주문 상태 변경입니다.");
+        }
     }
 
 

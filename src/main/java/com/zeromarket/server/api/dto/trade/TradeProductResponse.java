@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto.trade;
 
+import com.zeromarket.server.common.enums.OrderStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.enums.TradeType;
 import jakarta.validation.constraints.Pattern;
@@ -14,6 +15,7 @@ public class TradeProductResponse {
     private Long memberId;
     private Long tradeId;
     private Long productId;
+    private Long orderId;
 
     private String productTitle;
     private String thumbnailUrl;
@@ -31,6 +33,7 @@ public class TradeProductResponse {
 
     private TradeType tradeType;
     private TradeStatus tradeStatus;
+    private OrderStatus orderStatus;
 
     private LocalDateTime createdAt;     // 거래 생성 & 결제 시간
     private LocalDateTime updatedAt;

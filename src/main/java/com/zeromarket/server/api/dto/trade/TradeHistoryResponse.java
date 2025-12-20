@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto.trade;
 
+import com.zeromarket.server.common.enums.OrderStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
 import com.zeromarket.server.common.enums.TradeType;
 import lombok.Getter;
@@ -13,6 +14,7 @@ public class TradeHistoryResponse {
 
     private Long productId;
     private Long tradeId;
+    private Long orderId;
     private Long buyerId;
 
     private String productTitle;
@@ -22,9 +24,7 @@ public class TradeHistoryResponse {
 
     private TradeType tradeType;
     private TradeStatus tradeStatus;
-
-    private Boolean isDirect;
-    private Boolean isDelivery;
+    private OrderStatus orderStatus;
 
     private Boolean isHidden;
 
