@@ -3,6 +3,7 @@ package com.zeromarket.server.api.controller.order;
 import com.zeromarket.server.api.dto.order.CreateOrderRequest;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.order.OrderServiceImpl;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +29,12 @@ public class OrderRestController {
     private final OrderServiceImpl orderService;
 
     @PostMapping
-    public ResponseEntity<Long> create(
+    public ResponseEntity<Map> create(
         @RequestBody CreateOrderRequest req,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long orderId = orderService.createOrder(req, userDetails.getMemberId());
-        return ResponseEntity.ok(orderId);
+        return ResponseEntity.ok(Map.of("orderId", orderId));
     }
 
     @GetMapping("/{orderId}/complete")

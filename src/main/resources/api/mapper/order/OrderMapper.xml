@@ -41,8 +41,8 @@
         SELECT
             t.trade_id, 		-- 거래 번호 (trade.trade_id)
             p.product_title,	-- 상품정보-이름 (product.product_title)
-            p.sell_price,		-- 상품정보-가격 (product.sell_price)
-            pi.image_url,		-- 상품정보-이미지 (product_image.image_url)
+            o.amount_paid,		-- 상품정보-가격 (product.sell_price)
+            pi.image_url AS productImageUrl,
             o.receiver_name,	-- 배송지정보-이름 (o.receiver_name)
             o.receiver_phone,	-- 배송지정보-연락처 (o.receiver_phon)
             t.trade_type,		-- 거래정보-거래 타입 (trade.trade_type)
@@ -62,8 +62,8 @@
         LEFT JOIN product_image pi
             ON p.product_id = pi.product_id
             AND pi.is_main = true
-        WHERE o.order_id = 2
-            AND o.buyer_id = 44;
+        WHERE o.order_id = #{orderId}
+            AND o.buyer_id = #{memberId}
     </select>
 
     <update id="updateOrderStatus">
