@@ -8,6 +8,7 @@ import com.zeromarket.server.common.entity.Trade;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import com.zeromarket.server.common.enums.OrderStatus;
 import com.zeromarket.server.common.enums.SalesStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
 import org.apache.ibatis.annotations.Mapper;
@@ -31,6 +32,10 @@ public interface TradeHistoryMapper {
     Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
 
     void updateTradeStatus(Long tradeId, TradeStatus target, LocalDateTime completedAt, LocalDateTime canceledAt, String canceledBy, LocalDateTime updatedAt);
+
+    void updateOrderStatus(@Param("tradeId") Long tradeId,
+                           @Param("orderStatus") OrderStatus orderStatus,
+                           @Param("updatedAt") LocalDateTime updatedAt);
 
     void updateProductSalesStatus(@Param("productId") Long productId,
                                   @Param("salesStatus") SalesStatus salesStatus);

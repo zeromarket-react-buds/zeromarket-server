@@ -11,6 +11,7 @@
         <id     column="product_id"    property="productId"/>
 
         <result column="trade_id"      property="tradeId"/>
+        <result column="order_id"      property="orderId"/>
         <result column="buyer_id"      property="buyerId"/>
 
         <result column="product_title" property="productTitle"/>
@@ -23,6 +24,9 @@
         <result column="trade_status"
                 property="tradeStatus"
                 javaType="com.zeromarket.server.common.enums.TradeStatus"/>
+        <result column="order_status"
+                property="orderStatus"
+                javaType="com.zeromarket.server.common.enums.OrderStatus"/>
 
         <result column="is_direct"     property="isDirect"/>
         <result column="is_delivery"   property="isDelivery"/>
@@ -75,12 +79,14 @@
         SELECT
             p.product_id,
             t.trade_id,
+            o.order_id,
             t.buyer_id,
             p.product_title,
             pi.image_url AS thumbnail_url,
             p.sell_price,
             t.trade_type,
             t.trade_status,
+            o.order_status,
             p.is_direct,
             p.is_delivery,
             p.is_hidden,
@@ -98,6 +104,9 @@
         LEFT JOIN product_image pi
             ON pi.product_id = p.product_id
             AND pi.is_main = TRUE
+
+        LEFT JOIN "order" o
+            ON o.trade_id = t.trade_id
 
         WHERE
             p.is_deleted = FALSE
@@ -165,6 +174,7 @@
 
         <id     column="product_id"    property="productId"/>
         <result column="trade_id"      property="tradeId"/>
+        <result column="order_id"      property="orderId"/>
 
         <result column="product_title" property="productTitle"/>
         <result column="thumbnail_url" property="thumbnailUrl"/>
@@ -184,6 +194,9 @@
         <result column="trade_status"
                 property="tradeStatus"
                 javaType="com.zeromarket.server.common.enums.TradeStatus"/>
+        <result column="order_status"
+                property="orderStatus"
+                javaType="com.zeromarket.server.common.enums.OrderStatus"/>
 
         <result column="created_at"    property="createdAt"/>
         <result column="updated_at"    property="updatedAt"/>
@@ -197,6 +210,7 @@
         SELECT
             t.trade_id,
             p.product_id,
+            o.order_id,
             p.product_title,
             pi.image_url AS thumbnail_url,
             p.sell_price,
@@ -208,6 +222,7 @@
             mb.phone        AS phone,
             t.trade_type,
             t.trade_status,
+            o.order_status,
             t.created_at,
             t.updated_at,
             t.completed_at,
@@ -223,6 +238,8 @@
         LEFT JOIN product_image pi
             ON pi.product_id = p.product_id
             AND pi.is_main = TRUE
+        LEFT JOIN "order" o
+            ON o.trade_id = t.trade_id
         WHERE t.trade_id = #{tradeId}
 
     </select>
@@ -259,6 +276,13 @@
                 canceled_at  = #{canceledAt},
                 canceled_by  = #{canceledBy},
                 updated_at   = #{updatedAt}
+        WHERE trade_id = #{tradeId}
+    </update>
+
+    <update id="updateOrderStatus">
+        UPDATE "order"
+        SET order_status = #{orderStatus},
+            updated_at = #{updatedAt}
         WHERE trade_id = #{tradeId}
     </update>
 
