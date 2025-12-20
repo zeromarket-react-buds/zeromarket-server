@@ -20,7 +20,7 @@ public class NotificationServiceImpl implements NotificationService {
             receiverId,
             chatRoomId,
             body,
-            "/chat/rooms/" + chatRoomId
+            "/chats/" + chatRoomId
         );
     }
 

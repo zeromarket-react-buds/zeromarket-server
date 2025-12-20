@@ -36,7 +36,7 @@ spring:
   application:
     name: zeromarket-server
   datasource:
-    url: ${DB_URL}?prepareThreshold=0&application_name=zeromarket&options=-c%20statement_timeout%3D8000
+    url: ${DB_URL}?prepareThreshold=0&ApplicationName=zeromarket&&options=-c%20statement_timeout%3D8000
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     hikari:

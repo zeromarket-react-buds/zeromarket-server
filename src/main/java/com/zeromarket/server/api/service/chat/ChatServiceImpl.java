@@ -191,7 +191,7 @@ public class ChatServiceImpl implements ChatService {
 
         // 5) 알림 upsert (DB)
         String preview = makePreview(req.getContent());
-        String linkUrl = "/chat/rooms/" + req.getChatRoomId();
+        String linkUrl = "/chats/" + req.getChatRoomId();
 
         for (Long receiverId : receiverIds) {
             notificationMapper.upsertChatNotification(
