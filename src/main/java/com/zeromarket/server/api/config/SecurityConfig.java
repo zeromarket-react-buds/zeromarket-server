@@ -54,7 +54,8 @@ public class SecurityConfig {
                     .requestMatchers(
                         "/api/me/**",
                         "/api/sellershop/**",
-                        "/api/trades/**"
+                        "/api/trades/**",
+                        "/api/product/custom-texts/**"
                     ).authenticated()
 
                     // 나머지 모든 요청은 인증(로그인)이 필요함

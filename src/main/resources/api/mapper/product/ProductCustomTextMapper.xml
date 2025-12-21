@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.product.ProductCustomTextMapper">
+
+    <select id="findProductCustomTexts"
+                resultType="com.zeromarket.server.api.dto.product.ProductCustomTextResponse">
+
+        SELECT
+        custom_text_id AS id,
+        custom_content AS text
+        FROM custom_text
+        WHERE member_id = #{memberId}
+        AND content_type = #{contentType}
+        AND deleted_at IS NULL
+        ORDER BY sort_order NULLS LAST, created_at DESC
+
+    </select>
+</mapper>
