@@ -22,8 +22,11 @@ public class SellerShopServiceImpl implements SellerShopService {
     // 셀러샵의 판매상품 조회
     @Override
     public SalesProductCursorResponse getProductsBySellerCursor(SalesProductRequest req) {
-        if(memberMapper.selectMemberById(req.getLoginMemberId()) == null) {
-            throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+        //로긴유저id 전달시에만 회원여부체크 -
+        if(req.getLoginMemberId()!=null){
+            if(memberMapper.selectMemberById(req.getLoginMemberId()) == null) {
+                throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+            }
         }
 
         List<ProductQueryResponse> items = productMapper.selectProductsBySellerCursor(req);

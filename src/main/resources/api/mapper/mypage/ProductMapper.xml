@@ -20,7 +20,9 @@
             COALESCE(wc.wish_count, 0) AS wish_count,
 
             CASE
-                WHEN #{loginMemberId} IS NOT NULL AND EXISTS (
+<!--                 jdbcType=BIGINT 추가 > null일 때의 타입 명시 -->
+                WHEN #{loginMemberId, jdbcType=BIGINT} IS NOT NULL AND EXISTS (
+<!--                WHEN #{loginMemberId} IS NOT NULL AND EXISTS (-->
                     SELECT 1
                     FROM wish w
                     WHERE w.product_id = p.product_id

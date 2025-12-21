@@ -26,7 +26,7 @@ public class SellerShopRestController {
     private final SellerShopService sellerShopService;
     private final ReviewService reviewService;
 
-    @GetMapping("/api/seller/products/{sellerId}")
+    @GetMapping("/api/sellers/{sellerId}/products")
     public ResponseEntity<SalesProductCursorResponse> getSalesProductsBySellerCursor(
         @PathVariable Long sellerId,
         @RequestParam(required = false) Long cursorProductId,

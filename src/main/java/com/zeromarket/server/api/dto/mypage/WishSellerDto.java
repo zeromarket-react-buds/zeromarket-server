@@ -18,4 +18,6 @@ public class WishSellerDto {
     private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+
 }

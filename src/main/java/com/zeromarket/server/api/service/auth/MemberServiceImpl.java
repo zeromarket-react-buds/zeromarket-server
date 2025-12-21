@@ -45,15 +45,29 @@ public class MemberServiceImpl implements MemberService {
         dto.setTrustScore(Double.toString(trustScore));
 
         // 좋아요 여부 추가
-        WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId, memberId);
+//        WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId, memberId);
+//        boolean liked = false;
+//        if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())) {
+//            liked = true;
+//        };
+//        dto.setLiked(liked);
+//
+         //좋아요 여부
         boolean liked = false;
-        if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())) {
-            liked = true;
-        };
+
+        //로긴 상태일때만 디비에서 좋아요 여부 조회
+        if(authMemberId != null){
+            WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId,memberId);
+            if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())){
+                liked=true;
+            }
+        }
+
         dto.setLiked(liked);
 
         return dto;
     }
+
 
     // 회원정보 설정 페이지에서 해당 회원 정보 조회
     @Override
