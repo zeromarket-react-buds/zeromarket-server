@@ -49,7 +49,10 @@ public interface TradeHistoryMapper {
 
     Trade existValidTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);
 
-    void updateSoftDelete(Long tradeId, boolean sellerDeleted, boolean buyerDeleted, LocalDateTime updatedAt);
+    void updateSoftDelete(@Param("tradeId") Long tradeId,
+                          @Param("sellerDeleted") boolean sellerDeleted,
+                          @Param("buyerDeleted") boolean buyerDeleted,
+                          @Param("updatedAt") LocalDateTime updatedAt);
 
     List<Trade> existValidProcessingTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);
 
