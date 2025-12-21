@@ -30,6 +30,9 @@ public class TradeProductResponse {
     private Long buyerId;
     private String name;
     private String phone;
+    private Long zipcode;
+    private String addrBase;
+    private String addrDetail;
 
     private TradeType tradeType;
     private TradeStatus tradeStatus;

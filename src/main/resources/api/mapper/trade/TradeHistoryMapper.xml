@@ -182,6 +182,9 @@
         <result column="nickname"      property="nickname"/>
         <result column="name"          property="name"/>
         <result column="phone"         property="phone"/>
+        <result column="delivery_zipcode"       property="zipcode"/>
+        <result column="delivery_addr_base"     property="addrBase"/>
+        <result column="delivery_addr_detail"   property="addrDetail"/>
 
         <result column="trade_type"
                 property="tradeType"
@@ -212,9 +215,12 @@
             t.canceled_by,
             ms.member_id    AS seller_id,
             mb.member_id    AS buyer_id,
-            ms.nickname     AS nickname,
-            mb.name         AS name,
-            mb.phone        AS phone,
+            ms.nickname,
+            mb.name,
+            mb.phone,
+            o.delivery_zipcode,
+            o.delivery_addr_base,
+            o.delivery_addr_detail,
             t.trade_type,
             t.trade_status,
             o.order_status,
