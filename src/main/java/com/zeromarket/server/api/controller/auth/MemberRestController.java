@@ -68,9 +68,13 @@ public class MemberRestController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long memberId
     ) {
+        //비로그인이라면(=null이라면) , 0 또는 null 전달하도록
+        Long loginMemberId = (userDetails!=null) ? userDetails.getMemberId() : null;
+
         MemberProfileDto dto = memberService.getMemberProfile(
             memberId,                   // 셀러샵 회원
-            userDetails.getMemberId()   // 로그인 회원 (좋아요 확인용)
+//            userDetails.getMemberId()   // 로그인 회원 (좋아요 확인용)
+            loginMemberId              //현 로그인 사용자id(비로그인시 null)
         );
         return ResponseEntity.ok(dto);
     }

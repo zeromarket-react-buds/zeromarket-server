@@ -29,6 +29,16 @@ public class JwtFilter extends OncePerRequestFilter {
         this.customUserDetailService = customUserDetailService;
     }
 
+    //공통 판별메서드
+    private boolean isPublicGetRequest(String path,String method){ //path-요청경로 , method-요청방식
+        if(!"GET".equalsIgnoreCase(method)) return false;
+
+        return  path.startsWith("/api/products") ||
+            path.startsWith("/api/sellers") ||
+            path.startsWith("/api/reviews") ||
+            (path.startsWith("/api/members/") && path.endsWith("/profile"));
+    }
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
@@ -48,20 +58,25 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // /api/products, /api/products/{productId} → GET 요청만 예외
-        if (path.startsWith("/api/products") && "GET".equalsIgnoreCase(method)) {
-
-            String token = extractToken(request);
-
-            // 토큰이 없으면 필터링 건너뛰기 (익명 접근 허용)
-            if (token == null) {
-                return true;
-            }
-
-            // 토큰이 있으면 필터링 적용 (CustomUserDetails 저장 시도)
-            return false;
-        }
+//        if (path.startsWith("/api/products") && "GET".equalsIgnoreCase(method)) {
+//
+//            String token = extractToken(request);
+//
+//            // 토큰이 없으면 필터링 건너뛰기 (익명 접근 허용)
+//            if (token == null) {
+//                return true;
+//            }
+//
+//            // 토큰이 있으면 필터링 적용 (CustomUserDetails 저장 시도)
+//            return false;
+//        }
 
         if (path.contains("swagger-ui") || path.contains("api-docs")) {
+            return true;
+        }
+
+        //비로긴 허용get요청인데 토큰 없다면 필터 건너뜀(permitAll로 보냄)
+        if(isPublicGetRequest(path,method) && extractToken(request)==null){
             return true;
         }
 
@@ -82,14 +97,16 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String path = request.getRequestURI();
             String method = request.getMethod();
-            boolean isPublicGetProducts = path.startsWith("/api/products") && "GET".equalsIgnoreCase(method);
+//            boolean isPublicGetProducts = path.startsWith("/api/products") && "GET".equalsIgnoreCase(method);
+            boolean isPublic = isPublicGetRequest(path,method);
 
             String token = extractToken(request);
 
 //            1. 토큰 없음 -> TOKEN_MISSING
             if(token == null){
                 // "/api/products" GET 요청은 토큰이 없어도 통과
-                if (isPublicGetProducts) {
+//                if (isPublicGetProducts) {
+                if (isPublic) {
                     filterChain.doFilter(request, response);
                     return;
                 }

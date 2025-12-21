@@ -45,6 +45,11 @@ public class SecurityConfig {
                     // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
                     .requestMatchers("/api/auth/**", "/api/oauth/**", "/api/products/**", "/ws/**").permitAll()
                     .requestMatchers(
+                        "/api/sellers/**",
+                        "/api/reviews/received/**",
+                        "/api/members/*/profile"
+                    ).permitAll()
+                    .requestMatchers(
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html"
@@ -53,8 +58,10 @@ public class SecurityConfig {
                     // ⭐ 로그인 필요 (JWT)
                     .requestMatchers(
                         "/api/me/**",
-                        "/api/sellershop/**",
-                        "/api/trades/**"
+//                        "/api/sellershop/**",
+                        "/api/trades/**",
+                        "/api/reviews/received/summary", // 내 마이페이지 요약 (ID X 경로)
+                        "/api/reviews/received"          // 내 마이페이지 목록 (상동
                     ).authenticated()
 
                     // 나머지 모든 요청은 인증(로그인)이 필요함
