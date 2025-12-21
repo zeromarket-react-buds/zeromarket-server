@@ -31,7 +31,12 @@ public interface TradeHistoryMapper {
     
     Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
 
-    void updateTradeStatus(Long tradeId, TradeStatus target, LocalDateTime completedAt, LocalDateTime canceledAt, String canceledBy, LocalDateTime updatedAt);
+    void updateTradeStatus(@Param("tradeId") Long tradeId,
+                          @Param("status") TradeStatus status,
+                          @Param("completedAt") LocalDateTime completedAt,
+                          @Param("canceledAt") LocalDateTime canceledAt,
+                          @Param("canceledBy") String canceledBy,
+                          @Param("updatedAt") LocalDateTime updatedAt);
 
     void updateOrderStatus(@Param("tradeId") Long tradeId,
                            @Param("orderStatus") OrderStatus orderStatus,

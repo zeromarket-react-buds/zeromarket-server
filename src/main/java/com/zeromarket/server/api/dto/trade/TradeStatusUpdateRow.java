@@ -2,6 +2,7 @@ package com.zeromarket.server.api.dto.trade;
 
 import com.zeromarket.server.common.enums.OrderStatus;
 import com.zeromarket.server.common.enums.TradeStatus;
+import com.zeromarket.server.common.enums.TradeType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +18,9 @@ public class TradeStatusUpdateRow {
     private Long buyerId;
 
     private TradeStatus tradeStatus;
-    private Long orderId;            // 추가
-    private OrderStatus orderStatus; // 추가
+    private TradeType tradeType;
+    private Long orderId;
+    private OrderStatus orderStatus;
 
     private LocalDateTime updatedAt;
     private LocalDateTime completedAt;
