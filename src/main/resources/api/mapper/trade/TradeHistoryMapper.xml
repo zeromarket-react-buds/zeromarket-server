@@ -28,9 +28,6 @@
                 property="orderStatus"
                 javaType="com.zeromarket.server.common.enums.OrderStatus"/>
 
-        <result column="is_direct"     property="isDirect"/>
-        <result column="is_delivery"   property="isDelivery"/>
-
         <result column="is_hidden"     property="isHidden"/>
 
         <result column="seller_deleted" property="sellerDeleted"/>
@@ -87,8 +84,6 @@
             t.trade_type,
             t.trade_status,
             o.order_status,
-            p.is_direct,
-            p.is_delivery,
             p.is_hidden,
             t.seller_deleted,
             t.buyer_deleted,
@@ -253,7 +248,12 @@
             p.product_id     AS productId,
             p.seller_id      AS sellerId,
             t.buyer_id       AS buyerId,
+            o.order_id       AS orderId,
+
+            t.trade_type     AS tradeType,
             t.trade_status   AS tradeStatus,
+            o.order_status   AS orderStatus,
+
             t.updated_at     AS updatedAt,
             t.completed_at   AS completedAt,
             t.canceled_at    AS canceledAt,
@@ -265,13 +265,16 @@
         JOIN product p
             ON p.product_id = t.product_id
 
+        LEFT JOIN "order" o
+            ON o.trade_id = t.trade_id
+
         WHERE t.trade_id = #{tradeId}
     </select>
 
     <!-- 상태 및 완료 시간 업데이트 -->
     <update id="updateTradeStatus">
         UPDATE trade
-            SET trade_status = #{target},
+            SET trade_status = #{status},
                 completed_at = #{completedAt},
                 canceled_at  = #{canceledAt},
                 canceled_by  = #{canceledBy},
