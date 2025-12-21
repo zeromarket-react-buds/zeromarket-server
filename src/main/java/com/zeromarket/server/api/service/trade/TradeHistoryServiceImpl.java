@@ -426,9 +426,9 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
 
     /*
      주문(order) 상태 전이 검증
-     - 주문확인: PAID -> DELIVERY_READY
-     - 배송 흐름: DELIVERY_READY -> SHIPPED -> DELIVERED
-     - 취소: PAID/DELIVERY_READY 에서 CANCELED 허용 (단, 이번 요구사항에서는 취소 버튼은 PAID에서만 노출/허용)
+     - 주문확인: PAID > DELIVERY_READY
+     - 배송 흐름: DELIVERY_READY > SHIPPED > DELIVERED
+     - 취소: PAID/DELIVERY_READY 에서 CANCELED 허용
      */
     private void validateOrderStatusTransition(OrderStatus current, OrderStatus next) {
         boolean allowed = switch (current) {
