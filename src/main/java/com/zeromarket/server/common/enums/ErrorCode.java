@@ -27,6 +27,8 @@ public enum ErrorCode {
     // 회원
     MEMBER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),
     MEMBER_ALREADY_WITHDRAWN(410, "이미 탈퇴한 회원입니다."),
+    CANNOT_WITHDRAW_DURING_ACTIVE_TRADE(409, "진행 중 거래가 있어 탈퇴할 수 없습니다."),
+    REJOIN_NOT_ALLOWED_YET(403, "탈퇴 후 7일 이내에는 재가입할 수 없습니다."),
 
     // 시스템
     INTERNAL_SERVER_ERROR(500, "서버 오류가 발생했습니다."),
@@ -84,4 +86,3 @@ public enum ErrorCode {
         return message;
     }
 }
-

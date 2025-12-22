@@ -40,9 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
  * -> product.FOR_SALE
  */
 
-//todo: 거래 중복 발생 가능
-//todo: 상태 전이 유효성 검사
-
 @RequiredArgsConstructor
 @Service
 public class OrderServiceImpl {
@@ -77,7 +74,7 @@ public class OrderServiceImpl {
         }
 
         // 4. 중복 결제 방지 (보조 수단)
-        // - order.paid/delivery_ready/shipped
+        // - order.PAID / DELIVERY_READY / SHIPPED
         boolean exists = tradeMapper.existsActiveOrderByProductId(
             request.getProductId()
         );
@@ -153,45 +150,4 @@ public class OrderServiceImpl {
         return dto;
     };
 
-    /**
-     * 배송 시작 (order.DELIVERY_READY)
-     * @param orderId
-     */
-    @Transactional
-    public void markDeliveryReady(Long orderId) {
-        orderMapper.updateOrderStatus(orderId, OrderStatus.DELIVERY_READY.name());
-    }
-
-    /**
-     * 배송 중 (order.SHIPPED)
-     * @param orderId
-     */
-    @Transactional
-    public void ship(Long orderId) {
-        orderMapper.updateOrderStatus(orderId, OrderStatus.SHIPPED.name());
-    }
-
-    /**
-     * 배송 완료 -> 거래 완료 (order.DELIVERED, trade.COMPLETED)
-     * @param orderId
-     * @param tradeId
-     */
-    @Transactional
-    public void completeOrder(Long orderId, Long tradeId) {
-
-        orderMapper.updateOrderStatus(orderId, OrderStatus.DELIVERED.name());
-//        tradeMapper.updateTradeStatus(tradeId, TradeStatus.COMPLETED.name());
-    }
-
-    /**
-     * 주문 취소 (order.CANCELED, trade.CANCELED)
-     * @param orderId
-     * @param tradeId
-     */
-    @Transactional
-    public void cancelOrder(Long orderId, Long tradeId) {
-
-        orderMapper.updateOrderStatus(orderId, OrderStatus.CANCELED.name());
-//        tradeMapper.updateTradeStatus(tradeId, TradeStatus.CANCELED);
-    }
 }

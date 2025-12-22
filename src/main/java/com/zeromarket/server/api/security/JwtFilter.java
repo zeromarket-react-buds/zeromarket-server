@@ -1,6 +1,8 @@
 package com.zeromarket.server.api.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -156,6 +158,11 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (MalformedJwtException e) {
 //            6. 토큰 형식 오류 -> TOKEN_MALFORMED
             sendError(response, 401, "TOKEN_MALFORMED", "토큰 형식이 잘못되었습니다");
+
+        } catch (ApiException e) {
+            // 도메인 ApiException을 직접 처리 -> 탈퇴 에러 코드를 그대로 내려줌
+            ErrorCode code = e.getErrorCode();
+            sendError(response, code.getStatus(), code.name(), code.getMessage());
 
         } catch (Exception e) {
             log.error("Exception: {}", e.getMessage());

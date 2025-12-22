@@ -66,11 +66,4 @@
             AND o.buyer_id = #{memberId}
     </select>
 
-    <update id="updateOrderStatus">
-        UPDATE "order"
-        SET order_status = #{status},
-            updated_at = CURRENT_TIMESTAMP
-        WHERE order_id = #{orderId}
-    </update>
-
 </mapper>

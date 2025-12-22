@@ -15,7 +15,9 @@ public interface MemberMapper {
 
     // 회원 조회
     Member selectMemberById(Long memberId);
+    Member selectMemberByIdWithWithdrawn(Long memberId);
     Member selectMemberByLoginId(String loginId);
+    Member selectMemberByLoginIdWithWithdrawn(String loginId);
     MemberProfileDto selectMemberProfile(Long memberId);
 //    Optional<Member> selectMemberByEmail(String email);
 //    Optional<Member> selectMemberByNickname(String nickname);
@@ -44,6 +46,7 @@ public interface MemberMapper {
 //    OAuth 카카오
     Member findBySocialId(@Param("socialId") String socialId);
     void insertSocialMember(Member member);
+    Member findBySocialIdWithWithdrawn(@Param("socialId") String socialId);
     
     MemberEditResponse getMemberEdit(Long memberId);
 

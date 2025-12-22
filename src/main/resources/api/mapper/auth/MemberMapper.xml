@@ -34,11 +34,23 @@
         AND withdrawn_at IS NULL
   </select>
 
+  <select id="selectMemberByIdWithWithdrawn" resultType="com.zeromarket.server.common.entity.Member">
+    SELECT *
+    FROM member
+    WHERE member_id = #{memberId}
+  </select>
+
   <select id="selectMemberByLoginId" resultType="com.zeromarket.server.common.entity.Member">
     SELECT *
     FROM member
     WHERE login_id = #{loginId}
         AND withdrawn_at IS NULL
+  </select>
+
+  <select id="selectMemberByLoginIdWithWithdrawn" resultType="com.zeromarket.server.common.entity.Member">
+    SELECT *
+    FROM member
+    WHERE login_id = #{loginId}
   </select>
 
   <!-- 중복 체크 -->
@@ -102,6 +114,18 @@
         FROM member
         WHERE social_id = #{socialId}
             AND withdrawn_at IS NULL
+    </select>
+
+    <select id="findBySocialIdWithWithdrawn" resultType="com.zeromarket.server.common.entity.Member">
+        SELECT
+            member_id,
+            email,
+            nickname,
+            social_id,
+            role,
+            withdrawn_at
+        FROM member
+        WHERE social_id = #{socialId}
     </select>
 
     <!-- oauth 회원가입 -->

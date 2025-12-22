@@ -439,26 +439,15 @@
         )
     </select>
 
-
-    <!--    <insert id="insertTrade" useGeneratedKeys="true" keyProperty="tradeId">-->
-<!--        INSERT INTO trade (-->
-<!--            product_id,-->
-<!--            buyer_id,-->
-<!--            trade_type,-->
-<!--            trade_status-->
-<!--        )-->
-<!--        VALUES (-->
-<!--            #{productId},-->
-<!--            #{buyerId},-->
-<!--            #{tradeType},-->
-<!--            'PENDING'-->
-<!--        )-->
-<!--    </insert>-->
-
-<!--    <update id="updateTradeStatus">-->
-<!--        UPDATE trade-->
-<!--        SET trade_status = #{status},-->
-<!--        updated_at = CURRENT_TIMESTAMP-->
-<!--        WHERE trade_id = #{tradeId}-->
-<!--    </update>-->
+    <select id="existsActiveTradeByMemberId"
+            parameterType="long"
+            resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM trade t
+            JOIN product p ON t.product_id = p.product_id
+            WHERE t.trade_status = 'PENDING'
+              AND (t.buyer_id = #{memberId} OR p.seller_id = #{memberId})
+        )
+    </select>
 </mapper>

@@ -22,8 +22,13 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(loginId))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // UserDetails 로딩 시 탈퇴 회원이면 차단
+        if (member.getWithdrawnAt() != null) {
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
+        }
 
         return new CustomUserDetails(
             member.getMemberId(),

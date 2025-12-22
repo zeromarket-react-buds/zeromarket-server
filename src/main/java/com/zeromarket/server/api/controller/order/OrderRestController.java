@@ -15,12 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-//POST   /api/orders
-//POST   /api/orders/{orderId}/delivery-ready
-//POST   /api/orders/{orderId}/ship
-//POST   /api/orders/{orderId}/complete
-//POST   /api/orders/{orderId}/cancel
-
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -47,26 +41,5 @@ public class OrderRestController {
             orderService.selectOrderComplete(orderId, user.getMemberId())
         );
     }
-
-
-//    @PostMapping("/{orderId}/delivery-ready")
-//    public void deliveryReady(@PathVariable Long orderId) {
-//        orderService.markDeliveryReady(orderId);
-//    }
-
-//    @PostMapping("/{orderId}/ship")
-//    public void ship(@PathVariable Long orderId) {
-//        orderService.ship(orderId);
-//    }
-//
-//    @PostMapping("/{orderId}/complete")
-//    public void complete(@PathVariable Long orderId) {
-//        orderService.complete(orderId);
-//    }
-//
-//    @PostMapping("/{orderId}/cancel")
-//    public void cancel(@PathVariable Long orderId) {
-//        orderService.cancel(orderId);
-//    }
 }
 

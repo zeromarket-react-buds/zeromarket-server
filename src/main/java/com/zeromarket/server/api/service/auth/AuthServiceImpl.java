@@ -85,9 +85,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public TokenInfo login(MemberLoginRequest dto, HttpServletResponse response) {
-        // loginId으로 회원 찾기
-        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(dto.getLoginId()))
+        // loginId으로 회원 찾기 (탈퇴 포함)
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(dto.getLoginId()))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 탈퇴 계정 여부 검사
+        if (member.getWithdrawnAt() != null) {
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
+        }
 
         // 비밀번호 일치 확인
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
@@ -124,8 +129,11 @@ public class AuthServiceImpl implements AuthService {
 //        3. token 재발급
         String loginId = jwtUtil.getLoginId(refreshToken);
 
-        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(loginId))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+        if (member.getWithdrawnAt() != null) {
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
+        }
 //            .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
 
         String newAccessToken = jwtUtil.generateAccessToken(member.getLoginId(), member.getRole());
@@ -144,8 +152,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public MemberResponse getMyInfo(String loginId) {
-        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginId(loginId))
+        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(loginId))
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+        if (member.getWithdrawnAt() != null) {
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
+        }
 
         MemberResponse response = new MemberResponse();
 

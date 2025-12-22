@@ -48,7 +48,7 @@ public class OAuthServiceImpl implements OAuthService {
         return accessToken;
 
         } catch (ApiException e) {
-            throw new ApiException(ErrorCode.KAKAO_LOGIN_FAILED);
+            throw e;
         }
     }
 }

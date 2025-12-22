@@ -2,11 +2,13 @@ package com.zeromarket.server.api.service.auth;
 
 import com.zeromarket.server.api.dto.auth.KakaoUserInfo;
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
+import com.zeromarket.server.api.dto.auth.WithdrawRequest;
 import com.zeromarket.server.api.dto.mypage.MemberEditRequest;
 import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
+import com.zeromarket.server.api.mapper.trade.TradeHistoryMapper;
 import com.zeromarket.server.api.security.JwtUtil;
 import com.zeromarket.server.api.security.KakaoOAuthClient;
 import com.zeromarket.server.api.service.mypage.ReviewService;
@@ -15,6 +17,7 @@ import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.Role;
 import com.zeromarket.server.common.exception.ApiException;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,29 +33,21 @@ public class MemberServiceImpl implements MemberService {
     private final MemberMapper memberMapper;
     private final ReviewService reviewService;
     private final WishSellerMapper wishSellerMapper;
+    private final TradeHistoryMapper tradeHistoryMapper;
     private final JwtUtil jwtUtil;
     private final KakaoOAuthClient kakaoOAuthClient;
 
-    // 회원 프로필 정보 조회 (셀러샵 사용)
+    // 회원 프로필 조회 (타겟 프로필)
     @Override
     public MemberProfileDto getMemberProfile(Long memberId, Long authMemberId) {
-        // 프로필 정보 조회
+        // 프로필 조회
         MemberProfileDto dto = memberMapper.selectMemberProfile(memberId);
         if (dto == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
 
-        // 신뢰점수 추가
+        // 신뢰도 조회
         double trustScore = reviewService.getTrustScore(memberId);
         dto.setTrustScore(Double.toString(trustScore));
 
-        // 좋아요 여부 추가
-//        WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId, memberId);
-//        boolean liked = false;
-//        if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())) {
-//            liked = true;
-//        };
-//        dto.setLiked(liked);
-//
-         //좋아요 여부
         boolean liked = false;
 
         //로긴 상태일때만 디비에서 좋아요 여부 조회
@@ -68,19 +63,18 @@ public class MemberServiceImpl implements MemberService {
         return dto;
     }
 
-
-    // 회원정보 설정 페이지에서 해당 회원 정보 조회
+    // 회원정보 설정 페이지 조회용 회원 조회
     @Override
     public MemberEditResponse getMemberEdit(Long memberId) {
         return memberMapper.getMemberEdit(memberId);
     }
 
-    // 회원정보 설정 페이지에서 해당 회원 정보 수정
+    // 회원정보 설정 페이지 수정
     @Override
     public MemberEditResponse updateMemberEdit(Long memberId, MemberEditRequest request) {
         memberMapper.updateMemberEdit(memberId, request);
 
-            // 수정 후 최신 값 다시 조회해서 반환
+            // 수정 후 최신 정보 다시 조회하여 반환
             return memberMapper.getMemberEdit(memberId);
     }
 
@@ -90,98 +84,119 @@ public class MemberServiceImpl implements MemberService {
         // 1. social_id 생성
         String socialId = "kakao_" + kakaoUserInfo.getId();
 
-        // 2. 이미 가입된 회원 조회
-        Member member = memberMapper.findBySocialId(socialId);
+        // 2. 소셜 가입자 여부 조회 (탈퇴 포함)
+        Member member = memberMapper.findBySocialIdWithWithdrawn(socialId);
         if (member != null) {
+            if (member.getWithdrawnAt() != null) {
+                LocalDateTime withdrawnAt = member.getWithdrawnAt();
+                // 7일 이내 재가입 제한
+                if (withdrawnAt.plusDays(7).isAfter(LocalDateTime.now())) {
+                    throw new ApiException(ErrorCode.REJOIN_NOT_ALLOWED_YET);
+                }
+                // 7일 경과 시 새로 가입 허용 → 기존 탈퇴 계정은 그대로 두고 신규 생성으로 진행
+            }
             return member;
         }
 
-        // 3. 안전하게 값 꺼내기 (null 방어)
+        // 3. 프로필 정보 추출 (null 허용)
         KakaoUserInfo.KakaoAccount account = kakaoUserInfo.getKakao_account();
         KakaoUserInfo.KakaoAccount.Profile profile =
             account != null ? account.getProfile() : null;
 
-        String nicknameBase = profile != null ? profile.getNickname() : "카카오사용자";
+        String nicknameBase = profile != null ? profile.getNickname() : "제로마켓유저";
         String profileImageUrl =
             profile != null ? profile.getProfile_image_url() : null;
 
-        log.error("가져온 profileImageUrl={}", profileImageUrl);
+        log.error("회원 가입 profileImageUrl={}", profileImageUrl);
 
         int maxRetry = 5;
 
-        // nickname unique 제약 조건 위반 시, 5번까지 재생성 시도
+        // nickname unique 제약 준수를 위해 최대 5회까지 재시도
         for(int i = 0; i < maxRetry; i++) {
             String suffix = UUID.randomUUID().toString().substring(0, 4);
             String nickname = nicknameBase + "_" + suffix;
 
-            // 4. 신규 회원 생성
+            // 4. 회원 생성
             Member newMember = new Member();
             newMember.setSocialId(socialId);
             newMember.setNickname(nickname);
             newMember.setProfileImage(profileImageUrl);
             newMember.setRole(Role.ROLE_USER.getDescription());
-            newMember.setLoginId(socialId);                 // 더미 데이터 - loginId
-            newMember.setPassword("{noop}SOCIAL_LOGIN");    // 더미 데이터 - password
+            newMember.setLoginId(socialId);                 // 소셜 가입자 - loginId
+            newMember.setPassword("{noop}SOCIAL_LOGIN");    // 소셜 가입자 - password
 
             try {
                 memberMapper.insertSocialMember(newMember);
 
-//                log.info("loginId = null 확인용: {}",  newMember.getLoginId());
+//                log.info("loginId = null 확인: {}",  newMember.getLoginId());
 
                 return newMember;
             } catch(DuplicateKeyException e) {
-                // nickname UNIQUE 충돌 → 다시 시도
+                // nickname UNIQUE 충돌 발생 시 재시도
                 if (i == maxRetry - 1) {
-                    throw new IllegalStateException("닉네임 생성에 실패했습니다. 잠시 후 다시 시도해주세요.", e);
+                    throw new IllegalStateException("닉네임 생성에 실패했습니다. 다시 시도해 주세요.", e);
                 }
             }
         }
 
-        // 논리적으로 도달하지 않음
+        // 예외가 누락된 경우 방어 로직
         throw new IllegalStateException("닉네임 생성 실패");
     }
 
-    // TODO: oauth 계정 탈퇴만 고려 (일반 계정 고려 필요)
+    // TODO: 일반 로그인 탈퇴 고려!(oauth 회원만 고려) 및 알람 정리 (추후 연동 로직 추가)
     // 회원탈퇴
     @Override
-    public void withdraw(Long memberId, HttpServletResponse response) {
+    public void withdraw(Long memberId, WithdrawRequest request, HttpServletResponse response) {
 
-        Member member = memberMapper.selectMemberById(memberId);
+        // 탈퇴 여부와 무관하게 조회
+        Member member = memberMapper.selectMemberByIdWithWithdrawn(memberId);
         if(member == null) {throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);}
 
-        // 1. 카카오 연결 해제 (socialId != null인 경우)
+        // Idempotent(멱등 처리): already withdrawn -> 외부 호출/DB 업데이트 없이 쿠키만 삭제 후 200 반환
+        if (member.getWithdrawnAt() != null) {
+            jwtUtil.setRefreshCookie(null, response);
+            return;
+        }
+
+        // 진행 중 거래(PENDING) 존재 여부 검사
+        boolean hasActiveTrade = tradeHistoryMapper.existsActiveTradeByMemberId(memberId);
+        if (hasActiveTrade) {
+            throw new ApiException(ErrorCode.CANNOT_WITHDRAW_DURING_ACTIVE_TRADE);
+        }
+
+        // 1. 카카오 연동 해제 (socialId != null인 경우)
         String socialId = member.getSocialId();
         String prefix = "kakao_";
 
         if (socialId != null && socialId.startsWith(prefix)) {
             String extracted = socialId.substring(prefix.length());
-            log.info("추출된 socialId: {}", extracted);
+            log.info("탈퇴 대상 socialId: {}", extracted);
 
             kakaoOAuthClient.unlinkWithAdminKey(extracted);
-            log.info("카카오 연결 해제 완료");
+            log.info("카카오 연동 해제 완료");
         }
 
-        // 2. 쿠키 해제
-        jwtUtil.setRefreshCookie(null, response);
-
-        // 3. DB 회원 정보 삭제 (소프트 딜리트)
+        // 2. DB 회원 상태 업데이트 (soft delete)
         int updated = memberMapper.withdrawMember(
             memberId,
-            2,
-            ""
+            request != null ? request.getWithdrawalReasonId() : null,
+            request != null ? request.getWithdrawalReasonDetail() : null
         );
 
         if (updated == 0) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
         }
 
-        log.info("탈퇴 성공, 변경된 row: {}", updated);
+        log.info("회원탈퇴 완료, 업데이트된 row: {}", updated);
+
+        // 3. 리프레시 삭제
+        jwtUtil.setRefreshCookie(null, response);
     }
 
     @Override
     public void logout(HttpServletResponse response) {
-//        1. 쿠키 해제
-        jwtUtil.setRefreshCookie("", response);
+//        1. 리프레시 삭제
+        jwtUtil.setRefreshCookie(null, response);
 
     }
 }
