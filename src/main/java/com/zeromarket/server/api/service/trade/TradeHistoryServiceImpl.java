@@ -536,6 +536,19 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
             }
         }
 
+        // 이미 완료된 거래면 중복 누적 방지
+        if (trade.getTradeStatus() == TradeStatus.COMPLETED) {
+            throw new IllegalStateException("이미 완료된 거래입니다.");
+        }
+
+        // 환경점수 누적 (envScore 없으면 0으로 처리)
+        long addedScore = trade.getEnvScore() == null ? 0L : trade.getEnvScore();
+
+        if (addedScore > 0) {
+            mapper.addMemberEnvScoreTotal(trade.getSellerId(), addedScore, now);
+            mapper.addMemberEnvScoreTotal(trade.getBuyerId(),  addedScore, now);
+        }
+
         // trade 완료 처리: status + completed_at + updated_at
         mapper.updateTradeStatus(
             tradeId,

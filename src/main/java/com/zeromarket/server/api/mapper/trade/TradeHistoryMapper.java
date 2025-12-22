@@ -45,6 +45,10 @@ public interface TradeHistoryMapper {
     void updateProductSalesStatus(@Param("productId") Long productId,
                                   @Param("salesStatus") SalesStatus salesStatus);
 
+    void addMemberEnvScoreTotal(@Param("memberId") Long memberId,
+                                @Param("addedScore") Long addedScore,
+                                @Param("updatedAt") LocalDateTime updatedAt);
+
     int createTrade(TradeRequest tradeRequest);
 
     Trade existValidTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);

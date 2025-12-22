@@ -250,26 +250,35 @@
             parameterType="long"
             resultType="com.zeromarket.server.api.dto.trade.TradeStatusUpdateRow">
         SELECT
-            t.trade_id       AS tradeId,
-            p.product_id     AS productId,
-            p.seller_id      AS sellerId,
-            t.buyer_id       AS buyerId,
-            o.order_id       AS orderId,
+            t.trade_id,
+            p.product_id,
+            p.seller_id,
+            t.buyer_id,
+            o.order_id,
 
-            t.trade_type     AS tradeType,
-            t.trade_status   AS tradeStatus,
-            o.order_status   AS orderStatus,
+            t.trade_type,
+            t.trade_status,
+            o.order_status,
 
-            t.updated_at     AS updatedAt,
-            t.completed_at   AS completedAt,
-            t.canceled_at    AS canceledAt,
-            t.canceled_by    AS canceledBy,
-            t.seller_deleted AS sellerDeleted,
-            t.buyer_deleted  AS buyerDeleted
+            p.environment_score AS  envScore,
+            ms.environment_score_total AS sellerEnvScoreTotal,
+            mb.environment_score_total AS buyerEnvScoreTotal,
+
+            t.updated_at,
+            t.completed_at,
+            t.canceled_at,
+            t.canceled_by,
+            t.seller_deleted,
+            t.buyer_deleted
         FROM trade t
 
         JOIN product p
             ON p.product_id = t.product_id
+
+        JOIN member ms
+        ON ms.member_id = p.seller_id
+        JOIN member mb
+        ON mb.member_id = t.buyer_id
 
         LEFT JOIN "order" o
             ON o.trade_id = t.trade_id
@@ -301,6 +310,14 @@
             SET sales_status = #{salesStatus},
             updated_at   = CURRENT_TIMESTAMP
         WHERE product_id = #{productId}
+    </update>
+
+    <!-- 회원 환경점수 누적 -->
+    <update id="addMemberEnvScoreTotal">
+        UPDATE member
+            SET environment_score_total = COALESCE(environment_score_total, 0) + #{addedScore},
+                updated_at = #{updatedAt}
+        WHERE member_id = #{memberId}
     </update>
 
     <!-- seller_deleted / buyer_deleted 소프트 딜리트로 업데이트 -->

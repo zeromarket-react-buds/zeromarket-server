@@ -22,6 +22,10 @@ public class TradeStatusUpdateRow {
     private Long orderId;
     private OrderStatus orderStatus;
 
+    private Long envScore;
+    private Long sellerEnvScoreTotal;
+    private Long buyerEnvScoreTotal;
+
     private LocalDateTime updatedAt;
     private LocalDateTime completedAt;
     private LocalDateTime canceledAt;
