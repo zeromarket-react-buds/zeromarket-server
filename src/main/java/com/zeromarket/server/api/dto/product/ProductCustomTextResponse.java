@@ -1,3 +1,4 @@
+// 자주쓰는 문구 목록 불러오기
 package com.zeromarket.server.api.dto.product;
 
 import lombok.AllArgsConstructor;
