@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    default: local
   rabbitmq:
     listener:
       simple:
@@ -83,7 +85,7 @@ jwt:
 oauth:
     kakao:
       key: ${KAKAO_REST_API_KEY}
-      redirect-uri: "http://localhost:5173/oauth/kakao/callback"
+#      redirect-uri: "http://localhost:5173/oauth/kakao/callback"
       client-secret: ${KAKAO_CLIENT_SECRET}
       admin-key: ${KAKAO_ADMIN_KEY}
 azure:

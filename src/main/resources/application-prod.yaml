@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+oauth:
+  kakao:
+    redirect-uri: ${KAKAO_REDIRECT_URI}
+    

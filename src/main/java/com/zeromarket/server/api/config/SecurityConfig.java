@@ -7,6 +7,7 @@ import com.zeromarket.server.api.security.JwtFilter;
 import com.zeromarket.server.api.security.JwtUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,7 +44,8 @@ public class SecurityConfig {
                     // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
 //                .requestMatchers("/**").permitAll()
                     // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
-                    .requestMatchers("/api/auth/**", "/api/oauth/**", "/api/products/**", "/ws/**").permitAll()
+                    .requestMatchers("/api/auth/**", "/api/oauth/**", "/api/products/**", "/ws/**")
+                    .permitAll()
                     .requestMatchers(
                         "/api/sellers/**",
                         "/api/reviews/received/**",
@@ -66,7 +68,7 @@ public class SecurityConfig {
                     ).authenticated()
 
                     // 나머지 모든 요청은 인증(로그인)이 필요함
-                .anyRequest().authenticated()
+                    .anyRequest().authenticated()
             )
             // 2. 폼 로그인 설정 (기본값)
             .formLogin(withDefaults())
@@ -87,16 +89,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
+
     // CORS 설정 추가
     @Bean
     public CorsConfigurationSource corsSecurityConfig() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:5175",
-            "http://localhost:5176"
-        ));
+        List<String> origins = List.of(allowedOrigins.split("\\s*,\\s*"));
+        config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
