@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--자주 쓰는 문구-->
+
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zeromarket.server.api.mapper.product.ProductCustomTextMapper">
 
+    <!--목록 불러오기-->
     <select id="findProductCustomTexts"
                 resultType="com.zeromarket.server.api.dto.product.ProductCustomTextResponse">
 
@@ -16,4 +19,23 @@
         ORDER BY sort_order NULLS LAST, created_at DESC
 
     </select>
+
+    <!--문구 등록하기-->
+    <insert id="insertProductCustomText">
+        INSERT INTO custom_text
+        (
+            member_id,
+            content_type,
+            custom_content,
+            created_at
+        )
+        VALUES
+            (
+                #{memberId},
+                #{contentType},
+                #{text},
+                NOW()
+            )
+    </insert>
+
 </mapper>
