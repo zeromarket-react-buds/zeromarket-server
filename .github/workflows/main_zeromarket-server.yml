@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -23,29 +23,38 @@ jobs:
         with:
           java-version: '17'
           distribution: 'microsoft'
+          # Gradle 캐싱을 활성화하여 빌드 속도를 높입니다.
+          cache: 'gradle'
 
-      - name: Build with Maven
-        run: mvn clean install
+      # 1. Gradle 래퍼(wrapper)에 실행 권한을 부여합니다.
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
+      # 2. Gradle을 사용하여 빌드합니다. (테스트 제외는 선택 사항입니다: -x test)
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      # 3. 빌드된 JAR 파일을 업로드합니다. Gradle의 기본 경로인 build/libs/*.jar를 사용합니다.
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          # plain.jar 파일이 생성될 경우 배포 오류가 날 수 있어 'bootJar' 결과물만 선택하는 것이 좋습니다.
+          path: 'build/libs/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-  
+      id-token: write
+      contents: read
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -60,4 +69,3 @@ jobs:
           app-name: 'zeromarket-server'
           slot-name: 'Production'
           package: '*.jar'
-          
