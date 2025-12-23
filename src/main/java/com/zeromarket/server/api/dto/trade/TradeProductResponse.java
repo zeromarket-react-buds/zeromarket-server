@@ -25,7 +25,8 @@ public class TradeProductResponse {
     private String canceledBy;
 
     private Long sellerId;
-    private String nickname;
+    private String sellerNickname;
+    private String buyerNickname;
 
     private Long buyerId;
     private String name;

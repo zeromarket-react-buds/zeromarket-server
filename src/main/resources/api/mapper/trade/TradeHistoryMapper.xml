@@ -179,7 +179,8 @@
         <result column="seller_id"     property="sellerId"/>
         <result column="buyer_id"      property="buyerId"/>
 
-        <result column="nickname"      property="nickname"/>
+        <result column="seller_nickname"      property="sellerNickname"/>
+        <result column="buyer_nickname"      property="buyerNickname"/>
         <result column="name"          property="name"/>
         <result column="phone"         property="phone"/>
         <result column="delivery_zipcode"       property="zipcode"/>
@@ -215,7 +216,8 @@
             t.canceled_by,
             ms.member_id    AS seller_id,
             mb.member_id    AS buyer_id,
-            ms.nickname,
+            ms.nickname     AS seller_nickname,
+            mb.nickname     AS buyer_nickname,
             mb.name,
             mb.phone,
             o.delivery_zipcode,
