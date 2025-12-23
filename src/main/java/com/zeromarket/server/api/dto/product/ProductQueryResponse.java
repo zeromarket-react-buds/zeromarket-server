@@ -31,4 +31,6 @@ public class ProductQueryResponse {
     private Double latitude;
     private Double longitude;
     private String category;
+
+    private boolean isHidden; // 마이샵 숨김상품 표시용으로 필요함
 }
