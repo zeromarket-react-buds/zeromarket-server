@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+//자주쓰는문구 목록 불러오기
 @Service
 @RequiredArgsConstructor
 public class ProductCustomTextQueryService {
