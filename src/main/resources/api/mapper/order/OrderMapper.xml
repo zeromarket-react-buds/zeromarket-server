@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.order.OrderMapper">
+
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO "order" (
+            trade_id,
+            buyer_id,
+            order_status,
+
+            amount_paid,
+            payment_method,
+
+            receiver_name,
+            receiver_phone,
+            delivery_zipcode,
+            delivery_addr_base,
+            delivery_addr_detail
+        )
+        VALUES (
+            #{tradeId},
+            #{buyerId},
+            'PAID',
+
+            #{amountPaid},
+            #{paymentMethod},
+
+            #{receiverName},
+            #{receiverPhone},
+            #{deliveryZipcode},
+            #{deliveryAddrBase},
+            #{deliveryAddrDetail}
+        )
+    </insert>
+
+    <select id="selectOrderComplete"
+        resultType="com.zeromarket.server.api.dto.order.OrderCompleteDto">
+
+        SELECT
+            t.trade_id, 		-- 거래 번호 (trade.trade_id)
+            p.product_title,	-- 상품정보-이름 (product.product_title)
+            o.amount_paid,		-- 상품정보-가격 (product.sell_price)
+            pi.image_url AS productImageUrl,
+            o.receiver_name,	-- 배송지정보-이름 (o.receiver_name)
+            o.receiver_phone,	-- 배송지정보-연락처 (o.receiver_phon)
+            t.trade_type,		-- 거래정보-거래 타입 (trade.trade_type)
+            o.created_at,		-- 거래정보-거래 날짜 (trade.created_at)
+            o.payment_method, 	-- 거래정보-거래 방법(order.payment_method) CASH / INTERNAL
+
+            CASE
+                WHEN t.trade_type = 'DELIVERY' THEN
+                    CONCAT(o.delivery_zipcode, ' ', o.delivery_addr_base, ' ', o.delivery_addr_detail)
+                ELSE NULL
+            END AS delivery_address, -- 배송지정보-주소
+
+            o.amount_paid		-- 결재금액-금액 (order.amount_paid)
+        FROM public."order" o
+        INNER JOIN trade t ON o.trade_id = t.trade_id
+        INNER JOIN product p ON t.product_id = p.product_id
+        LEFT JOIN product_image pi
+            ON p.product_id = pi.product_id
+            AND pi.is_main = true
+        WHERE o.order_id = #{orderId}
+            AND o.buyer_id = #{memberId}
+    </select>
+
+</mapper>

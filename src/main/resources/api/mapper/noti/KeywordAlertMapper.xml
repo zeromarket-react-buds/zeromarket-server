@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.noti.KeywordAlertMapper">
+
+    <!-- 키워드 알림 리스트 -->
+    <select id="selectKeywordAlertsByMember"
+        resultType="com.zeromarket.server.common.entity.KeywordAlert">
+        SELECT alert_id,
+               member_id,
+               keyword,
+               price_min,
+               price_max,
+               is_deleted,
+               created_at,
+               updated_at
+        FROM keyword_alert
+        WHERE member_id = #{memberId}
+         AND is_deleted = false
+        order by alert_id desc
+    </select>
+
+    <select id="getKeywordAlertsByIds"
+            resultType="com.zeromarket.server.common.entity.KeywordAlert">
+        SELECT alert_id,
+               member_id,
+               keyword,
+               price_min,
+               price_max,
+               is_deleted,
+               created_at,
+               updated_at
+        FROM keyword_alert
+        WHERE member_id = #{memberId}
+         AND alert_id=#{alertId}
+         AND is_deleted = false
+    </select>
+
+    <insert id="insertKeywordAlert" parameterType="com.zeromarket.server.common.entity.KeywordAlert">
+        INSERT INTO public.keyword_alert
+        (member_id,
+         keyword,
+         price_min,
+         price_max,
+         is_deleted)
+        VALUES (#{memberId},
+                #{keyword},
+                #{priceMin},
+                #{priceMax},
+                false
+               )
+    </insert>
+    <update id="updateKeywordAlert" parameterType="com.zeromarket.server.common.entity.KeywordAlert">
+        UPDATE public.keyword_alert
+        SET keyword=#{keyword},
+            price_min=#{priceMin},
+            price_max=#{priceMax},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE alert_id = #{alertId}
+          AND member_id = #{memberId}
+
+    </update>
+    <delete id="deleteKeywordAlert">
+        UPDATE public.keyword_alert
+        SET is_deleted= true,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE alert_id = #{alertId}
+          AND member_id = #{memberId}
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.mypage.ProfileMapper">
+
+    <select id="getProfileSetting"
+            parameterType="long"
+            resultType="com.zeromarket.server.api.dto.mypage.ProfileSettingResponse">
+        SELECT
+            m.member_id      AS memberId,
+            m.profile_image  AS profileImage,
+            m.nickname       AS nickname,
+            m.introduction   AS introduction
+        FROM member m
+        WHERE m.member_id = #{memberId}
+    </select>
+
+    <update id="updateProfileSetting">
+        UPDATE member
+            SET profile_image = #{request.profileImage},
+            nickname      = #{request.nickname},
+            introduction  = #{request.introduction},
+            updated_at    = CURRENT_TIMESTAMP
+        WHERE member_id   = #{memberId}
+    </update>
+
+</mapper>

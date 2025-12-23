@@ -1,0 +1,66 @@
+package com.zeromarket.server.api.mapper.trade;
+
+import com.zeromarket.server.api.dto.order.*;
+import com.zeromarket.server.api.dto.mypage.TradeReviewInfoDto;
+
+import com.zeromarket.server.api.dto.trade.*;
+import com.zeromarket.server.common.entity.Trade;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import com.zeromarket.server.common.enums.OrderStatus;
+import com.zeromarket.server.common.enums.SalesStatus;
+import com.zeromarket.server.common.enums.TradeStatus;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+
+@Mapper
+public interface TradeHistoryMapper {
+    List<TradeHistoryResponse> selectTradeList(TradeHistoryRequest req);
+
+    TradeProductResponse selectTradeProduct(TradeProductRequest req);
+
+    TradeReviewInfoDto selectTradeInfoForReview(
+        @Param("tradeId") Long tradeId,
+        @Param("loginMemberId") Long loginMemberId
+    );
+
+    TradeStatusUpdateRow selectById(Long tradeId);
+    
+    Map<String, Object> selectSellerBuyerStatusByTradeId(Long tradeId);
+
+    void updateTradeStatus(@Param("tradeId") Long tradeId,
+                          @Param("status") TradeStatus status,
+                          @Param("completedAt") LocalDateTime completedAt,
+                          @Param("canceledAt") LocalDateTime canceledAt,
+                          @Param("canceledBy") String canceledBy,
+                          @Param("updatedAt") LocalDateTime updatedAt);
+
+    void updateOrderStatus(@Param("tradeId") Long tradeId,
+                           @Param("orderStatus") OrderStatus orderStatus,
+                           @Param("updatedAt") LocalDateTime updatedAt);
+
+    void updateProductSalesStatus(@Param("productId") Long productId,
+                                  @Param("salesStatus") SalesStatus salesStatus);
+
+    void addMemberEnvScoreTotal(@Param("memberId") Long memberId,
+                                @Param("addedScore") Long addedScore,
+                                @Param("updatedAt") LocalDateTime updatedAt);
+
+    int createTrade(TradeRequest tradeRequest);
+
+    Trade existValidTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);
+
+    void updateSoftDelete(@Param("tradeId") Long tradeId,
+                          @Param("sellerDeleted") boolean sellerDeleted,
+                          @Param("buyerDeleted") boolean buyerDeleted,
+                          @Param("updatedAt") LocalDateTime updatedAt);
+
+    List<Trade> existValidProcessingTradeByProductIdSellerId(@Param("productId") Long productId, @Param("sellerId") Long sellerId, @Param("buyerId") Long buyerId);
+
+    boolean existsActiveOrderByProductId(Long productId);
+
+    boolean existsActiveTradeByMemberId(@Param("memberId") Long memberId);
+}

@@ -1,0 +1,203 @@
+package com.zeromarket.server.api.controller.product;
+
+import com.zeromarket.server.api.dto.product.*;
+import com.zeromarket.server.api.dto.LoadMoreResponse;
+import com.zeromarket.server.api.security.CustomUserDetails;
+import com.zeromarket.server.api.service.product.ProductCommandService;
+import com.zeromarket.server.api.service.product.ProductQueryService;
+import com.zeromarket.server.api.service.product.VisionService;
+import com.zeromarket.server.common.enums.ErrorCode;
+import com.zeromarket.server.common.exception.ApiException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.io.IOException;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api/products")
+@Tag(name = "상품 API", description = "상품 관련 API")
+public class ProductRestController {
+
+    private ProductQueryService productQueryService;
+    private ProductCommandService productCommandService;
+    private final VisionService visionService;
+
+//    @Operation(summary = "상품 목록 조회", description = "검색 포함 상품 목록 조회")
+//    @GetMapping
+//    public ResponseEntity<LoadMoreResponse<ProductQueryResponse>> getProductList(@ModelAttribute ProductQueryRequest productQueryRequest) {
+//       LoadMoreResponse<ProductQueryResponse> result = productQueryService.selectProductList(productQueryRequest);
+//       return ResponseEntity.ok(result);
+//    }
+    @Operation(summary = "상품 목록 조회", description = "검색 포함 상품 목록 조회")
+    @GetMapping
+    public ResponseEntity<LoadMoreResponse<ProductQueryResponse>> getProductList(
+        @ModelAttribute ProductQueryRequest productQueryRequest,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        //  로그인한 사용자라면 memberId 전달
+        if (userDetails != null) {
+            productQueryRequest.setMemberId(userDetails.getMemberId());
+        } else {
+            //  비로그인 → memberId = 0 (항상 찜 false)
+            productQueryRequest.setMemberId(null);//0L수정-> 비로그인은 null
+        }
+
+        //userDetails가 null이라면 항상 0L이 들어감 → 찜 = false
+        //여기서 0 나오면 → 로그인 정보가 안 들어온 것.
+        System.out.println("로그인 ID = " + productQueryRequest.getMemberId());
+
+        LoadMoreResponse<ProductQueryResponse> result =
+            productQueryService.selectProductList(productQueryRequest);
+
+        return ResponseEntity.ok(result);
+    }
+
+    //상품 상세 조회
+    @Operation(summary = "상품 상세조회", description = "상세조회 화면 - 상품id로 개별조회 + 조회수 증가 + 찜 수 조회")
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductDetailResponse> getProductDetail(
+        @PathVariable Long productId,
+        @RequestParam(required = false) Long memberId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        // 1️. 로그인 사용자 정보가 있으면 memberId 재설정
+        if (userDetails != null) {
+            memberId = userDetails.getMemberId();
+        }
+
+        // 2️. 로그인 상태가 아니면 TEMP_MEMBER_ID 사용 (비로그인 조회 가능)
+        if (memberId == null) {
+            memberId = null; // 비로그인 → 항상 찜해제 상태로 보여줌
+        }
+
+        // 임시 로그인/미구현 상태라면 TEMP_MEMBER_ID 사용
+        // 추후 Spring Security 로그인 적용되면 SecurityContext에서 memberId를 가져오면 됨
+        //Long TEMP_MEMBER_ID = 1L;
+
+        //TEMP_MEMBER_ID->memberId
+        ProductDetailResponse result = productQueryService.getProductDetail(memberId, productId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    // 상품 등록 전 Vision
+    @Operation(summary = "상품등록 전 Vision 분석", description = "이미지 1장 분석 후 caption/tags 반환")
+    // 요청 타입은 multipart/form-data. FormData로 보내는 파일 요청만 허용
+    @PostMapping(value = "/vision", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductVisionResponse> productVision(
+        // FormData 안에서 image라는 이름의 파일을 받음. 프론트의 formData.append("image", file)과 이름이 반드시 같아야
+        @RequestPart("image") MultipartFile image,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) throws IOException {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        ProductVisionResponse response =
+            productCommandService.productVisionAnalyze(
+                image.getBytes(), // 업로드된 파일에서 실제 이미지 바이트 배열을 꺼냄
+                image.getContentType()); // 이미지 타입을 꺼냄
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 상품등록 전 AI 초안
+    @Operation(summary = "상품등록 전 AI 초안", description = "Vision 결과 기반 상품명/설명 초안 생성")
+    @PostMapping("/aidraft")
+    public ResponseEntity<ProductAiDraftResponse> aiDraft(
+        @RequestBody ProductAiDraftRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) throw new ApiException(ErrorCode.UNAUTHORIZED);
+        return ResponseEntity.ok(productCommandService.generateAiDraft(request));
+    }
+
+    //상품 등록
+    @Operation(summary = "상품 등록", description = "상품 정보 + Supabase 이미지 URL")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ProductCreateResponse> createProduct
+    (   @RequestBody ProductCreateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails)
+    {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        request.setSellerId(userDetails.getMemberId());//로그인 중 사용자id를 자동으로 sellerId로 설정
+
+        Long newProductId = productCommandService.createProduct(request);
+
+        ProductCreateResponse response =
+            new ProductCreateResponse(newProductId, "상품이 정상적으로 등록되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    //비슷한 상품 조회
+    @Operation(summary = "비슷한 상품 조회", description = "현 상품과 비슷한 상품 조회")
+    @GetMapping("/{productId}/similar")
+    public ResponseEntity<List<ProductQueryResponse>> getSimilarProducts(@PathVariable Long productId) {
+
+        return ResponseEntity.ok(productQueryService.findSimilarProducts(productId));
+    }
+    
+    //상품 숨기기
+    @Operation(summary = "상품 숨기기", description = "현재 노출중 상품 숨기기")
+    @PatchMapping("/{productId}/hide")
+    public ResponseEntity<Void> updateHidden(
+        @PathVariable Long productId,
+        @RequestBody HideRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        //로긴 상태확인
+        if(userDetails==null){
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        //해당 상품 sellerId = 로그인Id 비교
+        productCommandService.validateProductOwnership(productId,userDetails.getMemberId());
+
+        productCommandService.updateHidden(productId, request.isHidden());
+        return ResponseEntity.ok().build();
+    }
+
+    //상품수정(텍스트,이미지 통합)
+    @Operation(summary = "상품 수정", description = "등록된 상품상세 수정")
+    @PatchMapping("/{productId}")
+    public ResponseEntity<Void> updateProduct(
+        @PathVariable Long productId,
+        @RequestBody ProductUpdateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        if(userDetails==null){
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        productCommandService.validateProductOwnership(productId,userDetails.getMemberId());
+
+        productCommandService.updateProduct(productId,request);
+        return ResponseEntity.ok().build();
+    }
+
+    //상품 삭제-soft delete 방식
+    @Operation(summary = "상품 삭제", description = "등록된 상품 삭제")
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId,
+        @AuthenticationPrincipal CustomUserDetails userDetails){
+        if(userDetails==null){
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        productCommandService.validateProductOwnership(productId,userDetails.getMemberId());
+
+        productCommandService.deleteProduct(productId);
+        return ResponseEntity.ok().build();
+    }
+
+}

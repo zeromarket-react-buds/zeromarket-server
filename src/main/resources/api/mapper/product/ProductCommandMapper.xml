@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.product.ProductCommandMapper">
+
+  <!--  상품등록-->
+  <insert id="insertProduct" useGeneratedKeys="true" keyProperty="productId">
+    INSERT INTO product
+    (
+    seller_id,
+    product_title,
+    description,
+    sell_price,
+    level3_id,
+    sales_status,
+    product_status,
+    is_direct,
+    is_delivery,
+    selling_area,
+    ai_caption,
+    ai_tags,
+    environment_score,
+    created_at
+    )
+    VALUES
+    (
+    #{sellerId},
+    #{productTitle},
+    #{productDescription},
+    #{sellPrice},
+    #{categoryDepth3},
+    #{salesStatus},
+    #{productStatus},
+    #{direct},
+    #{delivery},
+    #{sellingArea},
+    #{aiCaption},
+    CAST(#{aiTags} AS jsonb),
+    #{environmentScore},
+    NOW()
+    )
+  </insert>
+
+  <!--  상품 사진등록-->
+  <insert id="insertProductImage">
+    INSERT INTO product_image
+    (
+    product_id,
+    image_url,
+    sort_order,
+    is_main,
+    created_at
+    )
+    VALUES
+    (
+    #{productId},
+    #{imageUrl},
+    #{sortOrder},
+    #{isMain},
+    NOW()
+    )
+  </insert>
+
+<!--  상품 숨기기-->
+  <update id="updateHidden">
+    UPDATE product
+    SET
+    is_hidden = #{hidden},
+    updated_at = NOW()
+    WHERE product_id = #{productId};
+  </update>
+
+<!--  상품 soft 삭제-->
+  <update id="softDeleteProduct">
+    UPDATE product
+    SET
+    is_deleted = true,
+    updated_at=NOW()
+    WHERE product_id = #{productId};
+  </update>
+
+<!--  상품 텍스트 수정-->
+  <update id="updateProduct" parameterType="map">
+    UPDATE product
+    <set>
+      <if test="request.productTitle!=null">
+        product_title =#{request.productTitle},
+      </if>
+      <if test="request.productDescription!= null">
+        description=#{request.productDescription},
+      </if>
+      <if test="request.sellPrice != null">
+        sell_price=#{request.sellPrice},
+      </if>
+      <if test="request.categoryDepth3!=null">
+        level3_id=#{request.categoryDepth3},
+      </if>
+      <if test="request.productStatus!=null">
+        product_status=#{request.productStatus},
+      </if>
+      <if test="request.direct!=null">
+        is_direct=#{request.direct},
+      </if>
+      <if test="request.delivery!=null">
+        is_delivery=#{request.delivery},
+      </if>
+      <if test="request.sellingArea!=null">
+        selling_area=#{request.sellingArea},
+      </if>
+      updated_at = NOW()
+    </set>
+    WHERE product_id = #{productId}
+  </update>
+
+<!--  기존첨부이미지 전부삭제-->
+  <delete id="deleteImagesByProductId">
+    DELETE FROM product_image
+    WHERE product_id = #{productId}
+  </delete>
+
+<!--상품소유자id확인-->
+  <select id="getProductSellerId" resultType="Long">
+    SELECT seller_id
+    FROM product
+    WHERE product_id = #{productId}
+  </select>
+
+    <update id="updateProductStatus">
+        UPDATE
+            product
+        SET
+            sales_status = #{salesStatus}
+        WHERE
+            product_id = #{productId}
+    </update>
+
+  <insert id="insertProductLocation" parameterType="map">
+    INSERT INTO product_location(
+      product_id,
+      location_name,
+      member_id,
+      reference_area_id,
+      latitude,
+      longitude,
+      road_address,
+      jibun_address,
+      building_name,
+      zip_code,
+      legal_dong_code,
+      created_at
+    )VALUES(
+      #{productId},
+      #{request.location.locationName},
+      #{memberId},
+      #{request.location.referenceAreaId},
+      #{request.location.latitude, javaType=java.lang.Double},
+      #{request.location.longitude, javaType=java.lang.Double},
+<!--      #{request.location.latitude},-->
+<!--      #{request.location.longitude},-->
+      #{request.location.roadAddress},
+      #{request.location.jibunAddress},
+      #{request.location.buildingName},
+      #{request.location.zipCode},
+      #{request.location.legalDongCode},
+      NOW()
+    );
+  </insert>
+  <insert id="insertProductLocationFromUpdate" parameterType="map">
+    INSERT INTO product_location(
+    product_id,
+    location_name,
+    member_id,
+    reference_area_id,
+    latitude,
+    longitude,
+    road_address,
+    jibun_address,
+    building_name,
+    zip_code,
+    legal_dong_code,
+    created_at
+    )VALUES(
+    #{productId},
+    #{location.locationName},
+    (SELECT seller_id FROM product WHERE product_id = #{productId}),
+    #{location.referenceAreaId},
+    #{location.latitude, javaType=java.lang.Double},
+    #{location.longitude, javaType=java.lang.Double},
+    <!--      #{request.location.latitude},-->
+    <!--      #{request.location.longitude},-->
+    #{location.roadAddress},
+    #{location.jibunAddress},
+    #{location.buildingName},
+    #{location.zipCode},
+    #{location.legalDongCode},
+    NOW()
+    )
+  </insert>
+
+  <delete id="deleteProductLocation">
+    DELETE FROM product_location
+    WHERE product_id = #{productId}
+  </delete>
+
+
+</mapper>

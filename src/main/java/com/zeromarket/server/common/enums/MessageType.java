@@ -1,0 +1,28 @@
+package com.zeromarket.server.common.enums;
+
+public enum MessageType {
+
+    TEXT("텍스트"),
+
+    IMAGE("이미지"),
+
+    SYSTEM("시스템");
+
+    // 필드 추가 (선택 사항: 문자열 설명)
+    private final String description;
+
+    // 생성자
+    MessageType(String description) {
+        this.description = description;
+    }
+
+    // Getter
+    public String getDescription() {
+        return description;
+    }
+
+    public String getName() {
+        return this.name();
+    }
+
+}

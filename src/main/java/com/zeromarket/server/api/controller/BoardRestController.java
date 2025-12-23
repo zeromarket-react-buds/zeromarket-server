@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/boards")
-@Tag(name = "Board API", description = "게시판 CRUD API")
+@Tag(name = "Board API", description = "게시판 CRUD API 콘트라베이스")
 public class BoardRestController {
 
     private BoardService boardService;

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.mypage.ReviewMapper">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="ReviewResultMap" type="com.zeromarket.server.common.entity.Review">
+        <id property="reviewId" column="review_id"/>
+        <result property="writerId" column="writer_id"/>
+        <result property="tradeId" column="trade_id"/>
+        <result property="reviewedBy" column="reviewed_by"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+
+        <!-- 추가 매핑 -->
+        <result column="opponent_nickname" property="opponentNickname"/>
+        <result column="product_title" property="productTitle"/>
+    </resultMap>
+
+    <!--  리뷰 저장  -->
+    <insert id="insertReview" parameterType="com.zeromarket.server.common.entity.Review"
+        useGeneratedKeys="true" keyProperty="reviewId">
+        INSERT INTO review (
+            writer_id,
+            trade_id,
+            reviewed_by,
+            rating,
+            content
+        )
+        VALUES (
+            #{writerId},
+            #{tradeId},
+            #{reviewedBy},
+            #{rating},
+            #{content}
+        )
+    </insert>
+
+    <!--  후기 중복 작성 방지  -->
+    <select id="existsReviewByWriter"
+        parameterType="map"
+        resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM review
+        WHERE trade_id = #{tradeId}
+        AND writer_id = #{writerId}
+        AND is_deleted = FALSE
+        )
+    </select>
+
+    <!-- 리뷰 ID로 조회 -->
+    <select id="selectReviewById"
+        parameterType="long"
+        resultType="com.zeromarket.server.api.dto.mypage.ReviewResponse">
+        SELECT
+            r.review_id,
+            r.writer_id,
+            r.trade_id,
+            r.reviewed_by,
+            r.rating,
+            r.content,
+            r.created_at,
+
+            p.product_title,
+
+            pi.image_url AS product_image,
+
+        CASE WHEN r.reviewed_by = 'SELLER'
+            THEN buyer.nickname
+            ELSE seller.nickname
+        END AS opponent_nickname,
+
+        CASE WHEN r.reviewed_by = 'SELLER'
+            THEN buyer.profile_image
+            ELSE seller.profile_image
+        END AS opponent_profile_image
+
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN product p ON t.product_id = p.product_id
+        LEFT JOIN product_image pi
+            ON pi.product_id = p.product_id
+            AND pi.is_main = TRUE
+        JOIN member seller ON p.seller_id = seller.member_id
+        JOIN member buyer ON t.buyer_id = buyer.member_id
+        WHERE r.review_id = #{reviewId}
+            AND r.is_deleted = FALSE
+    </select>
+
+    <!--  특정 회원이 받은 후기 목록 조회 (5,4점만, 최신순 3건만)  -->
+    <select id="selectReceivedReviewSummary"
+        parameterType="long"
+        resultType="com.zeromarket.server.api.dto.mypage.ReceivedReviewSummaryDto">
+        <![CDATA[
+        WITH received_reviews AS (
+        SELECT
+            r.review_id,
+            r.rating,
+            r.content,
+            m.nickname AS writerNickname,
+            r.created_at,
+            ROW_NUMBER() OVER (PARTITION BY r.rating ORDER BY r.created_at DESC) AS rn
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN product p ON t.product_id = p.product_id
+        JOIN member m ON r.writer_id = m.member_id
+        WHERE r.is_deleted = FALSE
+        AND r.rating IN (4, 5)
+        AND (
+            (r.reviewed_by = 'SELLER' AND t.buyer_id = #{memberId})
+            OR (r.reviewed_by = 'BUYER' AND p.seller_id = #{memberId})
+            )
+        )
+        SELECT *
+        FROM received_reviews
+        WHERE rn <= 3
+        ORDER BY rating DESC, created_at DESC;
+        ]]>
+    </select>
+
+    <!--  특정 회원이 받은 후기 목록 총 개수 (5,4점만)  -->
+    <select id="countReceivedReviewsOnMyPage"
+        parameterType="long"
+        resultType="int">
+        SELECT COUNT(*)
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN product p ON t.product_id = p.product_id
+        WHERE r.is_deleted = FALSE
+        AND r.rating IN (4, 5)
+        AND (
+            (r.reviewed_by = 'SELLER' AND t.buyer_id = #{memberId})
+            OR (r.reviewed_by = 'BUYER' AND p.seller_id = #{memberId})
+        )
+    </select>
+
+    <!--  특정 회원이 받은 리뷰 목록 (특정 점수 전체 목록 + 페이징)  -->
+    <select id="selectReceivedReviewsByRating"
+        parameterType="map"
+        resultType="com.zeromarket.server.api.dto.mypage.ReviewListResponse">
+
+        SELECT
+            r.review_id,
+            r.rating,
+            r.content,
+            m.nickname AS writerNickname,
+            r.created_at
+
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN member m ON r.writer_id = m.member_id
+        JOIN product p ON t.product_id = p.product_id
+        WHERE r.is_deleted = FALSE
+            AND r.rating = #{rating}
+            AND (
+                (r.reviewed_by = 'SELLER' AND t.buyer_id = #{memberId})
+                OR (r.reviewed_by = 'BUYER' AND p.seller_id = #{memberId})
+            )
+
+        <if test="cursorCreatedAt != null">
+            AND (
+            r.created_at &lt; #{cursorCreatedAt}
+            OR (r.created_at = #{cursorCreatedAt}
+            AND r.review_id &lt; #{cursorReviewId})
+            )
+        </if>
+
+        ORDER BY r.created_at DESC, r.review_id DESC
+        LIMIT #{size}
+    </select>
+
+    <!--  특정 회원이 받은 후기 총 개수 (rating별)  -->
+    <select id="countReceivedReviewsByRating"
+        parameterType="map"
+        resultType="int">
+        SELECT COUNT(*)
+        FROM review r
+        JOIN trade t ON r.trade_id = t.trade_id
+        JOIN product p ON t.product_id = p.product_id
+        WHERE r.is_deleted = FALSE
+        AND r.rating = #{rating}
+        AND (
+            (r.reviewed_by = 'SELLER' AND t.buyer_id = #{memberId})
+            OR (r.reviewed_by = 'BUYER' AND p.seller_id = #{memberId})
+        )
+    </select>
+
+    <select id="getAvgRating" resultType="Double">
+        SELECT ROUND(AVG(ratings.rating)::numeric, 1)
+        FROM (SELECT t.trade_id, r.rating, r.is_deleted, p.seller_id AS member_id, p.product_title, 'sell' AS type
+              FROM review r
+                   INNER JOIN trade t
+                        ON r.trade_id = t.trade_id AND t.trade_status = 'COMPLETED'
+                   INNER JOIN product p
+                       ON t.product_id = p.product_id
+              WHERE p.seller_id = #{memberId}
+                AND r.reviewed_by = 'BUYER'
+              UNION ALL
+              SELECT t.trade_id, r.rating, r.is_deleted, t.buyer_id AS member_id, p.product_title,  'buy' AS type
+              FROM review r
+                   INNER JOIN trade t
+                       ON r.trade_id = t.trade_id AND t.trade_status = 'COMPLETED'
+                   INNER JOIN product p ON t.product_id = p.product_id
+              WHERE t.buyer_id = #{memberId}
+                AND r.reviewed_by = 'SELLER') ratings where ratings.is_deleted = false
+    </select>
+
+    <!-- 특정 회원이 받은 리뷰 조회 -->
+    <select id="selectReviewsByMemberId" resultMap="ReviewResultMap">
+        SELECT r.*
+        FROM review r
+        INNER JOIN trade t ON r.trade_id = t.trade_id
+        INNER JOIN product p ON t.product_id = p.product_id
+        WHERE (
+            (r.reviewed_by = 'SELLER' AND p.seller_id = #{memberId})
+            OR
+            (r.reviewed_by = 'BUYER' AND t.buyer_id = #{memberId})
+            )
+        AND r.is_deleted = false
+        ORDER BY r.created_at DESC
+    </select>
+
+    <!-- 모든 리뷰 조회 -->
+    <select id="selectAllReviews" resultMap="ReviewResultMap">
+        SELECT * FROM review
+        WHERE is_deleted = false
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 작성자 ID로 리뷰 조회 (내가 작성한 리뷰) -->
+    <select id="selectReviewsByWriterId" resultType="com.zeromarket.server.common.entity.Review">
+        SELECT * FROM review
+        WHERE writer_id = #{writerId}
+        AND is_deleted = false
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 거래 ID로 리뷰 조회 -->
+    <select id="selectReviewsByTradeId" resultMap="ReviewResultMap">
+        SELECT * FROM review
+        WHERE trade_id = #{tradeId}
+        AND is_deleted = false
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 평점별 리뷰 조회 -->
+    <select id="selectReviewsByRating" resultMap="ReviewResultMap">
+        SELECT * FROM review
+        WHERE rating = #{rating}
+        AND is_deleted = false
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 회원의 평균 평점 조회 -->
+    <select id="selectAverageRatingByMemberId" resultType="double">
+        SELECT COALESCE(AVG(r.rating), 0.0) as avg_rating
+        FROM review r
+        INNER JOIN trade t ON r.trade_id = t.trade_id
+        INNER JOIN product p ON t.product_id = p.product_id
+        WHERE (
+        (r.reviewed_by = 'SELLER' AND p.seller_id = #{memberId})
+        OR
+        (r.reviewed_by = 'BUYER' AND t.buyer_id = #{memberId})
+        )
+        AND r.is_deleted = false
+    </select>
+
+    <!-- 리뷰 수정 -->
+    <update id="updateReview" parameterType="com.zeromarket.server.common.entity.Review">
+        UPDATE review
+        SET updated_at = CURRENT_TIMESTAMP
+        <if test="rating != null">, rating = #{rating}</if>
+        <if test="content != null">, content = #{content}</if>
+        WHERE review_id = #{reviewId}
+        AND is_deleted = false
+    </update>
+
+    <!-- 리뷰 삭제 (소프트 삭제) -->
+    <update id="deleteReview">
+        UPDATE review
+        SET is_deleted = true,
+        updated_at = CURRENT_TIMESTAMP
+        WHERE review_id = #{reviewId}
+    </update>
+
+    <!-- 리뷰 완전 삭제 -->
+    <delete id="hardDeleteReview">
+        DELETE FROM review
+        WHERE review_id = #{reviewId}
+    </delete>
+
+</mapper>

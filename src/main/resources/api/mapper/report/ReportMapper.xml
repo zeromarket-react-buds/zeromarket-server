@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeromarket.server.api.mapper.report.ReportMapper">
+
+    <select id="existsReport" resultType="int">
+      SELECT COUNT(1) <!--      조건을 만족하는 1개이상의 행갯수를 int로 반환-->
+      FROM report
+      WHERE reporter_id =#{reporterId}
+      AND target_type=#{targetType}
+      AND target_id =#{targetId}
+      AND status IN('WAIT','PROCESSING')<!--      DONE만 재신고가능-->
+    </select>
+
+  <insert id="insertReport" parameterType="map">
+    INSERT INTO report (
+      reason_id,
+      reporter_id,
+      admin_id,
+      target_type,
+      target_id,
+      reason_text,
+      status
+    )
+    VALUES(
+      #{request.reasonId},
+      #{reporterId},
+      NULL,
+      #{request.targetType},
+      #{request.targetId},
+      #{request.reasonText},
+      'WAIT'
+    )
+    RETURNING report_id;
+  </insert>
+
+  <select id="selectActiveReasons" resultType="com.zeromarket.server.api.dto.report.ReportReasonCodeResponse">
+    SELECT
+      reason_id AS reasonId,
+      reason_code AS reasonCode,
+      reason_description AS reasonDescription,
+      is_active AS isActive
+    FROM report_reason_code
+    WHERE is_active=true
+    AND target_type = #{targetType}
+    ORDER BY reason_id ASC
+  </select>
+</mapper>

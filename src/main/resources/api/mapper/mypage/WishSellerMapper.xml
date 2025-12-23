@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.mypage.WishSellerMapper">
+
+    <!--  기존 여부 확인  -->
+    <select id="selectWishSeller" resultType="com.zeromarket.server.api.dto.mypage.WishSellerDto">
+        SELECT
+            wish_seller_id,
+            member_id,
+            seller_id,
+            is_deleted,
+            created_at,
+            updated_at
+        FROM wish_seller
+        WHERE member_id = #{memberId}
+            AND seller_id = #{sellerId}
+    </select>
+
+    <!--  신규 생성  -->
+    <insert id="insertWishSeller" useGeneratedKeys="true" keyProperty="wishSellerId">
+        INSERT INTO wish_seller (member_id, seller_id)
+        VALUES (#{memberId}, #{sellerId})
+    </insert>
+
+    <!--  상태 활성화(is_deleted=true)로 변경  -->
+    <update id="reactiveWishSeller">
+        UPDATE wish_seller
+        SET is_deleted = FALSE,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE wish_seller_id = #{wishSellerId}
+    </update>
+
+    <!--  삭제(is_deleted=true) 처리  -->
+    <update id="softDeleteWishSeller">
+        UPDATE wish_seller
+        SET is_deleted = TRUE,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE wish_seller_id = #{wishSellerId}
+    </update>
+
+    <!-- 내가 찜한 셀러 목록 -->
+    <select id="selectLikedSellers"
+        resultType="com.zeromarket.server.api.dto.mypage.LikedSellerResponse">
+        SELECT
+        m.member_id     AS sellerId,
+        m.nickname      AS nickname,
+        m.profile_image AS profileImage,
+        TRUE            AS liked
+        FROM wish_seller ws
+        JOIN member m
+        ON ws.seller_id = m.member_id
+        WHERE ws.member_id = #{memberId}
+        AND ws.is_deleted = FALSE
+        ORDER BY ws.updated_at DESC
+    </select>
+
+</mapper>

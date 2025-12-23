@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zeromarket.server.api.mapper.auth.MemberMapper">
+
+  <!-- 회원 생성 -->
+  <insert id="insertMember" parameterType="com.zeromarket.server.common.entity.Member"
+    useGeneratedKeys="true" keyProperty="memberId" keyColumn="member_id">
+    INSERT INTO member (
+        login_id,
+        password,
+        role,
+        name,
+        nickname,
+        phone,
+        email
+    ) VALUES (
+        #{loginId},
+        #{password},
+        #{role},
+        #{name},
+        #{nickname},
+        #{phone},
+        #{email}
+    )
+  </insert>
+
+  <!-- 회원 조회 -->
+  <select id="selectMemberById" resultType="com.zeromarket.server.common.entity.Member">
+    SELECT *
+    FROM member
+    WHERE member_id = #{memberId}
+        AND withdrawn_at IS NULL
+  </select>
+
+  <select id="selectMemberByIdWithWithdrawn" resultType="com.zeromarket.server.common.entity.Member">
+    SELECT *
+    FROM member
+    WHERE member_id = #{memberId}
+  </select>
+
+  <select id="selectMemberByLoginId" resultType="com.zeromarket.server.common.entity.Member">
+    SELECT *
+    FROM member
+    WHERE login_id = #{loginId}
+        AND withdrawn_at IS NULL
+  </select>
+
+  <select id="selectMemberByLoginIdWithWithdrawn" resultType="com.zeromarket.server.common.entity.Member">
+    SELECT *
+    FROM member
+    WHERE login_id = #{loginId}
+  </select>
+
+  <!-- 중복 체크 -->
+  <select id="existsByLoginId" resultType="boolean">
+    SELECT COUNT(*) > 0
+    FROM member
+    WHERE login_id = #{loginId}
+    AND withdrawn_at IS NULL
+  </select>
+
+    <!-- 회원 프로필 조회 -->
+    <select id="selectMemberProfile" resultType="com.zeromarket.server.api.dto.auth.MemberProfileDto">
+        SELECT
+            m.member_id AS memberId,
+            m.nickname AS nickname,
+            m.profile_image AS profileImage,
+            m.introduction AS description,
+            m.environment_score_total AS environmentScoreTotal
+        FROM member m
+        WHERE m.member_id = #{memberId}
+            AND m.withdrawn_at IS NULL
+    </select>
+
+    <select id="existsByNickname" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE nickname = #{nickname}
+        AND withdrawn_at IS NULL
+    </select>
+
+    <select id="existsByPhone" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE phone = #{phone}
+        AND withdrawn_at IS NULL
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE email = #{email}
+        AND withdrawn_at IS NULL
+    </select>
+
+    <select id="existsByNicknameExcludingMe" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM member
+        WHERE nickname = #{nickname}
+        AND member_id != #{memberId}
+        AND withdrawn_at IS NULL
+    </select>
+
+    <!-- social_id 회원 존재 여부 -->
+    <select id="findBySocialId" resultType="com.zeromarket.server.common.entity.Member">
+        SELECT
+            member_id,
+            email,
+            nickname,
+            social_id,
+            role
+        FROM member
+        WHERE social_id = #{socialId}
+            AND withdrawn_at IS NULL
+    </select>
+
+    <select id="findBySocialIdWithWithdrawn" resultType="com.zeromarket.server.common.entity.Member">
+        SELECT
+            member_id,
+            email,
+            nickname,
+            social_id,
+            role,
+            withdrawn_at
+        FROM member
+        WHERE social_id = #{socialId}
+    </select>
+
+    <!-- oauth 회원가입 -->
+    <insert id="insertSocialMember" useGeneratedKeys="true" keyProperty="memberId">
+        INSERT INTO member (
+            nickname,
+            social_id,
+            role,
+            profile_image,
+            login_id,
+            password
+        ) VALUES (
+            #{nickname},
+            #{socialId},
+            #{role},
+            #{profileImage},
+            #{loginId},
+            #{password}
+        )
+    </insert>
+
+    <!--  회원 탈퇴 (soft delete), UNIQUE 제약 조건 회피를 위해 memberId와 현재 시간을 조합  -->
+    <update id="withdrawMember">
+        UPDATE member
+        SET
+            withdrawn_at = NOW(),
+            withdrawal_reason_id = #{withdrawalReasonId},
+            withdrawal_reason_detail = #{withdrawalReasonDetail},
+
+            login_id = 'withdrawn_' || #{memberId} || '_' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS'),
+            email = 'withdrawn_' || #{memberId} || '_' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS') || '@example.com',
+            nickname = 'withdrawn_' || #{memberId} || '_' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS'),
+            social_id = NULL,
+
+            updated_at = NOW()
+
+        WHERE member_id = #{memberId}
+            AND withdrawn_at IS NULL
+    </update>
+
+    <!-- 회원정보 설정 페이지에서 해당 회원 정보 조회 -->
+    <select id="getMemberEdit"
+            parameterType="long"
+            resultType="com.zeromarket.server.api.dto.mypage.MemberEditResponse">
+        SELECT
+            m.member_id      AS memberId,
+            m.profile_image  AS profileImage,
+            m.nickname       AS nickname,
+            m.phone          AS phone,
+            m.email          AS email
+        FROM member m
+        WHERE m.member_id = #{memberId}
+    </select>
+
+    <!-- 회원정보 설정 페이지에서 해당 회원 정보 수정 -->
+    <update id="updateMemberEdit">
+        UPDATE member
+        <set>
+            <if test="request.phone != null">
+                phone = #{request.phone},
+            </if>
+            <if test="request.email != null">
+                <choose>
+                    <when test="request.email == ''">
+                        email = NULL,
+                    </when>
+                    <otherwise>
+                        email = #{request.email},
+                    </otherwise>
+                </choose>
+            </if>
+            updated_at = CURRENT_TIMESTAMP
+        </set>
+        WHERE member_id = #{memberId}
+    </update>
+</mapper>

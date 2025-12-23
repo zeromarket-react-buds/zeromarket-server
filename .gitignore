@@ -36,4 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
+### HS Add ###
 .env
+*.log
