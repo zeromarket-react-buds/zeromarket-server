@@ -32,6 +32,7 @@ public class SellerShopRestController {
         @RequestParam(required = false) Long cursorProductId,
         @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime cursorCreatedAt,
         @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "false") boolean includeHidden,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         SalesProductRequest req = new SalesProductRequest();
@@ -39,6 +40,7 @@ public class SellerShopRestController {
         req.setCursorProductId(cursorProductId);
         req.setCursorCreatedAt(cursorCreatedAt);
         req.setSize(size);
+        req.setIncludeHidden(includeHidden);
         req.setLoginMemberId(userDetails != null ? userDetails.getMemberId() : null);
 
         SalesProductCursorResponse res = sellerShopService.getProductsBySellerCursor(req);

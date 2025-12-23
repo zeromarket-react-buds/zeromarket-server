@@ -13,6 +13,7 @@
             p.product_title,
             p.sell_price,
             p.sales_status,
+            p.is_hidden,
             p.created_at,
             p.is_delivery,
             p.is_direct,
@@ -50,7 +51,10 @@
 
         WHERE p.seller_id = #{sellerId}
             AND p.is_deleted = FALSE
-            AND p.is_hidden = FALSE
+            <if test="includeHidden == false">
+              AND p.is_hidden = FALSE
+            </if>
+<!--            AND p.is_hidden = FALSE-->
             AND p.sales_status IN ('FOR_SALE', 'RESERVED')
 
         <if test="cursorCreatedAt != null">
