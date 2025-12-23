@@ -134,7 +134,6 @@ public class AuthServiceImpl implements AuthService {
         if (member.getWithdrawnAt() != null) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
         }
-//            .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
 
         String newAccessToken = jwtUtil.generateAccessToken(member.getLoginId(), member.getRole());
         String newRefreshToken = jwtUtil.generateRefreshToken(member.getLoginId());
@@ -146,7 +145,6 @@ public class AuthServiceImpl implements AuthService {
         );
 
         return new TokenInfo(newAccessToken);
-//        return new TokenInfo(newAccessToken, newRefreshToken);
     }
 
     @Override

@@ -92,8 +92,8 @@ public class ReviewServiceImpl implements ReviewService {
         if (entity == null) {throw new ApiException(ErrorCode.REVIEW_NOT_FOUND);}
 
         // 2) 거래 조회
-        Map<String, Object> sellerBuyerStatus = tradeMapper.selectSellerBuyerStatusByTradeId(entity.getTradeId());
-        if(sellerBuyerStatus == null){throw new ApiException(ErrorCode.TRADE_NOT_FOUND);}
+//        Map<String, Object> sellerBuyerStatus = tradeMapper.selectSellerBuyerStatusByTradeId(entity.getTradeId());
+//        if(sellerBuyerStatus == null){throw new ApiException(ErrorCode.TRADE_NOT_FOUND);}
 
         // 3) 거래 참여자인지 확인
 //        if (!memberId.equals(sellerBuyerStatus.get("sellerId")) && !memberId.equals(sellerBuyerStatus.get("buyerId"))) {
