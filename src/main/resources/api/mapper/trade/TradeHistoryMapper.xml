@@ -199,6 +199,7 @@
 
         <result column="created_at"    property="createdAt"/>
         <result column="updated_at"    property="updatedAt"/>
+        <result column="order_updated_at"    property="orderUpdatedAt"/>
         <result column="completed_at"  property="completedAt"/>
         <result column="canceled_at"   property="canceledAt"/>
     </resultMap>
@@ -228,6 +229,7 @@
             o.order_status,
             t.created_at,
             t.updated_at,
+            o.updated_at    AS order_updated_at,
             t.completed_at,
             t.canceled_at
         FROM trade t
