@@ -11,4 +11,10 @@ public interface ProductCustomTextMapper {
             @Param("memberId") Long memberId,
             @Param("contentType") String contentType
     );
+
+    void insertProductCustomText(
+            @Param("memberId") Long memberId,
+            @Param("contentType") String contentType,
+            @Param("text") String text
+    );
 }

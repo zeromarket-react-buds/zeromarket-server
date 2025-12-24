@@ -16,4 +16,5 @@ public class SalesProductRequest {
     private LocalDateTime cursorCreatedAt;
     private Long loginMemberId;       // 찜 여부 확인용
     private int size = 10;
+    private boolean includeHidden;
 }
