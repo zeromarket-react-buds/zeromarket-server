@@ -2,6 +2,7 @@ package com.zeromarket.server.api.controller.product;
 
 import com.zeromarket.server.api.dto.product.ProductCustomTextCreateRequest;
 import com.zeromarket.server.api.dto.product.ProductCustomTextResponse;
+import com.zeromarket.server.api.dto.product.ProductCustomTextUpdateRequest;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.product.ProductCustomTextCommandService;
 import com.zeromarket.server.api.service.product.ProductCustomTextQueryService;
@@ -19,7 +20,7 @@ import java.util.List;
 public class ProductCustomTextController {
 
     private final ProductCustomTextQueryService queryService;//목록불러오기
-    private final ProductCustomTextCommandService commandService;//문구 등록
+    private final ProductCustomTextCommandService commandService;//문구 등록, 삭제
 
     //목록 불러오기
     @GetMapping
@@ -43,5 +44,20 @@ public class ProductCustomTextController {
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    //삭제
+    @DeleteMapping("/{id}")
+    public void deleteProductCustomText(@PathVariable Long id) {
+        commandService.deleteProductCustomText(id);
+    }
+
+    //수정
+    @PatchMapping("/{id}")
+    public void updateProductCustomText(
+            @PathVariable Long id,
+            @RequestBody ProductCustomTextUpdateRequest request
+    ) {
+        commandService.updateProductCustomText(id, request.getText());
     }
 }
