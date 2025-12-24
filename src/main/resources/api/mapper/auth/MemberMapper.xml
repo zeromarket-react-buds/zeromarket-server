@@ -201,4 +201,12 @@
         </set>
         WHERE member_id = #{memberId}
     </update>
+
+    <!-- 소셜 연동/해제 -->
+    <update id="updateSocialId">
+        UPDATE member
+        SET social_id = #{socialId},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE member_id = #{memberId}
+    </update>
 </mapper>
