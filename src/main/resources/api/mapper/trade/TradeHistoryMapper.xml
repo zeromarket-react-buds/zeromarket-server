@@ -380,8 +380,8 @@
 
         <result column="tradeStatus"
             property="tradeStatus"
-            javaType="com.zeromarket.server.common.enums.TradeStatus"
-            typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+            javaType="com.zeromarket.server.common.enums.TradeStatus"/>
+        <!--    typeHandler="org.apache.ibatis.type.EnumTypeHandler"    -->
     </resultMap>
 
     <select id="selectSellerBuyerStatusByTradeId"
