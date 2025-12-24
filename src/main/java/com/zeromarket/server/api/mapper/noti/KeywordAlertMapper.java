@@ -17,4 +17,6 @@ public interface KeywordAlertMapper {
     void deleteKeywordAlert(Long alertId, Long memberId);
 
     KeywordAlert getKeywordAlertsByIds(Long alertId, Long memberId);
+
+    List<KeywordAlert> selectKeywordAlertsLikeProductTitle(@Param("productTitle") String productTitle);
 }

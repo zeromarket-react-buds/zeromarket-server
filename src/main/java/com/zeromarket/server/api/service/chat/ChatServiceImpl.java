@@ -22,6 +22,8 @@ import com.zeromarket.server.common.entity.ChatMessage;
 import com.zeromarket.server.common.entity.ChatRoom;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.MessageType;
+import com.zeromarket.server.common.enums.NotificationRefType;
+import com.zeromarket.server.common.enums.NotificationType;
 import com.zeromarket.server.common.exception.ApiException;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -201,8 +203,8 @@ public class ChatServiceImpl implements ChatService {
 
         // 6) 알림 push DTO (개인 채널)
         NotificationPush notiPush = NotificationPush.builder()
-            .notificationType("CHAT_MESSAGE")
-            .refType("CHAT_ROOM")
+            .notificationType(NotificationType.CHAT_MESSAGE)
+            .refType(NotificationRefType.CHAT_ROOM)
             .refId(req.getChatRoomId())
             .body(preview)
             .linkUrl(linkUrl)

@@ -1,8 +1,12 @@
 package com.zeromarket.server.api.service.product;
 
+import com.zeromarket.server.api.dto.noti.NotificationDto;
 import com.zeromarket.server.api.dto.product.*;
+import com.zeromarket.server.api.mapper.noti.KeywordAlertMapper;
 import com.zeromarket.server.api.mapper.product.AreaQueryMapper;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
+import com.zeromarket.server.api.service.noti.NotificationService;
+import com.zeromarket.server.common.entity.KeywordAlert;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.enums.ProductStatus;
 import com.zeromarket.server.common.enums.SalesStatus;
@@ -11,6 +15,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +25,8 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     private final AreaQueryMapper areaQueryMapper;
     private final VisionService visionService;
     private final AiDraftService aiDraftService;
+    private final NotificationService notificationService;
+    private final KeywordAlertMapper keywordAlertMapper;
 
     // 상품 등록 전 vision. VisionService로 흐름 연결
     @Override
@@ -130,6 +137,18 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             mapper.insertProductLocation(newProductId,request,request.getSellerId());
         }
 
+        List<Long> alertTargetMemberIds = keywordAlertMapper.selectKeywordAlertsLikeProductTitle(
+            request.getProductTitle()).stream().map(
+            KeywordAlert::getMemberId).toList();
+
+        if (!CollectionUtils.isEmpty(alertTargetMemberIds)) {
+            String keywordMessage = """
+                \"%s\" 제목의 상품이 등록되었습니다.
+                """.formatted(request.getProductTitle());
+
+            notificationService.publish(alertTargetMemberIds,
+                NotificationDto.builderByProductCreate(newProductId, keywordMessage));
+        }
         return newProductId; //여기까지 예외없이끝나면 트랜잭션이 커밋됨..
     }
 

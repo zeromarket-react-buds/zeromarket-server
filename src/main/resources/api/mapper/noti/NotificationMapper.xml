@@ -33,6 +33,17 @@
                NOW() WHERE NOT EXISTS (SELECT 1 FROM updated)
     </insert>
 
+    <insert id="insertNotification" parameterType="com.zeromarket.server.api.dto.noti.NotificationDto"
+      useGeneratedKeys="true"
+        keyProperty="notificationId"
+        keyColumn="notification_id">
+        INSERT
+        INTO notification (member_id, notification_type, ref_type, ref_id,
+                           body, link_url, is_read, created_at)
+        VALUES (#{memberId}, #{notificationType}, #{refType}, #{refId},
+                           #{body}, #{linkUrl}, FALSE, now())
+    </insert>
+
     <!-- 알림 리스트 -->
     <select id="findNotificationsByMember"
         resultType="com.zeromarket.server.api.dto.noti.NotificationDto">
@@ -82,6 +93,16 @@
           AND ref_id = #{chatRoomId}
           AND is_read = FALSE
           AND deleted_at IS NULL
+    </update>
+    <update id="markReadByRef" parameterType="com.zeromarket.server.api.dto.noti.NotificationDto">
+        UPDATE notification
+        SET is_read = TRUE,
+            read_at = NOW()
+        WHERE member_id = #{memberId}
+          AND ref_type = #{refType}
+          AND ref_id = #{refId}
+          AND notification_type = #{notificationType}
+          AND is_read = false
     </update>
 
 </mapper>

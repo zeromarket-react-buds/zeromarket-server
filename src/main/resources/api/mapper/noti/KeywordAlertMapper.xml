@@ -70,5 +70,19 @@
           AND member_id = #{memberId}
     </delete>
 
+    <select id="selectKeywordAlertsLikeProductTitle" resultType="com.zeromarket.server.common.entity.KeywordAlert">
+        SELECT alert_id,
+               member_id,
+               keyword,
+               price_min,
+               price_max,
+               is_deleted,
+               created_at,
+               updated_at
+        FROM keyword_alert
+        WHERE #{productTitle} LIKE '%' || keyword || '%'
+         AND is_deleted = false
+    </select>
+
 
 </mapper>
