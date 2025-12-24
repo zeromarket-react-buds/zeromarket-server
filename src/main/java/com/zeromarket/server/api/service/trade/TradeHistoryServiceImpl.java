@@ -199,9 +199,9 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
         }
 
         if (completeRequested) {
-            // 완료는 판매자만 허용
-            if (!isSeller) {
-                throw new IllegalStateException("거래 완료는 판매자만 처리할 수 있습니다.");
+            // 완료는 구매자만 허용
+            if (!isBuyer) {
+                throw new IllegalStateException("거래 완료는 구매자만 처리할 수 있습니다.");
             }
 
             completeTradeAndOrderIfNeeded(trade, tradeId, now);
