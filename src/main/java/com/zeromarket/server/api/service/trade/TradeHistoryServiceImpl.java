@@ -213,7 +213,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
             return response;
         }
 
-        // 그 외는 주문 상태만 변경만 허용 (예: 주문확인 버튼)
+        // 그 외는 주문 상태만 변경 허용 (예: 주문확인, 배송완료 버튼)
         if (request.getOrderStatus() != null) {
             if (trade.getOrderId() == null || trade.getOrderStatus() == null) {
                 throw new IllegalStateException("주문이 없는 거래입니다.");
@@ -222,7 +222,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
             OrderStatus currentOrder = trade.getOrderStatus();
             OrderStatus nextOrder = request.getOrderStatus();
 
-            // 주문확인: PAID > DELIVERY_READY (CANCELED는 위 cancelRequested에서 이미 처리됨)
+            // 주문확인, 배송완료: PAID > DELIVERY_READY, DELIVERY_READY > DELIVERED (CANCELED는 위 cancelRequested에서 이미 처리됨)
             validateOrderStatusTransition(currentOrder, nextOrder);
 
             mapper.updateOrderStatus(tradeId, nextOrder, now);
@@ -433,7 +433,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
     private void validateOrderStatusTransition(OrderStatus current, OrderStatus next) {
         boolean allowed = switch (current) {
             case PAID -> (next == OrderStatus.DELIVERY_READY || next == OrderStatus.CANCELED);
-            case DELIVERY_READY -> (next == OrderStatus.SHIPPED || next == OrderStatus.DELIVERED || next == OrderStatus.CANCELED);
+            case DELIVERY_READY -> (next == OrderStatus.DELIVERED || next == OrderStatus.CANCELED);
             case SHIPPED -> (next == OrderStatus.DELIVERED);
             case DELIVERED, CANCELED -> false;
         };

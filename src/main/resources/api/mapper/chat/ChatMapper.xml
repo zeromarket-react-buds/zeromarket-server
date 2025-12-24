@@ -346,4 +346,10 @@
           AND deleted_at is null
 
     </select>
+    <select id="getChatRoomIdsByProductId" resultType="java.lang.Long">
+        SELECT chat_room_id
+        FROM chat_room
+        WHERE product_id = #{productId}
+          AND is_deleted IS FALSE
+    </select>
 </mapper>

@@ -27,7 +27,7 @@ public class ChatDispatchServiceImpl implements ChatDispatchService {
         ChatMessage entity = new ChatMessage();
         entity.setChatRoomId(msg.getChatRoomId());
         entity.setMemberId(msg.getMemberId());
-        entity.setMessageType(MessageType.TEXT);
+        entity.setMessageType(msg.getMessageType() != null ? msg.getMessageType() : MessageType.TEXT);
         entity.setContent(msg.getContent());
 
         chatMapper.createChatMessage(entity);
@@ -42,6 +42,7 @@ public class ChatDispatchServiceImpl implements ChatDispatchService {
                 .memberId(msg.getMemberId())
                 .content(msg.getContent())
                 .createdAt(OffsetDateTime.now().toString())
+                .messageType(entity.getMessageType())
                 .build();
 
         String dest = "/sub/chat/room/" + msg.getChatRoomId();

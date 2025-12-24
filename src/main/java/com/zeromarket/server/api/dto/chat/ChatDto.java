@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.dto.chat;
 
+import com.zeromarket.server.common.enums.MessageType;
 import lombok.*;
 
 public class ChatDto {
@@ -30,6 +31,7 @@ public class ChatDto {
         private String content;
         private String createdAt;
         private Boolean isMine; // 내가 보낸 메시지인지 여부
+        private MessageType messageType;
     }
 
     @Getter
@@ -47,11 +49,23 @@ public class ChatDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
+    @Builder
     public static class ChatMessageReq {
 
         private Long chatRoomId;   // roomId
         private Long memberId;     // sender
+        private MessageType messageType;
         private String content;    // message text
+
+        public static ChatMessageReq buildByProductPriceChanged(Long chatRoomId, Long memberId, String content) {
+            return ChatMessageReq.builder()
+                .chatRoomId(chatRoomId)
+                .memberId(memberId)
+                .messageType(MessageType.SYSTEM)
+                .content(content)
+                .build();
+        }
+
     }
 
     @Getter
@@ -63,6 +77,7 @@ public class ChatDto {
         private Long memberId;
         private String content;
         private String sentAt; // ISO string
+        private MessageType messageType;
 
         public static ChatMessageRes from(ChatMessageReq req) {
             return ChatMessageRes.builder()
@@ -72,5 +87,6 @@ public class ChatDto {
                 .sentAt(java.time.OffsetDateTime.now().toString())
                 .build();
         }
+
     }
 }

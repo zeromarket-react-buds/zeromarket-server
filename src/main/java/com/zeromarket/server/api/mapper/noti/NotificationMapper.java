@@ -12,6 +12,7 @@ public interface NotificationMapper {
     List<NotificationDto> findNotificationsByMember(@Param("memberId") Long memberId,
                                        @Param("size") int size);
 
+
     int countUnreadByMember(@Param("memberId") Long memberId);
 
     int markAsRead(@Param("memberId") Long memberId,
@@ -24,4 +25,8 @@ public interface NotificationMapper {
                                @Param("chatRoomId") Long chatRoomId,
                                @Param("body") String body,
                                @Param("linkUrl") String linkUrl);
+
+    int insertNotification(NotificationDto notificationDto);
+
+    int markReadByRef(NotificationDto req);
 }

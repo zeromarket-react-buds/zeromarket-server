@@ -18,4 +18,5 @@ public class ProductBasicInfo {
     private TradeType tradeType;
     private SalesStatus salesStatus;
     private String mainImage;
+    private Long sellPrice;
 }
