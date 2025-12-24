@@ -14,6 +14,6 @@ public class TradeReviewStatusResponse {
     private Long myReviewId;              // 내가 쓴 리뷰 아이디
     private Long partnerReviewId;         // 상대가 쓴 리뷰 아이디
 
-    // 버튼 제어용
-    private boolean canWriteReview;       // 지금 내가 새 리뷰를 쓸 수 있는지
+    private Long partnerRating;           // 상대가 점수 매긴거
+
 }
