@@ -30,5 +30,7 @@ public interface ChatService {
     void markAsRead(Long chatRoomId, Long memberId, Long lastReadMessageId);
 
     ChatPersistResult persist(ChatDto.ChatMessageReq req);
+
+    List<Long> getChatRoomIdsByProductId(Long productId);
 }
 

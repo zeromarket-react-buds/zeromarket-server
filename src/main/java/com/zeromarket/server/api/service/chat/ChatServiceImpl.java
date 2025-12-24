@@ -27,6 +27,7 @@ import com.zeromarket.server.common.enums.NotificationType;
 import com.zeromarket.server.common.exception.ApiException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -169,8 +170,8 @@ public class ChatServiceImpl implements ChatService {
         // 1) 메시지 저장
         ChatMessage entity = new ChatMessage();
         entity.setChatRoomId(req.getChatRoomId());
-        entity.setMemberId(req.getMemberId());
-        entity.setMessageType(MessageType.TEXT);
+        entity.setMemberId(req.getMemberId()); // sender
+        entity.setMessageType(Objects.requireNonNullElse(req.getMessageType(), MessageType.TEXT));
         entity.setContent(req.getContent());
         chatMapper.createChatMessage(entity);
 
@@ -181,9 +182,10 @@ public class ChatServiceImpl implements ChatService {
         ChatDto.ChatMessagePush chatPush = ChatDto.ChatMessagePush.builder()
             .messageId(entity.getMessageId())
             .chatRoomId(req.getChatRoomId())
-            .memberId(req.getMemberId())
+            .memberId(req.getMemberId()) // sender
             .content(req.getContent())
             .createdAt(OffsetDateTime.now().toString())
+            .messageType(Objects.requireNonNullElse(req.getMessageType(), MessageType.TEXT))
             .build();
 
         // 4) 수신자 조회
@@ -213,6 +215,12 @@ public class ChatServiceImpl implements ChatService {
             .build();
 
         return new ChatPersistResult(chatPush, notiPush);
+    }
+
+    @Override
+    public List<Long> getChatRoomIdsByProductId(Long productId) {
+
+        return chatMapper.getChatRoomIdsByProductId(productId);
     }
 
     private String makePreview(String content) {

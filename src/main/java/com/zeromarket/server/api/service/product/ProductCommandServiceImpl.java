@@ -1,10 +1,14 @@
 package com.zeromarket.server.api.service.product;
 
+import com.zeromarket.server.api.dto.chat.ChatDto;
+import com.zeromarket.server.api.dto.chat.ChatDto.ChatMessageReq;
 import com.zeromarket.server.api.dto.noti.NotificationDto;
 import com.zeromarket.server.api.dto.product.*;
 import com.zeromarket.server.api.mapper.noti.KeywordAlertMapper;
 import com.zeromarket.server.api.mapper.product.AreaQueryMapper;
 import com.zeromarket.server.api.mapper.product.ProductCommandMapper;
+import com.zeromarket.server.api.mapper.product.ProductQueryMapper;
+import com.zeromarket.server.api.service.chat.ChatService;
 import com.zeromarket.server.api.service.noti.NotificationService;
 import com.zeromarket.server.common.entity.KeywordAlert;
 import com.zeromarket.server.common.enums.ErrorCode;
@@ -12,6 +16,7 @@ import com.zeromarket.server.common.enums.ProductStatus;
 import com.zeromarket.server.common.enums.SalesStatus;
 import com.zeromarket.server.common.exception.ApiException;
 import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +26,12 @@ import org.springframework.util.CollectionUtils;
 @AllArgsConstructor
 public class ProductCommandServiceImpl implements ProductCommandService {
 
+    private final ProductQueryMapper productQueryMapper;
     private final ProductCommandMapper mapper;
     private final AreaQueryMapper areaQueryMapper;
     private final VisionService visionService;
     private final AiDraftService aiDraftService;
+    private final ChatService chatService;
     private final NotificationService notificationService;
     private final KeywordAlertMapper keywordAlertMapper;
 
@@ -186,6 +193,8 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             request.setProductStatus(status);
         }
 
+        ProductBasicInfo beforeInfo = productQueryMapper.selectBasicInfo(productId);
+
         //텍스트,기본정보수정
         mapper.updateProduct(productId,request);
 
@@ -224,7 +233,29 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
         }
 
+        sendMessageIfPriceChanged(beforeInfo, request);
+
     }
+
+    private void sendMessageIfPriceChanged(ProductBasicInfo beforeInfo, ProductUpdateRequest request) {
+
+        Long beforePrice = beforeInfo.getSellPrice();
+        Long afterPrice = request.getSellPrice();
+        if (!Objects.equals(beforePrice, afterPrice)) {
+            List<Long> chatRoomIds = chatService.getChatRoomIdsByProductId(beforeInfo.getProductId());
+            String chatMessage = """
+                판매자가 상품 가격을 %s원에서 %s원으로 변경했어요.
+                """.formatted(String.format("%,d", beforePrice), String.format("%,d", afterPrice));
+            chatRoomIds.forEach(chatRoomId -> {
+                ChatMessageReq chatReq
+                    = ChatMessageReq.buildByProductPriceChanged(chatRoomId,
+                    beforeInfo.getSellerId(),
+                    chatMessage);
+                chatService.publish(chatReq);
+            });
+        }
+    }
+
     //상품 소유자 확인 메서드
     @Override
     public void validateProductOwnership(Long productId,Long loggedInUserId){

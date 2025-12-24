@@ -62,5 +62,7 @@ public interface ChatMapper {
         @Param("chatRoomId") Long chatRoomId,
         @Param("memberId") Long memberId
     );
+
+    List<Long> getChatRoomIdsByProductId(Long productId);
 //    List<ChatRecentMessageResponse> selectRecentChatMessages(@Param("memberId")  Long memberId);
 }
