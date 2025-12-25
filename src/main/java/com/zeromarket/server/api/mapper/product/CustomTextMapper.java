@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface ProductCustomTextMapper {
+public interface CustomTextMapper {
     //자주 쓰는 문구 목록 불러오기
     List<ProductCustomTextResponse> findProductCustomTexts(
             @Param("memberId") Long memberId,

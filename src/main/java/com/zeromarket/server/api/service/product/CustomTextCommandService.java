@@ -1,6 +1,6 @@
 package com.zeromarket.server.api.service.product;
 
-import com.zeromarket.server.api.mapper.product.ProductCustomTextMapper;
+import com.zeromarket.server.api.mapper.product.CustomTextMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomTextCommandService {
 
-    private final ProductCustomTextMapper mapper;
+    private final CustomTextMapper mapper;
 
     // 자주 쓰는 문구 등록 (PRODUCT / CHAT 공용)
     public void createCustomText(
