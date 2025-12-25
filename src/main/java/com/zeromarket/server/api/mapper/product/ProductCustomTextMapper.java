@@ -19,11 +19,15 @@ public interface ProductCustomTextMapper {
             @Param("text") String text
     );
     //삭제
-    void softDeleteProductCustomText(@Param("id") Long id);
+    int softDeleteProductCustomText(
+            @Param("id") Long id,
+            @Param("memberId") Long memberId
+    );
 
     //수정
-    void updateProductCustomText(
+    int updateProductCustomText(
             @Param("id") Long id,
+            @Param("memberId") Long memberId,
             @Param("text") String text
     );
 }

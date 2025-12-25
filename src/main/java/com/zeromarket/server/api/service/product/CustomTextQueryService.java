@@ -10,13 +10,15 @@ import java.util.List;
 //자주쓰는문구 목록 불러오기
 @Service
 @RequiredArgsConstructor
-public class ProductCustomTextQueryService {
+public class CustomTextQueryService {
 
     private final ProductCustomTextMapper mapper;
 
-    public List<ProductCustomTextResponse> getProductCustomTexts(
-            Long memberId
+    // 자주 쓰는 문구 목록 조회 (PRODUCT / CHAT 공용)
+    public List<ProductCustomTextResponse> getCustomTexts(
+            Long memberId,
+            String contentType
     ) {
-        return mapper.findProductCustomTexts(memberId, "PRODUCT");
+        return mapper.findProductCustomTexts(memberId, contentType);
     }
 }

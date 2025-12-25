@@ -43,14 +43,18 @@
         UPDATE custom_text
         SET deleted_at = NOW()
         WHERE custom_text_id = #{id}
+          AND member_id = #{memberId}
+          AND deleted_at IS NULL
     </update>
-
 
     <!--수정하기-->
     <update id="updateProductCustomText">
         UPDATE custom_text
-        SET custom_content = #{text}
+        SET
+            custom_content = #{text},
+            updated_at = NOW()
         WHERE custom_text_id = #{id}
+          AND member_id = #{memberId}
           AND deleted_at IS NULL
     </update>
 </mapper>
