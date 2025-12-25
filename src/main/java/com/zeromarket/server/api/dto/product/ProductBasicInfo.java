@@ -19,4 +19,5 @@ public class ProductBasicInfo {
     private SalesStatus salesStatus;
     private String mainImage;
     private Long sellPrice;
+    private Integer environmentScore;
 }
