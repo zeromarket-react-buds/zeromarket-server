@@ -354,12 +354,16 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
     @Transactional
     public Long processTradeCompleteBySeller(TradeRequest tradeRequest, Long memberId) {
 
-        validateProductAndSeller(tradeRequest.getProductId(), memberId);
+        Long sellerId = memberId;
+        Long buyerId = tradeRequest.getBuyerId();
+
+        ProductBasicInfo productBasicInfo = validateProductAndSeller(tradeRequest.getProductId(),
+            sellerId);
 
         Trade existTrade = mapper.existValidTradeByProductIdSellerId(
                 tradeRequest.getProductId(),
-                memberId,
-                tradeRequest.getBuyerId()
+                sellerId,
+                buyerId
             );
 
         if (existTrade != null && existTrade.getTradeStatus() == TradeStatus.COMPLETED) {
@@ -369,12 +373,19 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
 
         List<Trade> existProcessingTrades= mapper.existValidProcessingTradeByProductIdSellerId(
             tradeRequest.getProductId(),
-            memberId,
-            tradeRequest.getBuyerId()
+            sellerId,
+            buyerId
         );
 
         if (!CollectionUtils.isEmpty(existProcessingTrades)) {
             throw new ApiException(ErrorCode.TRADE_PROCESSING_ALREADY_EXIST);
+        }
+        // 환경점수 누적 (envScore 없으면 0으로 처리)
+        long addedScore = productBasicInfo.getEnvironmentScore() == null ? 0L : productBasicInfo.getEnvironmentScore();
+
+        if (addedScore > 0) {
+            mapper.addMemberEnvScoreTotal(sellerId, addedScore, LocalDateTime.now());
+            mapper.addMemberEnvScoreTotal(buyerId,  addedScore, LocalDateTime.now());
         }
 
         if (existTrade == null || existTrade.getTradeId() <= 0) {
