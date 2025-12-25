@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface ProductCustomTextMapper {
+public interface CustomTextMapper {
     //자주 쓰는 문구 목록 불러오기
     List<ProductCustomTextResponse> findProductCustomTexts(
             @Param("memberId") Long memberId,
@@ -19,11 +19,15 @@ public interface ProductCustomTextMapper {
             @Param("text") String text
     );
     //삭제
-    void softDeleteProductCustomText(@Param("id") Long id);
+    int softDeleteProductCustomText(
+            @Param("id") Long id,
+            @Param("memberId") Long memberId
+    );
 
     //수정
-    void updateProductCustomText(
+    int updateProductCustomText(
             @Param("id") Long id,
+            @Param("memberId") Long memberId,
             @Param("text") String text
     );
 }
