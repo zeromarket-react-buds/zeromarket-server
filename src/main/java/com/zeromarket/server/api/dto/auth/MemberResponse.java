@@ -22,6 +22,7 @@ public class MemberResponse {
     private String introduction;
     private String role;
     private String profileImage;
+    private boolean socialLinked;
 
     private Long environmentScoreTotal;
 

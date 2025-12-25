@@ -17,6 +17,10 @@ public interface MemberService {
 
     Member findOrCreateKakaoUser(KakaoUserInfo userInfo);
 
+    void linkSocial(Long memberId, String socialId);
+
+    void unlinkSocial(Long memberId);
+
     void withdraw(Long memberId, WithdrawRequest request, HttpServletResponse response);
 
     void logout(HttpServletResponse response);

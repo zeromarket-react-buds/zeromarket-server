@@ -159,6 +159,7 @@ public class AuthServiceImpl implements AuthService {
         MemberResponse response = new MemberResponse();
 
         BeanUtils.copyProperties(member, response);
+        response.setSocialLinked(member.getSocialId() != null);
 
         return response;
     }

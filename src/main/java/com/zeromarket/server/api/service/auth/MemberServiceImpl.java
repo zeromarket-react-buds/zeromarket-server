@@ -143,7 +143,32 @@ public class MemberServiceImpl implements MemberService {
         throw new IllegalStateException("닉네임 생성 실패");
     }
 
-    // TODO: 일반 로그인 탈퇴 고려!(oauth 회원만 고려) 및 알람 정리 (추후 연동 로직 추가)
+    @Override
+    public void linkSocial(Long memberId, String socialId) {
+        Member me = memberMapper.selectMemberById(memberId);
+        if (me == null) {
+            throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        Member other = memberMapper.findBySocialId(socialId);
+        if (other != null && !other.getMemberId().equals(memberId)) {
+            throw new ApiException(ErrorCode.DUPLICATE_RESOURCE);
+        }
+
+        memberMapper.updateSocialId(memberId, socialId);
+    }
+
+    @Override
+    public void unlinkSocial(Long memberId) {
+        Member me = memberMapper.selectMemberById(memberId);
+        if (me == null) {
+            throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        memberMapper.updateSocialId(memberId, null);
+    }
+
+    // TODO: 알람 정리 (추후 연동 로직 추가)
     // 회원탈퇴
     @Override
     public void withdraw(Long memberId, WithdrawRequest request, HttpServletResponse response) {

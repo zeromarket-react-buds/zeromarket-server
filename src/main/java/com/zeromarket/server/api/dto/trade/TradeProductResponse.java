@@ -39,8 +39,9 @@ public class TradeProductResponse {
     private TradeStatus tradeStatus;
     private OrderStatus orderStatus;
 
-    private LocalDateTime createdAt;     // 거래 생성 & 결제 시간
-    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;     // 거래 생성 & 결제 시간 (trade 테이블 createdAt)
+    private LocalDateTime updatedAt;     // trade 테이블 updatedAt
+    private LocalDateTime orderUpdatedAt; // order 테이블의 updatedAt값
     private LocalDateTime completedAt;   // 거래 완료
     private LocalDateTime canceledAt;    // 거래 취소
 

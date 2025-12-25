@@ -87,7 +87,7 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
         }
     }
 
-    // 리뷰 상태 공통 계산 메서드
+    // 거래에 대한 리뷰들을 조회하고, 내 리뷰/상대 리뷰를 구분하는 메서드
     private TradeReviewStatusResponse buildReviewStatus(
         Long tradeId,
         TradeStatus tradeStatus,
@@ -112,16 +112,34 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
             }
         }
 
+        return createReviewStatus(my, partner);
+    }
+
+    // Review 엔티티를 기반으로 리뷰 상태 응답 DTO를 생성하는 메서드
+    private TradeReviewStatusResponse createReviewStatus(
+        Review my,
+        Review partner
+    ) {
         TradeReviewStatusResponse status = new TradeReviewStatusResponse();
+
+        // 내 리뷰
         status.setMyReviewExists(my != null);
-        status.setPartnerReviewExists(partner != null);
-
         status.setMyReviewId(my != null ? my.getReviewId() : null);
-        status.setPartnerReviewId(partner != null ? partner.getReviewId() : null);
 
-        boolean isCompleted = tradeStatus == TradeStatus.COMPLETED;
+        // 상대 리뷰 평점 (Review 엔티티의 rating을 partnerRating으로 매핑)
+        Integer partnerRating = (partner != null ? partner.getRating() : null);
+        status.setPartnerRating(
+            partnerRating != null ? partnerRating.longValue() : null
+        );
 
-        status.setCanWriteReview(isCompleted && my == null);
+        // 받은 후기 노출 조건: 평점 3 이상만
+        boolean partnerVisible =
+            (partner != null && partnerRating != null && partnerRating >= 3);
+
+        status.setPartnerReviewExists(partnerVisible);
+        status.setPartnerReviewId(
+            partnerVisible ? partner.getReviewId() : null
+        );
 
         return status;
     }
@@ -199,9 +217,9 @@ public class TradeHistoryServiceImpl implements TradeHistoryService {
         }
 
         if (completeRequested) {
-            // 완료는 판매자만 허용
-            if (!isSeller) {
-                throw new IllegalStateException("거래 완료는 판매자만 처리할 수 있습니다.");
+            // 완료는 구매자만 허용
+            if (!isBuyer) {
+                throw new IllegalStateException("거래 완료는 구매자만 처리할 수 있습니다.");
             }
 
             completeTradeAndOrderIfNeeded(trade, tradeId, now);

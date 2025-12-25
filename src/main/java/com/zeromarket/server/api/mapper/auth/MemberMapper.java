@@ -55,4 +55,6 @@ public interface MemberMapper {
         @Param("memberId") Long memberId,
         @Param("request") MemberEditRequest request
     );
+
+    void updateSocialId(@Param("memberId") Long memberId, @Param("socialId") String socialId);
 }
