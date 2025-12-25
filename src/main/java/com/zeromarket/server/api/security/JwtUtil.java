@@ -110,14 +110,22 @@ public class JwtUtil {
         return getClaims(token).get("type", String.class);
     }
 
-//    refresh token 쿠키에 저장
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.same-site:Lax}")
+    private String cookieSameSite;
+
+    //    refresh token 쿠키에 저장
     public void setRefreshCookie(String refreshToken, HttpServletResponse response) {
         boolean isLogout = (refreshToken == null || refreshToken.isBlank());
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
-            .secure(false)          // HTTPS면 true
-            .sameSite("Lax")        // HTTPS + 프론트/백 분리면 None
+//            .secure(false)          // HTTPS면 true
+//            .sameSite("Lax")        // HTTPS + 프론트/백 분리면 None
+            .secure(cookieSecure)
+            .sameSite(cookieSameSite)
             .path("/")
             .maxAge(isLogout ? 0 : REFRESH_EXPIRATION)
             .build();
