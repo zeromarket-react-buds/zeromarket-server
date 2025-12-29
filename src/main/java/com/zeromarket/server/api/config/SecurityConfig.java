@@ -44,7 +44,7 @@ public class SecurityConfig {
                     // /board/로 시작하는 모든 요청은 인증 없이 접근 허용 (로그인 필요 없음)
 //                .requestMatchers("/**").permitAll()
                     // /api/로 시작하는 요청은 임시로 허용 (개발 중에는 유용)
-                    .requestMatchers("/api/auth/**", "/api/oauth/**", "/api/products/**", "/ws/**")
+                    .requestMatchers("/api/auth/**", "/api/oauth/**", "/api/products/**", "/api/categories/**", "/ws/**")
                     .permitAll()
                     .requestMatchers(
                         "/api/sellers/**",
