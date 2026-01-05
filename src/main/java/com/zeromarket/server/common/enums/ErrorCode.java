@@ -23,6 +23,8 @@ public enum ErrorCode {
     KAKAO_USER_INFO_REQUEST_FAILED(500, "카카오 사용자 정보 조회에 실패했습니다."),
     KAKAO_LOGIN_FAILED(500, "카카오 로그인에 실패했습니다."),
     KAKAO_UNLINK_FAILED(500, "카카오 회원 탈퇴에 실패했습니다"),
+    SOCIAL_LINK_NOT_ALLOWED(409, "이미 소셜 계정과 연동된 회원입니다."),
+    SOCIAL_CREATE_FAILED(500, "닉네임 생성에 실패했습니다. 다시 시도해 주세요."),
 
     // 회원
     MEMBER_NOT_FOUND(404, "회원 정보를 찾을 수 없습니다."),

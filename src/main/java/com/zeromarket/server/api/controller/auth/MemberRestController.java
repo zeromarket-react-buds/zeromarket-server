@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.controller.auth;
 
+import com.zeromarket.server.api.dto.auth.KakaoLinkRequest;
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.WithdrawRequest;
@@ -8,6 +9,7 @@ import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
 import com.zeromarket.server.api.security.CustomUserDetails;
 import com.zeromarket.server.api.service.auth.AuthService;
 import com.zeromarket.server.api.service.auth.MemberService;
+import com.zeromarket.server.api.service.auth.OAuthService;
 import com.zeromarket.server.common.enums.ErrorCode;
 import com.zeromarket.server.common.exception.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +26,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * MemberRestController
+ * - getMyInfo          /api/members/me
+ * - logout             /api/members/logout
+ * - withdraw           /api/members/withdraw
+ * - linkKakao          /api/members/oauth/kakao/link
+ * - unlinkKakao        /api/members/oauth/kakao/unlink
+ */
+
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
@@ -32,6 +43,7 @@ public class MemberRestController {
 
     private final AuthService authService;
     private final MemberService memberService;
+    private final OAuthService oAuthService;
 
     // 인증 관련제어 (인증 정보 조회 API)
     @Operation(summary = "My info", description = "Fetch current member info from auth context")
@@ -43,7 +55,7 @@ public class MemberRestController {
             throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
-        MemberResponse response = authService.getMyInfo(userDetails.getLoginId());
+        MemberResponse response = memberService.getMyInfo(userDetails.getLoginId());
 
         return ResponseEntity.ok(response);
     }
@@ -51,7 +63,7 @@ public class MemberRestController {
     @Operation(summary = "Logout", description = "Invalidate session/token")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        memberService.logout(response);
+        authService.logout(response);
         return ResponseEntity.ok().build();
     }
 
@@ -120,5 +132,30 @@ public class MemberRestController {
         MemberEditResponse dto = memberService.updateMemberEdit(memberId, request);
 
         return ResponseEntity.ok(dto);
+    }
+
+    @Operation(summary = "카카오 계정 연동", description = "로그인 후 카카오 계정을 현재 계정에 연결")
+    @PostMapping("/oauth/kakao/link")
+    public ResponseEntity<?> linkKakao(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody KakaoLinkRequest request
+    ) {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        oAuthService.linkKakao(request.getCode(), request.getRedirectUri(), userDetails.getMemberId());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "카카오 계정 연동 해제", description = "로그인 후 카카오 연동을 해제")
+    @PostMapping("/oauth/kakao/unlink")
+    public ResponseEntity<?> unlinkKakao(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+        oAuthService.unlinkKakao(userDetails.getMemberId());
+        return ResponseEntity.ok().build();
     }
 }

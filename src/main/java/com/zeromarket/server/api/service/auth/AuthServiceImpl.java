@@ -29,6 +29,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * AuthServicee
+ * - login
+ * - logout
+ * - refresh
+ */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,57 +44,13 @@ public class AuthServiceImpl implements AuthService {
     private final MemberMapper memberMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final ReviewService reviewService;
-    private final WishSellerMapper wishSellerMapper;
-    private final KakaoOAuthClient kakaoOAuthClient;
-
-    @Override
-    @Transactional
-    public Long signup(MemberSignupRequest dto) {
-//        email 필드가 빈 문자열("")인 경우, Null 값으로 변경(DB 저장을 위해)
-        String email = dto.getEmail();
-        if(email == null || email.isBlank()) {
-            dto.setEmail(null);
-        }
-
-//        unique 필드 검증
-        if(memberMapper.existsByLoginId(dto.getLoginId())) {
-            throw new ApiException(ErrorCode.LOGINID_ALREADY_EXIST);
-        }
-
-        if(memberMapper.existsByNickname(dto.getNickname())) {
-            throw new ApiException(ErrorCode.NICKNAME_ALREADY_EXIST);
-        }
-
-        if(memberMapper.existsByPhone(dto.getPhone())) {
-            throw new ApiException(ErrorCode.PHONE_ALREADY_EXIST);
-        }
-
-        if(dto.getEmail() != null && memberMapper.existsByEmail(dto.getEmail())) {
-            throw new ApiException(ErrorCode.EMAIL_ALREADY_EXIST);
-        }
-
-//        dto -> entity
-        Member member = new Member();
-        BeanUtils.copyProperties(dto, member);
-        member.setRole(Role.ROLE_USER.getDescription());
-        member.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        try {
-            memberMapper.insertMember(member);
-            return member.getMemberId();
-        } catch (DuplicateKeyException e) {
-            throw new ApiException(ErrorCode.DUPLICATE_RESOURCE);
-        }
-    }
-
 
     @Override
     @Transactional(readOnly = true)
     public TokenInfo login(MemberLoginRequest dto, HttpServletResponse response) {
         // loginId으로 회원 찾기 (탈퇴 포함)
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(dto.getLoginId()))
-            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 탈퇴 계정 여부 검사
         if (member.getWithdrawnAt() != null) {
@@ -101,15 +64,20 @@ public class AuthServiceImpl implements AuthService {
 
         // 쿠키 설정
         jwtUtil.setRefreshCookie(
-            jwtUtil.generateRefreshToken(dto.getLoginId()),
-            response
+                jwtUtil.generateRefreshToken(dto.getLoginId()),
+                response
         );
 
         // 엑세스 토큰 반환
-        return new TokenInfo(
-            jwtUtil.generateAccessToken(member.getLoginId(), member.getRole())
-//            jwtUtil.generateRefreshToken(member.getLoginId())
+        return new TokenInfo(jwtUtil.generateAccessToken(member.getLoginId(), member.getRole())
         );
+    }
+    
+    @Override
+    public void logout(HttpServletResponse response) {
+//        1. 리프레시 삭제
+        jwtUtil.setRefreshCookie(null, response);
+
     }
 
     @Override
@@ -117,11 +85,11 @@ public class AuthServiceImpl implements AuthService {
     public TokenInfo refresh(String refreshToken, HttpServletResponse response) {
 
 //        1. null 확인
-        if (refreshToken == null|| refreshToken.isBlank()) {
+        if (refreshToken == null || refreshToken.isBlank()) {
             throw new ApiException(ErrorCode.JWT_NOT_EXIST);
         }
 
-//        2. access token 유효 확인
+//        2. token 유효 확인
         if (!jwtUtil.validateRefreshToken(refreshToken)) {
             throw new ApiException(ErrorCode.JWT_NOT_VALID);
         }
@@ -130,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
         String loginId = jwtUtil.getLoginId(refreshToken);
 
         Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(loginId))
-            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
         if (member.getWithdrawnAt() != null) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
         }
@@ -140,56 +108,10 @@ public class AuthServiceImpl implements AuthService {
 
 //        4. 쿠키 설정
         jwtUtil.setRefreshCookie(
-            newRefreshToken,
-            response
+                newRefreshToken,
+                response
         );
 
         return new TokenInfo(newAccessToken);
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public MemberResponse getMyInfo(String loginId) {
-        Member member = Optional.ofNullable(memberMapper.selectMemberByLoginIdWithWithdrawn(loginId))
-            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
-        if (member.getWithdrawnAt() != null) {
-            throw new ApiException(ErrorCode.MEMBER_ALREADY_WITHDRAWN);
-        }
-
-        MemberResponse response = new MemberResponse();
-
-        BeanUtils.copyProperties(member, response);
-        response.setSocialLinked(member.getSocialId() != null);
-
-        return response;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Boolean checkDuplicateId(String loginId) {
-        return memberMapper.existsByLoginId(loginId);
-    }
-
-    // 회원 프로필 정보 조회 (셀러샵 사용)
-    @Override
-    public MemberProfileDto  getMemberProfile(Long memberId, Long authMemberId) {
-        // 프로필 정보 조회
-        MemberProfileDto dto = memberMapper.selectMemberProfile(memberId);
-        if (dto == null) throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
-
-        // 신뢰점수 추가
-        double trustScore = reviewService.getTrustScore(memberId);
-        dto.setTrustScore(Double.toString(trustScore));
-
-        // 좋아요 여부 추가
-        WishSellerDto wishSellerDto = wishSellerMapper.selectWishSeller(authMemberId, memberId);
-        boolean liked = false;
-        if(wishSellerDto != null && Boolean.FALSE.equals(wishSellerDto.getIsDeleted())) {
-            liked = true;
-        };
-        dto.setLiked(liked);
-
-        return dto;
-    }
-
 }

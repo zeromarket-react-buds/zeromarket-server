@@ -4,15 +4,13 @@ import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
 import com.zeromarket.server.api.service.auth.AuthService;
+import com.zeromarket.server.api.service.auth.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import java.time.Duration;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * AuthRestController
+ * - signup         /api/auth/signup
+ * - login          /api/auth/login
+ * - refresh        /api/auth/refresh
+ * - check-id       /api/auth/check-id
+ */
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -29,11 +35,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthRestController {
 
     private final AuthService authService;
+    private final MemberService memberService;
 
     @Operation(summary = "회원가입", description = "")
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody MemberSignupRequest dto) {
-        Long memberId = authService.signup(dto);
+        Long memberId = memberService.signup(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Map.of("message", "회원가입 성공", "memberId", memberId));
 
@@ -65,14 +72,7 @@ public class AuthRestController {
     @Operation(summary = "아이디 중복 체크", description = "")
     @GetMapping("/check-id")
     public ResponseEntity<Map> checkDuplicateId(@RequestParam String loginId) {
-        Boolean existsByLoginId = authService.checkDuplicateId(loginId);
+        Boolean existsByLoginId = memberService.checkDuplicateId(loginId);
         return ResponseEntity.ok(Map.of("existsByLoginId", existsByLoginId));
     }
-
-//    @Operation(summary = "로그아웃", description = "")
-//    @PostMapping("/logout")
-//    public ResponseEntity<?> logout(HttpServletResponse response) {
-//        authService.logout(response);
-//        return ResponseEntity.ok().build();
-//    }
 }
