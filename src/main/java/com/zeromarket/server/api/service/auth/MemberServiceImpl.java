@@ -123,6 +123,12 @@ public class MemberServiceImpl implements MemberService {
             dto.setEmail(null);
         }
 
+        // 휴대폰 번호에서 하이픈 등 숫자가 아닌 문자 제거
+        String phone = dto.getPhone();
+        if (phone != null) {
+            dto.setPhone(phone.replaceAll("\\D", ""));
+        }
+
 //        2. unique 필드 검증
         if (memberMapper.existsByLoginId(dto.getLoginId())) {
             throw new ApiException(ErrorCode.LOGINID_ALREADY_EXIST);
