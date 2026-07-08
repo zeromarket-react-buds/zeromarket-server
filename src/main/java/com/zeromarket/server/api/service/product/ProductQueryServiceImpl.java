@@ -37,6 +37,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         queryReq.setMinPrice(req.getMinPrice());
         queryReq.setMaxPrice(req.getMaxPrice());
         queryReq.setArea(req.getArea());
+        queryReq.setTrade(req.getTrade());
         queryReq.setMemberId(req.getMemberId());//찜 여부 계산위한(새로고침해도 빨강 고정)
 
         queryReq.setSwLat(req.getSwLat());

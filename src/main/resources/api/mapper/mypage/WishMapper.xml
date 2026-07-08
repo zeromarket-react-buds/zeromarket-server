@@ -183,9 +183,13 @@
     <!--  추가됨: 찜 개수 조회 -->
     <select id="countWish" resultType="int">
         SELECT COUNT(*)
-        FROM wish
-        WHERE member_id = #{memberId}
-        AND is_deleted = FALSE
+        FROM wish w
+        JOIN product p ON w.product_id = p.product_id
+        WHERE w.member_id = #{memberId}
+        AND w.is_deleted = FALSE <!-- 사용자가 찜을 취소하지 않은 상태 -->
+        AND p.is_deleted = FALSE <!-- 상품(게시물)이 삭제되지 않은 상태 -->
+        AND p.is_hidden = FALSE
+        AND p.sales_status != 'SOLD_OUT'
     </select>
 
 </mapper>

@@ -110,6 +110,19 @@
             AND p.selling_area ILIKE CONCAT('%', #{area}, '%')
         </if>
 
+        <if test="trade != null and trade.size() > 0">
+            <foreach collection="trade" item="t">
+                <choose>
+                    <when test="t.name() == 'DELIVERY'">
+                        AND p.is_delivery = TRUE
+                    </when>
+                    <when test="t.name() == 'DIRECT'">
+                        AND p.is_direct = TRUE
+                    </when>
+                </choose>
+            </foreach>
+        </if>
+
         <if test="minPrice != null">
             AND p.sell_price &gt;= #{minPrice}
         </if>
