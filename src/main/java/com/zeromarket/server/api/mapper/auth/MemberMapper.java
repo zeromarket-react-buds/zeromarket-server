@@ -50,4 +50,10 @@ public interface MemberMapper {
                           @Param("profileImage") String profileImage,
                           @Param("socialId") String socialId);
     void updateSocialId(@Param("memberId") Long memberId, @Param("socialId") String socialId);
+
+    // 아이디 찾기
+    Member findMemberByNameAndPhone(
+        @Param("name") String name,
+        @Param("phone") String phone
+    );
 }
