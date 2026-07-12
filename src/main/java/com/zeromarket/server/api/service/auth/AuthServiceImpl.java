@@ -6,6 +6,8 @@ import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.auth.MemberResponse;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
+import com.zeromarket.server.api.dto.auth.FindAccountResponse;
+import com.zeromarket.server.api.dto.auth.FindAccountRequest;
 import com.zeromarket.server.api.dto.mypage.WishSellerDto;
 import com.zeromarket.server.api.mapper.auth.MemberMapper;
 import com.zeromarket.server.api.mapper.mypage.WishSellerMapper;
@@ -72,7 +74,30 @@ public class AuthServiceImpl implements AuthService {
         return new TokenInfo(jwtUtil.generateAccessToken(member.getLoginId(), member.getRole())
         );
     }
-    
+
+    // 아이디 찾기
+    @Override
+    public FindAccountResponse findLoginId(FindAccountRequest findAccountRequest) {
+        String name = findAccountRequest.getName();
+        String phone = String.valueOf(findAccountRequest.getPhone());
+
+        Member member = Optional.ofNullable(memberMapper.findMemberByNameAndPhone(name, phone))
+            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return FindAccountResponse.builder()
+            .loginId(maskLoginId(member.getLoginId()))
+            .build();
+    }
+
+    // 아이디 마스킹(***) 처리
+    private String maskLoginId(String loginId) {
+        if (loginId == null || loginId.length() <= 3) {
+            return loginId;
+        }
+
+        return loginId.substring(0, 3) + "***";
+    }
+
     @Override
     public void logout(HttpServletResponse response) {
 //        1. 리프레시 삭제

@@ -3,6 +3,8 @@ package com.zeromarket.server.api.controller.auth;
 import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
 import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
 import com.zeromarket.server.api.dto.auth.TokenInfo;
+import com.zeromarket.server.api.dto.auth.FindAccountResponse;
+import com.zeromarket.server.api.dto.auth.FindAccountRequest;
 import com.zeromarket.server.api.service.auth.AuthService;
 import com.zeromarket.server.api.service.auth.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,13 +14,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * AuthRestController
@@ -56,6 +52,18 @@ public class AuthRestController {
         return ResponseEntity.ok(
             Map.of("accessToken", tokenInfo.getAccessToken())
         );
+    }
+
+    @Operation(summary = "아이디 찾기", description = "아이디 찾기 용 회원 정보 조회")
+    @GetMapping("/findid")
+    public ResponseEntity<FindAccountResponse> findLoginId(
+        @ModelAttribute FindAccountRequest findAccountRequest
+    ) {
+
+        FindAccountResponse result =
+            authService.findLoginId(findAccountRequest);
+
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")

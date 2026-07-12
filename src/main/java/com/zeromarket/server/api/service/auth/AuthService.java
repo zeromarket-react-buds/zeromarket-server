@@ -1,15 +1,13 @@
 package com.zeromarket.server.api.service.auth;
 
-import com.zeromarket.server.api.dto.auth.MemberLoginRequest;
-import com.zeromarket.server.api.dto.auth.MemberProfileDto;
-import com.zeromarket.server.api.dto.auth.MemberResponse;
-import com.zeromarket.server.api.dto.auth.MemberSignupRequest;
-import com.zeromarket.server.api.dto.auth.TokenInfo;
+import com.zeromarket.server.api.dto.auth.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 
 public interface AuthService {
     TokenInfo login(MemberLoginRequest memberLoginRequest, HttpServletResponse response);
+
+    FindAccountResponse findLoginId(FindAccountRequest findAccountRequest);
 
     void logout(HttpServletResponse response);
 
