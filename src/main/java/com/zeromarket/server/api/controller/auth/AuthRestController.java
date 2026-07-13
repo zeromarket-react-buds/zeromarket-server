@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
  * AuthRestController
  * - signup         /api/auth/signup
  * - login          /api/auth/login
+ * - find-id        /api/auth/find-id
+ * - find-password  /api/auth/find-password
  * - refresh        /api/auth/refresh
  * - check-id       /api/auth/check-id
  */
@@ -55,7 +57,7 @@ public class AuthRestController {
     }
 
     @Operation(summary = "아이디 찾기", description = "아이디 찾기용 회원 정보 조회")
-    @GetMapping("/findid")
+    @GetMapping("/find-id")
     public ResponseEntity<FindAccountResponse> findLoginId(
         @ModelAttribute FindAccountRequest findAccountRequest
     ) {
@@ -67,7 +69,7 @@ public class AuthRestController {
     }
 
     @Operation(summary = "비밀번호 찾기", description = "비밀번호 찾기용 회원 정보 조회")
-    @GetMapping("/findPassword")
+    @GetMapping("/find-password")
     public ResponseEntity<Void> findPassword(
         @ModelAttribute FindAccountRequest request
     ) {
