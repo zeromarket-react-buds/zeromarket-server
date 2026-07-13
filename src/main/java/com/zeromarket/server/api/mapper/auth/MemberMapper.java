@@ -1,5 +1,6 @@
 package com.zeromarket.server.api.mapper.auth;
 
+import com.zeromarket.server.api.dto.auth.FindAccountRequest;
 import com.zeromarket.server.api.dto.auth.MemberProfileDto;
 import com.zeromarket.server.api.dto.mypage.MemberEditRequest;
 import com.zeromarket.server.api.dto.mypage.MemberEditResponse;
@@ -56,4 +57,7 @@ public interface MemberMapper {
         @Param("name") String name,
         @Param("phone") String phone
     );
+
+    // 비밀번호 찾기
+    Member findPassword(FindAccountRequest request);
 }

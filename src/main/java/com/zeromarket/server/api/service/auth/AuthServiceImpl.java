@@ -98,6 +98,16 @@ public class AuthServiceImpl implements AuthService {
         return loginId.substring(0, 3) + "***";
     }
 
+    // 비밀번호 찾기
+    @Override
+    public void findPassword(FindAccountRequest request) {
+        Member member = memberMapper.findPassword(request);
+
+        if (member == null) {
+            throw new ApiException(ErrorCode.FIND_ACCOUNT_NOT_MATCH);
+        }
+    }
+
     @Override
     public void logout(HttpServletResponse response) {
 //        1. 리프레시 삭제

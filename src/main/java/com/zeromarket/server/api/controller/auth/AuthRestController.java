@@ -54,7 +54,7 @@ public class AuthRestController {
         );
     }
 
-    @Operation(summary = "아이디 찾기", description = "아이디 찾기 용 회원 정보 조회")
+    @Operation(summary = "아이디 찾기", description = "아이디 찾기용 회원 정보 조회")
     @GetMapping("/findid")
     public ResponseEntity<FindAccountResponse> findLoginId(
         @ModelAttribute FindAccountRequest findAccountRequest
@@ -64,6 +64,16 @@ public class AuthRestController {
             authService.findLoginId(findAccountRequest);
 
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "비밀번호 찾기", description = "비밀번호 찾기용 회원 정보 조회")
+    @GetMapping("/findPassword")
+    public ResponseEntity<Void> findPassword(
+        @ModelAttribute FindAccountRequest request
+    ) {
+        authService.findPassword(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")

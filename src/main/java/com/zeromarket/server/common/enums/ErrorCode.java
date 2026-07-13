@@ -16,6 +16,7 @@ public enum ErrorCode {
     NICKNAME_ALREADY_EXIST(409, "닉네임이 이미 존재합니다."),
     PHONE_ALREADY_EXIST(409, "핸드폰 번호가 이미 존재합니다."),
     EMAIL_ALREADY_EXIST(409, "이메일이 이미 존재합니다."),
+    FIND_ACCOUNT_NOT_MATCH(404, "입력한 회원 정보와 일치하는 계정이 없습니다."),
 
     // OAuth
     INVALID_AUTHORIZATION_CODE(400, "유효하지 않은 인증 코드입니다."),

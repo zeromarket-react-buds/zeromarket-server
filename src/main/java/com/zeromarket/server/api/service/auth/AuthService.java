@@ -13,4 +13,5 @@ public interface AuthService {
 
     TokenInfo refresh(String refreshToken, HttpServletResponse response);
 
+    void findPassword(FindAccountRequest request);
 }

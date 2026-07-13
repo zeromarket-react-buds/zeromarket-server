@@ -35,6 +35,16 @@
             AND withdrawn_at IS NULL
     </select>
 
+    <!-- 비밀번호 찾기-->
+    <select id="findPassword" resultType="com.zeromarket.server.common.entity.Member">
+        SELECT *
+        FROM member
+        WHERE login_id = #{loginId}
+        AND name = #{name}
+        AND phone = #{phone}
+        AND withdrawn_at IS NULL
+    </select>
+
   <!-- 회원 조회 -->
   <select id="selectMemberById" resultType="com.zeromarket.server.common.entity.Member">
     SELECT *
