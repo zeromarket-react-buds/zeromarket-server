@@ -78,6 +78,16 @@ public class AuthRestController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "새 비밀번호 변경", description = "기존 비밀번호를 새 비밀번호 변경")
+    @PostMapping("/set-password")
+    public ResponseEntity<Void> setPassword(
+        @RequestBody FindAccountRequest request
+    ) {
+        authService.setPassword(request);
+
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(

@@ -108,6 +108,23 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    // 새 비밀번호 변경
+    @Override
+    @Transactional
+    public void setPassword(FindAccountRequest request) {
+        // 평문 비밀번호를 BCrypt로 암호화하여 저장
+        String encodedPassword =
+            passwordEncoder.encode(request.getNewPassword());
+
+        int updated =
+            memberMapper.setPassword(request.getLoginId(), encodedPassword);
+
+        // 변경 대상 회원이 없으면 예외 처리
+        if (updated == 0) {
+            throw new ApiException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+    }
+
     @Override
     public void logout(HttpServletResponse response) {
 //        1. 리프레시 삭제

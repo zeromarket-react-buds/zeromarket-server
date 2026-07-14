@@ -41,9 +41,18 @@
         FROM member
         WHERE login_id = #{loginId}
         AND name = #{name}
-        AND phone = #{phone}
+        AND REPLACE(phone, '-', '') = #{phone} <!-- 하이픈 있는 기존 전화번호 대응-->
         AND withdrawn_at IS NULL
     </select>
+
+    <!-- 새 비밀번호 변경-->
+    <update id="setPassword">
+        UPDATE member
+        SET password = #{newPassword},
+            updated_at = NOW()
+        WHERE login_id = #{loginId}
+        AND withdrawn_at IS NULL
+    </update>
 
   <!-- 회원 조회 -->
   <select id="selectMemberById" resultType="com.zeromarket.server.common.entity.Member">

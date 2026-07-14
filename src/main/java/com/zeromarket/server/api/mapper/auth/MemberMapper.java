@@ -60,4 +60,10 @@ public interface MemberMapper {
 
     // 비밀번호 찾기
     Member findPassword(FindAccountRequest request);
+
+    // 새 비밀번호 변경
+    int setPassword(
+        @Param("loginId") String loginId,
+        @Param("newPassword") String newPassword
+    );
 }
