@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
  * AuthRestController
  * - signup         /api/auth/signup
  * - login          /api/auth/login
+ * - find-id        /api/auth/find-id
+ * - find-password  /api/auth/find-password
  * - refresh        /api/auth/refresh
  * - check-id       /api/auth/check-id
  */
@@ -54,8 +56,8 @@ public class AuthRestController {
         );
     }
 
-    @Operation(summary = "아이디 찾기", description = "아이디 찾기 용 회원 정보 조회")
-    @GetMapping("/findid")
+    @Operation(summary = "아이디 찾기", description = "아이디 찾기용 회원 정보 조회")
+    @GetMapping("/find-id")
     public ResponseEntity<FindAccountResponse> findLoginId(
         @ModelAttribute FindAccountRequest findAccountRequest
     ) {
@@ -64,6 +66,26 @@ public class AuthRestController {
             authService.findLoginId(findAccountRequest);
 
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "비밀번호 찾기", description = "비밀번호 찾기용 회원 정보 조회")
+    @GetMapping("/find-password")
+    public ResponseEntity<Void> findPassword(
+        @ModelAttribute FindAccountRequest request
+    ) {
+        authService.findPassword(request);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "새 비밀번호 변경", description = "기존 비밀번호를 새 비밀번호 변경")
+    @PostMapping("/set-password")
+    public ResponseEntity<Void> setPassword(
+        @RequestBody FindAccountRequest request
+    ) {
+        authService.setPassword(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "엑세스 토큰 재발급 (refresh token flow)", description = "")

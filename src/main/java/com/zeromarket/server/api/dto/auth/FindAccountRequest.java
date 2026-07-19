@@ -7,4 +7,5 @@ public class FindAccountRequest {
     private String loginId;
     private String name;
     private String phone;
+    private String newPassword;
 }
